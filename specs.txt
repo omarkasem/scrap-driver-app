@@ -1,0 +1,92 @@
+API Integration (14h):
+Create WordPress REST API endpoint in scrap site to fetch collections with fields: customer_name, phone, address, vehicle info, collection_date, collection_driver
+Create function to fetch only collections where collection_date exists AND date > current_date
+Store fetched collections as CPT 'collections' with ACF fields matching the data
+Create wp-cron job to sync every hour and update any changed collection data
+Add manual sync button in admin to force refresh
+
+
+
+Collection CPT & Fields Setup (8h):
+Create 'collections' CPT with statuses: pending, booked, in_progress, completed
+Create ACF fields: customer_name, phone, address, vehicle_info (group), collection_date, assigned_driver, route_order, admin_notes, driver_notes
+Create driver/admin notes fields that sync back to scrap site
+Add collection status field that syncs with scrap site status
+
+
+
+User Roles & Permissions (6h):
+Create 'driver' role with specific capabilities
+Create function to map WordPress users to drivers from scrap site
+Add driver selection field in user profile
+Set up collection viewing permissions based on assigned driver
+
+
+MILESTONE 2: DRIVER FEATURE
+Shift Management (8h):
+Create 'Start Shift' button in driver dashboard
+Save shift_start_time in user meta when clicked
+Convert button to 'End Shift' after starting
+Save shift_end_time in user meta when ending
+Create 'shifts' CPT to store daily shift records
+Auto-redirect to first collection after shift start
+
+
+Collections View (12h):
+Create custom template for next collection
+Display vehicle info, customer details, address with copy button
+Add Google Maps link/button for address
+Create status update form with notes field
+Add photo upload button
+Create complete collection button
+
+
+Collections List (8h):
+Create template showing today's collections only
+Order collections by route_order field
+Show collection status and basic info in list
+Add click-through to full collection details
+Make it sync all the time with scrap site
+MILESTONE 3: ROUTE PLANNING
+Route Organization (14h):
+Create route planning page showing calendar of collection dates
+Query collections by date and driver
+Create drag-drop interface for reordering collections
+Save new order in route_order field
+Update collection order in database after reordering
+Distance Calculations (12h):
+Add settings page for home/base location
+Integrate Google Maps Distance Matrix API
+Calculate distances between stops
+Store distances in collection meta
+Calculate and display total route distance
+Add per-route fuel cost estimation
+Collection Assignment (10h):
+Create unassigned collections page
+Show collections with dates but no driver
+Add bulk driver assignment capability
+Add date modification capability
+Update scrap site when assignments change
+MILESTONE 4: HR SYSTEM
+Driver Shifts (12h):
+Create shifts listing page showing clock in/out times
+Calculate total hours per shift
+Store collections completed per shift
+Add shift adjustment request form
+Create shift adjustment approval interface
+Send email notifications for adjustment requests
+Leave Management (16h):
+Create ACF fields for driver work schedule (days of week)
+Create annual leave allowance field per driver
+Build leave request form with date picker
+Calculate working days based on selected dates
+Create leave approval interface
+Send email notifications for leave requests
+Add leave calendar showing approved requests
+Reports & Statistics (14h):
+Create daily/weekly/monthly collection reports
+Calculate collections per hour based on shift times
+Implement distance traveled calculations
+Create driver performance graphs
+Add CSV/PDF export functionality
+Create comparison reports between drivers
