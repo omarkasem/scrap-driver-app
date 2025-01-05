@@ -8,8 +8,8 @@ Add manual sync button in admin to force refresh
 
 
 Collection CPT & Fields Setup (8h):
-Create 'collections' CPT with statuses: pending, booked, in_progress, completed
-Create ACF fields: customer_name, phone, address, vehicle_info (group), collection_date, assigned_driver, route_order, admin_notes, driver_notes
+Create 'collections' CPT with 
+Create ACF fields:statuses: pending, booked, in_progress, completed, customer_name, phone, address, vehicle_info (group), collection_date, assigned_driver, route_order, admin_notes, driver_notes
 Create driver/admin notes fields that sync back to scrap site
 Add collection status field that syncs with scrap site status
 
@@ -33,7 +33,7 @@ Auto-redirect to first collection after shift start
 
 
 Collections View (12h):
-Create custom template for next collection
+Create custom template for single collection cpt
 Display vehicle info, customer details, address with copy button
 Add Google Maps link/button for address
 Create status update form with notes field
@@ -47,6 +47,9 @@ Order collections by route_order field
 Show collection status and basic info in list
 Add click-through to full collection details
 Make it sync all the time with scrap site
+
+
+
 MILESTONE 3: ROUTE PLANNING
 Route Organization (14h):
 Create route planning page showing calendar of collection dates

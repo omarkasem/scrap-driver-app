@@ -41,14 +41,14 @@ class Acf {
         unset($paths[0]);
     
         // Append the new path and return it.
-        $paths[] = SCRAP_DRIVER_ACF_PATH . 'acf-json';
+        $paths[] = SCRAP_DRIVER_PLUGIN_DIR . '/lib/acf-json';
     
         return $paths;    
     }
     
 
     function my_acf_json_save_point( $path ) {
-        return SCRAP_DRIVER_ACF_PATH . 'acf-json';
+        return SCRAP_DRIVER_PLUGIN_DIR . '/lib/acf-json';
     }
 
 

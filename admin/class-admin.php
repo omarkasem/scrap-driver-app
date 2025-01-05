@@ -7,6 +7,7 @@ class Admin {
         require_once plugin_dir_path(__FILE__) . 'includes/class-api.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-acf.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-cpt.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-generator.php';
         
     }
 

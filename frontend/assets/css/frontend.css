@@ -1,1 +1,75 @@
-/* Frontend styles go here */ 
+.sda-collection-single {
+    max-width: 1200px;
+    margin: 2em auto;
+    padding: 0 20px;
+}
+
+.sda-section {
+    margin-bottom: 2em;
+    padding: 1.5em;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.sda-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1em;
+}
+
+.sda-info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5em;
+    background: #f9f9f9;
+    border-radius: 3px;
+}
+
+.copyable {
+    position: relative;
+    padding-right: 30px;
+}
+
+.copy-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.sda-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.sda-form select,
+.sda-form textarea {
+    width: 100%;
+    padding: 8px;
+}
+
+.sda-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1em;
+    margin-top: 1em;
+}
+
+.sda-gallery img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+#sda-complete-collection {
+    width: 100%;
+    padding: 1em;
+    font-size: 1.2em;
+}
