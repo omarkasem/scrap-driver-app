@@ -2,9 +2,33 @@ jQuery(document).ready(function($) {
     // Copy to clipboard functionality
     $('.copy-btn').on('click', function() {
         const text = $(this).parent('.copyable').data('copy');
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Copied to clipboard!');
-        });
+        
+        // Create temporary textarea element
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed'; // Avoid scrolling to bottom
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            // Try modern clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    $(this).addClass('copied');
+                    setTimeout(() => $(this).removeClass('copied'), 2000);
+                });
+            } else {
+                // Fallback to execCommand
+                document.execCommand('copy');
+                $(this).addClass('copied');
+                setTimeout(() => $(this).removeClass('copied'), 2000);
+            }
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        } finally {
+            // Clean up
+            document.body.removeChild(textarea);
+        }
     });
 
     // Status update form

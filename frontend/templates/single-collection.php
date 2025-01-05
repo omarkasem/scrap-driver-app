@@ -50,7 +50,7 @@ while (have_posts()) :
                             <strong><?php echo esc_html(ucwords(str_replace('_', ' ', $key))); ?>:</strong>
                             <span class="copyable" data-copy="<?php echo esc_attr($value); ?>">
                                 <?php echo esc_html($value); ?>
-                                <button class="copy-btn" title="Copy to clipboard">📋</button>
+                                <button class="copy-btn" title="<?php esc_attr_e('Copy to clipboard', 'scrap-driver'); ?>">📋</button>
                             </span>
                         </div>
                     <?php endforeach; ?>
@@ -63,7 +63,7 @@ while (have_posts()) :
                 <div class="sda-address">
                     <p class="copyable" data-copy="<?php echo esc_attr($address); ?>">
                         <?php echo nl2br(esc_html($address)); ?>
-                        <button class="copy-btn" title="Copy to clipboard">📋</button>
+                        <button class="copy-btn" title="<?php esc_attr_e('Copy to clipboard', 'scrap-driver'); ?>">📋</button>
                     </p>
                     <a href="https://www.google.com/maps/search/?api=1&query=<?php echo urlencode($address); ?>"
                        class="button" target="_blank">

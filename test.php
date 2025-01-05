@@ -56,6 +56,12 @@ class Vrm_Lookup_API{
             'methods' => 'GET',
             'callback' => array($this,'get_all_data'),
         ));
+
+        // Add new endpoint for collection drivers
+        register_rest_route('vrmlookup/v1', '/get_all_drivers', array(
+            'methods' => 'GET',
+            'callback' => array($this,'get_all_drivers'),
+        ));
     }
 
     function logo_url( $request ) {
@@ -287,6 +293,19 @@ class Vrm_Lookup_API{
                 'total_items' => (int) $total_items,
                 'total_pages' => $total_pages
             ]
+        ], 200);
+    }
+
+    // Add new function for getting all drivers
+    public function get_all_drivers( $request ) {
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'vrm_lookup_collection_driver';
+        
+        $query = "SELECT * FROM `{$tableName}`";
+        $results = $wpdb->get_results($query, 'ARRAY_A');
+
+        return new WP_REST_Response([
+            'data' => $results
         ], 200);
     }
 }

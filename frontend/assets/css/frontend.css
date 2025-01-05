@@ -40,6 +40,19 @@
     border: none;
     cursor: pointer;
     padding: 5px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.copy-btn:hover {
+    opacity: 1;
+}
+
+.copy-btn.copied {
+    opacity: 1;
+    background-color: #4CAF50;
+    color: white;
 }
 
 .sda-form {

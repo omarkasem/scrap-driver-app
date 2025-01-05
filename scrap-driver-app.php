@@ -24,6 +24,8 @@ define( 'SCRAP_DRIVER_ACF_PATH', __DIR__ . '/lib/acf/' );
 define( 'SCRAP_DRIVER_ACF_URL', plugin_dir_url( __FILE__ ) . '/lib/acf/' );
 define( 'SCRAP_DRIVER_ACF_SHOW', true );
 
+// Add the following line where you include other class files
+require_once plugin_dir_path( __FILE__ ) . 'admin/includes/class-caps.php';
 
 // Autoloader function
 function scrap_driver_autoloader($class) {
@@ -57,6 +59,9 @@ function run_scrap_driver() {
     require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/class-frontend.php';
     $frontend = new ScrapDriver\Frontend();
     $frontend->init();
+
+    // Add this line to initialize the caps class
+    new Scrap_Driver_Caps();
 }
 
 run_scrap_driver();
