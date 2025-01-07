@@ -1,3 +1,8 @@
+STARTED 5 Jan 2025 - Sunday
+6h everyday
+
+
+
 API Integration (14h):
 Create WordPress REST API endpoint in scrap site to fetch collections with fields: customer_name, phone, address, vehicle info, collection_date, collection_driver
 Create function to fetch only collections where collection_date exists AND date > current_date

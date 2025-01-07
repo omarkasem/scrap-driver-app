@@ -6,9 +6,35 @@ class Frontend {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
 
         add_filter('single_template', array($this, 'load_collection_template'));
-
+        
+        // Change to theme_page_templates filter
+        add_filter('theme_page_templates', array($this, 'add_collections_template'));
+        add_filter('template_include', array($this, 'load_collections_list_template'));
     }
 
+    /**
+     * Add the collections template to the page template dropdown
+     */
+    public function add_collections_template($templates) {
+        $templates['view-collections.php'] = __('Collections List', 'scrap-driver');
+        return $templates;
+    }
+
+    public function load_collections_list_template($template) {
+        // Get the template selected for the page
+        if (is_page()) {
+            $page_template = get_page_template_slug();
+            
+            if ('view-collections.php' === $page_template) {
+                $custom_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
+                if (file_exists($custom_template)) {
+                    return $custom_template;
+                }
+            }
+        }
+        
+        return $template;
+    }
 
     public function load_collection_template($template) {
         global $post;

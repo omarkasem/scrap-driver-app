@@ -27,9 +27,9 @@ class CPT {
             'public'              => true,
             'show_ui'             => true,
             'show_in_menu'        => true,
-            'show_in_nav_menus'   => true,
+            'show_in_nav_menus'   => false,
             'supports'            => array('title'),
-            'has_archive'         => true,
+            'has_archive'         => false,
             'rewrite'             => array('slug' => 'collection', 'with_front' => false),
             'menu_icon'           => 'dashicons-database',
         );
