@@ -62,6 +62,8 @@ Query collections by date and driver
 Create drag-drop interface for reordering collections
 Save new order in route_order field
 Update collection order in database after reordering
+
+
 Distance Calculations (12h):
 Add settings page for home/base location
 Integrate Google Maps Distance Matrix API
@@ -69,12 +71,16 @@ Calculate distances between stops
 Store distances in collection meta
 Calculate and display total route distance
 Add per-route fuel cost estimation
+
+
 Collection Assignment (10h):
 Create unassigned collections page
 Show collections with dates but no driver
 Add bulk driver assignment capability
 Add date modification capability
 Update scrap site when assignments change
+
+
 MILESTONE 4: HR SYSTEM
 Driver Shifts (12h):
 Create shifts listing page showing clock in/out times

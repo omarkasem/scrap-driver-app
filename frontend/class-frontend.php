@@ -17,6 +17,7 @@ class Frontend {
      */
     public function add_collections_template($templates) {
         $templates['view-collections.php'] = __('Collections List', 'scrap-driver');
+        $templates['view-todays-collections.php'] = __('Today\'s Collections', 'scrap-driver');
         return $templates;
     }
 
@@ -27,6 +28,13 @@ class Frontend {
             
             if ('view-collections.php' === $page_template) {
                 $custom_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
+                if (file_exists($custom_template)) {
+                    return $custom_template;
+                }
+            }
+
+            if ('view-todays-collections.php' === $page_template) {
+                $custom_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-todays-collections.php';
                 if (file_exists($custom_template)) {
                     return $custom_template;
                 }
@@ -54,7 +62,7 @@ class Frontend {
         if (is_page()) {
             $page_template = get_page_template_slug();
 
-            if ('view-collections.php' === $page_template) {
+            if ('view-collections.php' === $page_template || 'view-todays-collections.php' === $page_template) {
                 wp_enqueue_style('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
                 wp_enqueue_script('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
             }

@@ -26,6 +26,7 @@ define( 'SCRAP_DRIVER_ACF_SHOW', true );
 
 // Add the following line where you include other class files
 require_once plugin_dir_path( __FILE__ ) . 'admin/includes/class-caps.php';
+require_once plugin_dir_path(__FILE__) . 'admin/includes/class-shift.php';
 
 // Autoloader function
 function scrap_driver_autoloader($class) {

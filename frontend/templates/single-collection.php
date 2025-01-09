@@ -149,6 +149,7 @@ while (have_posts()) :
     </div>
 
     <?php
+    do_action('sda_collection_completed', $collection_id, $current_user_id);
 endwhile;
 
 get_footer(); 
