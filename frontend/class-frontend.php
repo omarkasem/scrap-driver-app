@@ -51,6 +51,17 @@ class Frontend {
 
 
     public function enqueue_assets() {
+        if (is_page()) {
+            $page_template = get_page_template_slug();
+
+            if ('view-collections.php' === $page_template) {
+                wp_enqueue_style('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
+                wp_enqueue_script('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
+            }
+        }
+
+
+
         // Enqueue frontend CSS
         wp_enqueue_style(
             'scrap-driver-frontend',

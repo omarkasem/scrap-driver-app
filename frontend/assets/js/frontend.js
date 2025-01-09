@@ -87,4 +87,25 @@ jQuery(document).ready(function($) {
             $('#sda-status-form').submit();
         }
     });
+
+    if ($('#collections-table').length) {
+        $('#collections-table').DataTable({
+            order: [[3, 'asc']], // Sort by collection date by default
+            pageLength: 25,
+            language: {
+                search: sdaDataTableTranslations.search,
+                lengthMenu: sdaDataTableTranslations.lengthMenu,
+                info: sdaDataTableTranslations.info,
+                infoEmpty: sdaDataTableTranslations.infoEmpty,
+                infoFiltered: sdaDataTableTranslations.infoFiltered,
+                emptyTable: sdaDataTableTranslations.emptyTable,
+                paginate: {
+                    first: sdaDataTableTranslations.first,
+                    last: sdaDataTableTranslations.last,
+                    next: sdaDataTableTranslations.next,
+                    previous: sdaDataTableTranslations.previous
+                }
+            }
+        });
+    }
 });

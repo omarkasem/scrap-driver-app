@@ -30,10 +30,6 @@ if (!$is_admin && !$is_driver) {
     exit;
 }
 
-// Enqueue DataTables
-wp_enqueue_style('datatables', SCRAP_DRIVER_PLUGIN_DIR . 'frontend/assets/css/datatables.min.css');
-wp_enqueue_script('datatables', SCRAP_DRIVER_PLUGIN_DIR . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
-
 // Get collections based on user role
 $args = array(
     'post_type' => 'sda-collection',
@@ -60,6 +56,24 @@ $collections = new WP_Query($args);
     <h1><?php _e('Collections', 'scrap-driver'); ?></h1>
 
     <div class="sda-section">
+        <?php
+        // Add this before the table to pass translations to JS
+        $datatable_translations = array(
+            'search' => __('Search:', 'scrap-driver'),
+            'lengthMenu' => __('Show _MENU_ entries', 'scrap-driver'),
+            'info' => __('Showing _START_ to _END_ of _TOTAL_ entries', 'scrap-driver'),
+            'infoEmpty' => __('Showing 0 to 0 of 0 entries', 'scrap-driver'),
+            'infoFiltered' => __('(filtered from _MAX_ total entries)', 'scrap-driver'),
+            'emptyTable' => __('No collections available', 'scrap-driver'),
+            'first' => __('First', 'scrap-driver'),
+            'last' => __('Last', 'scrap-driver'),
+            'next' => __('Next', 'scrap-driver'),
+            'previous' => __('Previous', 'scrap-driver')
+        );
+        ?>
+        <script>
+            var sdaDataTableTranslations = <?php echo json_encode($datatable_translations); ?>;
+        </script>
         <table id="collections-table" class="display">
             <thead>
                 <tr>
@@ -117,27 +131,5 @@ $collections = new WP_Query($args);
     </div>
 </div>
 
-<script>
-jQuery(document).ready(function($) {
-    $('#collections-table').DataTable({
-        order: [[3, 'asc']], // Sort by collection date by default
-        pageLength: 25,
-        language: {
-            search: "<?php _e('Search:', 'scrap-driver'); ?>",
-            lengthMenu: "<?php _e('Show _MENU_ entries', 'scrap-driver'); ?>",
-            info: "<?php _e('Showing _START_ to _END_ of _TOTAL_ entries', 'scrap-driver'); ?>",
-            infoEmpty: "<?php _e('Showing 0 to 0 of 0 entries', 'scrap-driver'); ?>",
-            infoFiltered: "<?php _e('(filtered from _MAX_ total entries)', 'scrap-driver'); ?>",
-            emptyTable: "<?php _e('No collections available', 'scrap-driver'); ?>",
-            paginate: {
-                first: "<?php _e('First', 'scrap-driver'); ?>",
-                last: "<?php _e('Last', 'scrap-driver'); ?>",
-                next: "<?php _e('Next', 'scrap-driver'); ?>",
-                previous: "<?php _e('Previous', 'scrap-driver'); ?>"
-            }
-        }
-    });
-});
-</script>
 
 <?php get_footer(); ?> 
