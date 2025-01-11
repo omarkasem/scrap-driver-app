@@ -10,6 +10,12 @@ class Frontend {
         // Change to theme_page_templates filter
         add_filter('theme_page_templates', array($this, 'add_collections_template'));
         add_filter('template_include', array($this, 'load_collections_list_template'));
+
+        $this->includes();
+    }
+
+    public function includes() {
+        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/includes/class-collection.php';
     }
 
     /**
@@ -86,5 +92,7 @@ class Frontend {
             SCRAP_DRIVER_VERSION,
             true
         );
+
+        wp_localize_script('scrap-driver-frontend', 'sdaAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
     }
 } 

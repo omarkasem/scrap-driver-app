@@ -192,3 +192,57 @@ table.dataTable tbody td {
 .sda-shift-single .sda-info-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
+
+/* Add these styles */
+.sda-notes-display {
+    margin-top: 1.5em;
+}
+
+.sda-note {
+    padding: 1em;
+    margin-bottom: 1em;
+    background: #f9f9f9;
+    border-left: 3px solid #0073aa;
+    border-radius: 3px;
+}
+
+.sda-photo-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.sda-remove-photo {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #dc3232;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+    transition: background-color 0.2s;
+}
+
+.sda-remove-photo:hover {
+    background: #c92626;
+}
+
+.sda-notice {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.sda-notice-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}

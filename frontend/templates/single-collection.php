@@ -3,8 +3,8 @@
  * Template for displaying single collection
  */
 
+acf_form_head();
 get_header();
-
 while (have_posts()) :
     the_post();
     $collection_id = get_the_ID();
@@ -16,6 +16,37 @@ while (have_posts()) :
     // Check if user has permission to view/edit
     $can_edit = current_user_can('manage_options') || 
                 ($assigned_driver_id && $assigned_driver_id == $current_user_id);
+    
+    // Add check for active shift for drivers
+    if ($assigned_driver_id && $assigned_driver_id == $current_user_id && !current_user_can('manage_options')) {
+        $has_active_shift = get_user_meta($current_user_id, 'current_shift_id', true);
+        if (!$has_active_shift) {
+            ?>
+            <div class="wrap sda-collection-single">
+                <div class="sda-section sda-error-message">
+                    <h1><?php _e('No Active Shift', 'scrap-driver'); ?></h1>
+                    <p><?php _e('You must start your shift before viewing collections.', 'scrap-driver'); ?></p>
+                    <?php
+                    $shifts_page = get_pages(array(
+                        'meta_key' => '_wp_page_template',
+                        'meta_value' => 'view-shifts.php'
+                    ));
+                    if (!empty($shifts_page)) {
+                        $shifts_page_url = get_permalink($shifts_page[0]->ID);
+                    } else {
+                        $shifts_page_url = home_url();
+                    }
+                    ?>
+                    <a href="<?php echo esc_url($shifts_page_url); ?>" class="button">
+                        <?php _e('Go to My Shifts Page', 'scrap-driver'); ?>
+                    </a>
+                </div>
+            </div>
+            <?php
+            get_footer();
+            exit;
+        }
+    }
     
     if (!$can_edit) {
         ?>
@@ -44,12 +75,22 @@ while (have_posts()) :
         'phone' => get_field('phone')
     );
     $address = get_field('address');
-    $status = get_post_meta($collection_id, '_collection_status', true);
-    $notes = get_post_meta($collection_id, '_collection_notes', true);
-    $photos = get_post_meta($collection_id, '_collection_photos', true);
     ?>
 
     <div class="wrap sda-collection-single">
+        <?php if (isset($_GET['updated']) && $_GET['updated'] == 'true') : ?>
+            <div style="padding: 10px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
+                <?php _e('Collection updated successfully.', 'scrap-driver'); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {?>
+            <div class="sda-notice sda-notice-success">
+                <?php _e('Collection completed successfully.', 'scrap-driver'); ?>
+            </div>
+        <?php } ?>
+
+
         <h1><?php the_title(); ?></h1>
 
         <div class="sda-collection-details">
@@ -98,58 +139,47 @@ while (have_posts()) :
             </div>
 
             <?php if ($can_edit) : // Only show edit forms if user has permission ?>
-                <!-- Status Update Form -->
-                <div class="sda-section">
-                    <h2><?php _e('Update Status', 'scrap-driver'); ?></h2>
-                    <form id="sda-status-form" class="sda-form">
-                        <input type="hidden" name="collection_id" value="<?php echo esc_attr($collection_id); ?>">
-                        <select name="status" required>
-                            <option value=""><?php _e('Select Status', 'scrap-driver'); ?></option>
-                            <option value="pending" <?php selected($status, 'pending'); ?>>Pending</option>
-                            <option value="in_progress" <?php selected($status, 'in_progress'); ?>>In Progress</option>
-                            <option value="completed" <?php selected($status, 'completed'); ?>>Completed</option>
-                            <option value="cancelled" <?php selected($status, 'cancelled'); ?>>Cancelled</option>
-                        </select>
-                        <textarea name="notes" placeholder="Add notes..."><?php echo esc_textarea($notes); ?></textarea>
-                        <button type="submit" class="button button-primary">
-                            <?php _e('Update Status', 'scrap-driver'); ?>
-                        </button>
-                    </form>
-                </div>
+                <?php 
+                // Handle form submission
+                if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
+                    // Update collection status
+                    update_post_meta($collection_id, '_collection_status', 'completed');
+                    
+                    // Trigger collection completion action
+                    do_action('sda_collection_completed', $collection_id, $current_user_id);
+                    
+                    ?>
 
-                <!-- Photo Upload -->
-                <div class="sda-section">
-                    <h2><?php _e('Collection Photos', 'scrap-driver'); ?></h2>
-                    <form id="sda-photo-form" class="sda-form">
-                        <input type="hidden" name="collection_id" value="<?php echo esc_attr($collection_id); ?>">
-                        <input type="file" name="photo" accept="image/*" required>
-                        <button type="submit" class="button">
-                            <?php _e('Upload Photo', 'scrap-driver'); ?>
-                        </button>
-                    </form>
-                    <div id="sda-photo-gallery" class="sda-gallery">
-                        <?php
-                        if (!empty($photos)) {
-                            foreach ($photos as $photo_id) {
-                                echo wp_get_attachment_image($photo_id, 'medium');
-                            }
-                        }
-                        ?>
+                    <?php
+                }
+                
+                // Show ACF form
+                acf_form([
+                    'fields'=>['status','driver_notes','driver_uploaded_photos'],
+                    'uploader' => 'basic',
+                    'new_post' => false,
+                    'updated_message' => '',
+                ]); 
+                
+                // Only show complete button if collection is not already completed
+                $status = get_post_meta($collection_id, '_collection_status', true);
+                if ($status !== 'completed') :
+                ?>
+                    <!-- Complete Collection -->
+                    <div class="sda-section">
+                        <form method="POST" onsubmit="return confirm('<?php echo esc_js(__('Are you sure you want to complete this collection?', 'scrap-driver')); ?>');">
+                            <?php wp_nonce_field('complete_collection', 'complete_collection_nonce'); ?>
+                            <button type="submit" name="complete_collection" class="button button-primary button-large">
+                                <?php _e('Complete Collection', 'scrap-driver'); ?>
+                            </button>
+                        </form>
                     </div>
-                </div>
-
-                <!-- Complete Collection -->
-                <div class="sda-section">
-                    <button id="sda-complete-collection" class="button button-primary button-large">
-                        <?php _e('Complete Collection', 'scrap-driver'); ?>
-                    </button>
-                </div>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
 
     <?php
-    do_action('sda_collection_completed', $collection_id, $current_user_id);
 endwhile;
 
 get_footer(); 

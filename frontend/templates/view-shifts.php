@@ -155,6 +155,7 @@ $shifts = new WP_Query($args);
     </div>
 
     <div class="sda-section">
+        <h2><?php _e('My Shifts', 'scrap-driver'); ?></h2>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>

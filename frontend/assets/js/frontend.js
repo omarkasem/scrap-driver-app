@@ -31,62 +31,6 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // Status update form
-    $('#sda-status-form').on('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        
-        $.ajax({
-            url: '/wp-json/scrap-driver/v1/collections/<?php echo $collection_id; ?>/status',
-            method: 'POST',
-            data: {
-                status: formData.get('status'),
-                notes: formData.get('notes')
-            },
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
-            },
-            success: function(response) {
-                alert('Status updated successfully!');
-            },
-            error: function(xhr) {
-                alert('Error updating status. Please try again.');
-            }
-        });
-    });
-
-    // Photo upload form
-    $('#sda-photo-form').on('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        
-        $.ajax({
-            url: '/wp-json/scrap-driver/v1/collections/<?php echo $collection_id; ?>/photos',
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
-            },
-            success: function(response) {
-                const img = $('<img>').attr('src', response.url);
-                $('#sda-photo-gallery').append(img);
-                $('#sda-photo-form')[0].reset();
-            },
-            error: function(xhr) {
-                alert('Error uploading photo. Please try again.');
-            }
-        });
-    });
-
-    // Complete collection button
-    $('#sda-complete-collection').on('click', function() {
-        if (confirm('Are you sure you want to complete this collection?')) {
-            $('#sda-status-form select[name="status"]').val('completed');
-            $('#sda-status-form').submit();
-        }
-    });
 
     if ($('#collections-table').length) {
         $('#collections-table').DataTable({
@@ -108,4 +52,112 @@ jQuery(document).ready(function($) {
             }
         });
     }
+
+    // Status form submission
+    $('#sda-status-form').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const submitButton = form.find('button[type="submit"]');
+        
+        submitButton.prop('disabled', true);
+        
+        $.ajax({
+            url: sdaAjax.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'sda_update_collection_status',
+                ...Object.fromEntries(new FormData(this))
+            },
+            success: function(response) {
+                if (response.success) {
+                    form.find('textarea[name="notes"]').val('');
+                    $('.sda-notes-display').html(response.data.notes);
+                    alert(response.data.message);
+                } else {
+                    alert(response.data);
+                }
+            },
+            error: function() {
+                alert('An error occurred. Please try again.');
+            },
+            complete: function() {
+                submitButton.prop('disabled', false);
+            }
+        });
+    });
+
+    // Photo upload
+    $('#sda-photo-form').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const submitButton = form.find('button[type="submit"]');
+        
+        submitButton.prop('disabled', true);
+        
+        const formData = new FormData(this);
+        formData.append('action', 'sda_upload_collection_photo');
+        
+        $.ajax({
+            url: sdaAjax.ajaxurl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    const photoHtml = `
+                        <div class="sda-photo-wrapper">
+                            <img src="${response.data.image_url}" class="attachment-medium size-medium" alt="">
+                            <button class="sda-remove-photo" data-id="${response.data.attachment_id}">×</button>
+                        </div>
+                    `;
+                    $('#sda-photo-gallery').append(photoHtml);
+                    form.find('input[type="file"]').val('');
+                    alert(response.data.message);
+                } else {
+                    alert(response.data);
+                }
+            },
+            error: function() {
+                alert('An error occurred. Please try again.');
+            },
+            complete: function() {
+                submitButton.prop('disabled', false);
+            }
+        });
+    });
+
+    // Photo removal
+    $(document).on('click', '.sda-remove-photo', function(e) {
+        e.preventDefault();
+        const button = $(this);
+        const photoWrapper = button.closest('.sda-photo-wrapper');
+        const collectionId = $('#sda-photo-form input[name="collection_id"]').val();
+        const nonce = $('#sda-photo-form input[name="nonce"]').val();
+        
+        if (confirm('Are you sure you want to remove this photo?')) {
+            $.ajax({
+                url: sdaAjax.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'sda_remove_collection_photo',
+                    collection_id: collectionId,
+                    attachment_id: button.data('id'),
+                    nonce: nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        photoWrapper.fadeOut(function() {
+                            $(this).remove();
+                        });
+                    } else {
+                        alert(response.data);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        }
+    });
 });
