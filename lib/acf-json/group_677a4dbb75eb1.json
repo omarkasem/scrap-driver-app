@@ -114,7 +114,8 @@
                     "maxlength": "",
                     "placeholder": "",
                     "prepend": "",
-                    "append": ""
+                    "append": "",
+                    "readonly": 1
                 },
                 {
                     "key": "field_677a4dbb75eb8",
@@ -134,7 +135,8 @@
                     "maxlength": "",
                     "placeholder": "",
                     "prepend": "",
-                    "append": ""
+                    "append": "",
+                    "readonly": 1
                 },
                 {
                     "key": "field_677a4dbb75eb9",
@@ -154,7 +156,8 @@
                     "maxlength": "",
                     "placeholder": "",
                     "prepend": "",
-                    "append": ""
+                    "append": "",
+                    "readonly": 1
                 }
             ]
         },
@@ -199,6 +202,24 @@
             "bidirectional_target": []
         },
         {
+            "key": "field_678679e62e6b6",
+            "label": "Admin",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
             "key": "field_677a4dbb75ebc",
             "label": "Route Order",
             "name": "route_order",
@@ -225,20 +246,46 @@
             "label": "Admin Notes",
             "name": "admin_notes",
             "aria-label": "",
-            "type": "textarea",
+            "type": "repeater",
             "instructions": "Notes visible to admin only",
             "required": 0,
-            "conditional_logic": false,
+            "conditional_logic": 0,
             "wrapper": {
                 "width": "",
                 "class": "",
                 "id": ""
             },
-            "rows": 4,
-            "default_value": "",
-            "new_lines": "",
-            "maxlength": "",
-            "placeholder": ""
+            "layout": "row",
+            "pagination": 0,
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Add a Note",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_67867a03ed55f",
+                    "label": "Note",
+                    "name": "note",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_677a4dbb75ebd"
+                }
+            ]
         },
         {
             "key": "field_678269a1c2f63",
@@ -402,5 +449,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1736601839
+    "modified": 1736866385
 }

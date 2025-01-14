@@ -33,8 +33,9 @@ class Acf {
         add_filter( 'acf/settings/save_json', array($this,'my_acf_json_save_point') );
         add_filter( 'acf/settings/load_json', array($this,'my_acf_json_load_point') );
 
+        // Add filter for read-only fields
+        add_filter('acf/load_field', array($this, 'make_vehicle_info_readonly'));
     }
-
 
     function my_acf_json_load_point( $paths ) {
         // Remove the original path (optional).
@@ -60,6 +61,15 @@ class Acf {
 
     public function show_admin( $show_admin ) {
         return SCRAP_DRIVER_ACF_SHOW;
+    }
+
+    // Add this new method
+    public function make_vehicle_info_readonly($field) {
+        // Check if the field is part of the vehicle_info group
+        if (isset($field['parent']) && $field['parent'] === 'field_677a4dbb75eb6') {
+            $field['readonly'] = true;
+        }
+        return $field;
     }
 
 }

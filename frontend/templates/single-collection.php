@@ -138,8 +138,7 @@ while (have_posts()) :
                 </div>
             </div>
 
-            <?php if ($can_edit) : // Only show edit forms if user has permission ?>
-                <?php 
+            <?php if ($can_edit) :
                 // Handle form submission
                 if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
                     // Update collection status
@@ -147,12 +146,8 @@ while (have_posts()) :
                     
                     // Trigger collection completion action
                     do_action('sda_collection_completed', $collection_id, $current_user_id);
-                    
-                    ?>
-
-                    <?php
                 }
-                
+                echo '<div class="sda-section">';
                 // Show ACF form
                 acf_form([
                     'fields'=>['status','driver_notes','driver_uploaded_photos'],
@@ -160,7 +155,7 @@ while (have_posts()) :
                     'new_post' => false,
                     'updated_message' => '',
                 ]); 
-                
+                echo '</div>';
                 // Only show complete button if collection is not already completed
                 $status = get_post_meta($collection_id, '_collection_status', true);
                 if ($status !== 'completed') :
