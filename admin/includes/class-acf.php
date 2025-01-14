@@ -35,6 +35,9 @@ class Acf {
 
         // Add filter for read-only fields
         add_filter('acf/load_field', array($this, 'make_vehicle_info_readonly'));
+
+        // Add filter for loading field choices
+        add_filter('acf/load_field', array($this, 'load_vehicle_statuses'));
     }
 
     function my_acf_json_load_point( $paths ) {
@@ -69,6 +72,38 @@ class Acf {
         if (isset($field['parent']) && $field['parent'] === 'field_677a4dbb75eb6') {
             $field['readonly'] = true;
         }
+        return $field;
+    }
+
+    // Update the existing method to include status field handling
+    public function load_vehicle_statuses($field) {
+        // Handle status select field
+        if ($field['key'] === 'field_677a4dbb75eb2') {
+            // Make API request to get statuses
+            $response = wp_remote_get(SCRAP_DRIVER_API_URL . 'wp-json/vrmlookup/v1/get_all_statuses');
+
+            // Debug the API response
+            error_log('API Response: ' . print_r($response, true));
+            
+            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                $statuses = json_decode(wp_remote_retrieve_body($response), true);
+                
+                // Debug the decoded statuses
+                error_log('Decoded Statuses: ' . print_r($statuses, true));
+                
+                // Format the choices
+                $field['choices'] = array();
+                foreach ($statuses['data'] as $status) {
+                    $field['choices'][$status['id']] = $status['name'];
+                }
+                
+                // Debug the final choices
+                error_log('Field Choices: ' . print_r($field['choices'], true));
+            } else {
+                error_log('API Error: ' . print_r($response, true));
+            }
+        }
+        
         return $field;
     }
 

@@ -23,6 +23,7 @@ define('SCRAP_DRIVER_PLUGIN_URL', plugin_dir_url(__FILE__));
 define( 'SCRAP_DRIVER_ACF_PATH', __DIR__ . '/lib/acf/' );
 define( 'SCRAP_DRIVER_ACF_URL', plugin_dir_url( __FILE__ ) . '/lib/acf/' );
 define( 'SCRAP_DRIVER_ACF_SHOW', true );
+define( 'SCRAP_DRIVER_API_URL', 'https://vrm-dev.local/' );
 
 // Add the following line where you include other class files
 require_once plugin_dir_path( __FILE__ ) . 'admin/includes/class-caps.php';

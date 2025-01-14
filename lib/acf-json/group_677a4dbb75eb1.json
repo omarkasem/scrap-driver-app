@@ -114,8 +114,7 @@
                     "maxlength": "",
                     "placeholder": "",
                     "prepend": "",
-                    "append": "",
-                    "readonly": 1
+                    "append": ""
                 },
                 {
                     "key": "field_677a4dbb75eb8",
@@ -135,8 +134,7 @@
                     "maxlength": "",
                     "placeholder": "",
                     "prepend": "",
-                    "append": "",
-                    "readonly": 1
+                    "append": ""
                 },
                 {
                     "key": "field_677a4dbb75eb9",
@@ -156,8 +154,28 @@
                     "maxlength": "",
                     "placeholder": "",
                     "prepend": "",
-                    "append": "",
-                    "readonly": 1
+                    "append": ""
+                },
+                {
+                    "key": "field_678689b4ad199",
+                    "label": "Plate",
+                    "name": "plate",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
                 }
             ]
         },
@@ -246,7 +264,7 @@
             "label": "Admin Notes",
             "name": "admin_notes",
             "aria-label": "",
-            "type": "repeater",
+            "type": "textarea",
             "instructions": "Notes visible to admin only",
             "required": 0,
             "conditional_logic": 0,
@@ -255,37 +273,12 @@
                 "class": "",
                 "id": ""
             },
-            "layout": "row",
-            "pagination": 0,
-            "min": 0,
-            "max": 0,
-            "collapsed": "",
-            "button_label": "Add a Note",
-            "rows_per_page": 20,
-            "sub_fields": [
-                {
-                    "key": "field_67867a03ed55f",
-                    "label": "Note",
-                    "name": "note",
-                    "aria-label": "",
-                    "type": "text",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "maxlength": "",
-                    "allow_in_bindings": 0,
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": "",
-                    "parent_repeater": "field_677a4dbb75ebd"
-                }
-            ]
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 1,
+            "rows": "",
+            "placeholder": "",
+            "new_lines": ""
         },
         {
             "key": "field_678269a1c2f63",
@@ -320,10 +313,17 @@
                 "id": ""
             },
             "choices": {
-                "pending": "Pending",
-                "booked": "Booked",
-                "in_progress": "In Progress",
-                "completed": "Completed"
+                "1": "COD Issued",
+                "2": "Offer accepted",
+                "3": "Pending info",
+                "4": "Pending payment",
+                "5": "Pending Collection",
+                "6": "Completed",
+                "8": "Quote Enquiry",
+                "9": "Out of Range",
+                "10": "Out of Range - Contact",
+                "11": "Payment Complete",
+                "12": "Cancelled"
             },
             "default_value": "pending",
             "allow_null": 0,
@@ -338,7 +338,7 @@
             "label": "Driver Notes",
             "name": "driver_notes",
             "aria-label": "",
-            "type": "repeater",
+            "type": "textarea",
             "instructions": "",
             "required": 0,
             "conditional_logic": 0,
@@ -347,37 +347,12 @@
                 "class": "",
                 "id": ""
             },
-            "layout": "row",
-            "pagination": 0,
-            "min": 0,
-            "max": 0,
-            "collapsed": "",
-            "button_label": "Add a Note",
-            "rows_per_page": 20,
-            "sub_fields": [
-                {
-                    "key": "field_6782700eca4bc",
-                    "label": "Note",
-                    "name": "note",
-                    "aria-label": "",
-                    "type": "textarea",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "maxlength": "",
-                    "allow_in_bindings": 0,
-                    "rows": "",
-                    "placeholder": "",
-                    "new_lines": "",
-                    "parent_repeater": "field_677a4dbb75ebe"
-                }
-            ]
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 1,
+            "rows": "",
+            "placeholder": "",
+            "new_lines": ""
         },
         {
             "key": "field_678269acc2f64",
@@ -449,5 +424,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1736866385
+    "modified": 1736870333
 }

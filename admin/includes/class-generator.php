@@ -2,7 +2,7 @@
 namespace ScrapDriver\Admin;
 
 class Generator {
-    private $api_endpoint = 'https://scrapmycaronline.co.uk/dev/wp-json/vrmlookup/v1/get_all_data';
+    private $api_endpoint = SCRAP_DRIVER_API_URL . 'wp-json/vrmlookup/v1/get_all_data';
 
     public function __construct() {
         // Hook into the manual sync action
