@@ -1,89 +1,81 @@
 <?php
 namespace ScrapDriver\Admin;
 
+use WP_REST_Response;
+use WP_Error;
+
 class Api {
+    private $secure_key = 'a7f9e3b2c1d5h8j6k4m0p2q9r7s5t3u1v8w6x4y2z0';
+
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_routes'));
     }
 
     public function register_routes() {
-        // Update collection status
-        register_rest_route('scrap-driver/v1', '/collections/(?P<id>\d+)/status', array(
+        register_rest_route('scrap-driver/v1', '/update-collection', array(
             'methods' => 'POST',
-            'callback' => array($this, 'update_collection_status'),
-            'permission_callback' => array($this, 'check_permissions'),
-            'args' => array(
-                'status' => array(
-                    'required' => true,
-                    'type' => 'string',
-                ),
-                'notes' => array(
-                    'required' => false,
-                    'type' => 'string',
-                ),
+            'callback' => array($this, 'update_collection'),
+            'permission_callback' => '__return_true'
+        ));
+    }
+
+    public function update_collection($request) {
+        $data = $request->get_param('data');
+        $secure_key = $request->get_param('secure_key');
+
+        // Validate request
+        if (empty($data) || empty($secure_key)) {
+            return new WP_Error('invalid_request', 'Missing required parameters', array('status' => 400));
+        }
+
+        if ($secure_key !== $this->secure_key) {
+            return new WP_Error('invalid_key', 'Invalid secure key', array('status' => 401));
+        }
+
+        // Find the collection post by plate number
+        $args = array(
+            'post_type' => 'sda-collection',
+            'meta_query' => array(
+                array(
+                    'key' => 'vehicle_info_plate',
+                    'value' => $data['car_plate'],
+                    'compare' => '='
+                )
             ),
-        ));
+            'posts_per_page' => 1
+        );
 
-        // Handle photo upload
-        register_rest_route('scrap-driver/v1', '/collections/(?P<id>\d+)/photos', array(
-            'methods' => 'POST',
-            'callback' => array($this, 'upload_collection_photo'),
-            'permission_callback' => array($this, 'check_permissions'),
-        ));
-    }
+        $collections = get_posts($args);
 
-    public function update_collection_status($request) {
-        $post_id = $request->get_param('id');
-        $status = $request->get_param('status');
-        $notes = $request->get_param('notes');
-
-        update_post_meta($post_id, '_collection_status', sanitize_text_field($status));
-        if ($notes) {
-            update_post_meta($post_id, '_collection_notes', sanitize_textarea_field($notes));
+        if (empty($collections)) {
+            return new WP_Error('not_found', 'Collection not found', array('status' => 404));
         }
 
-        return rest_ensure_response(array(
-            'status' => 'success',
-            'message' => 'Collection status updated'
-        ));
-    }
+        $post_id = $collections[0]->ID;
 
-    public function upload_collection_photo($request) {
-        $post_id = $request->get_param('id');
-        $files = $request->get_file_params();
+        // Update the collection data
+        $updates = array(
+            'status' => $data['status_id'],
+            'collection_date' => $data['collection_date'],
+            'assigned_driver' => $data['collection_driver'],
+            'admin_notes' => $data['admin_notes'],
+            'driver_notes' => $data['driver_notes']
+        );
 
-        if (!empty($files['photo'])) {
-            require_once(ABSPATH . 'wp-admin/includes/image.php');
-            require_once(ABSPATH . 'wp-admin/includes/file.php');
-            require_once(ABSPATH . 'wp-admin/includes/media.php');
+        foreach ($updates as $key => $value) {
+            update_field($key, $value, $post_id);
+        }
 
-            $attachment_id = media_handle_upload('photo', $post_id);
-
-            if (is_wp_error($attachment_id)) {
-                return new \WP_Error('upload_error', $attachment_id->get_error_message());
-            }
-
-            // Add the photo to collection gallery
-            $gallery = get_post_meta($post_id, '_collection_photos', true);
-            if (empty($gallery)) {
-                $gallery = array();
-            }
-            $gallery[] = $attachment_id;
-            update_post_meta($post_id, '_collection_photos', $gallery);
-
-            return rest_ensure_response(array(
+        return new WP_REST_Response(
+            array(
                 'status' => 'success',
-                'attachment_id' => $attachment_id,
-                'url' => wp_get_attachment_url($attachment_id)
-            ));
-        }
-
-        return new \WP_Error('no_photo', 'No photo was uploaded');
+                'message' => 'Collection updated successfully',
+                'post_id' => $post_id
+            ), 
+            200
+        );
     }
 
-    public function check_permissions() {
-        return current_user_can('manage_options');
-    }
 }
 
 new Api();
