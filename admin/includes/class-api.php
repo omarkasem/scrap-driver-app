@@ -5,10 +5,14 @@ use WP_REST_Response;
 use WP_Error;
 
 class Api {
+    use CollectionProcessor;
+    
     private $secure_key = 'a7f9e3b2c1d5h8j6k4m0p2q9r7s5t3u1v8w6x4y2z0';
+    private $sync_endpoint = SCRAP_DRIVER_API_URL . 'wp-json/vrmlookup/v1/sync_collection_data';
 
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_routes'));
+        add_action('acf/save_post', array($this, 'sync_collection_to_api'), 20);
     }
 
     public function register_routes() {
@@ -17,6 +21,53 @@ class Api {
             'callback' => array($this, 'update_collection'),
             'permission_callback' => '__return_true'
         ));
+    }
+
+    public function sync_collection_to_api($post_id) {
+        // Only proceed if this is a collection post type
+        if (get_post_type($post_id) !== 'sda-collection') {
+            return;
+        }
+
+        // Don't sync if this is an autosave
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+
+        // Prepare the data for the API
+        $api_data = array(
+            'status_id' => get_field('status', $post_id),
+            'collection_date' => get_field('collection_date', $post_id),
+            'collection_driver' => get_field('assigned_driver', $post_id),
+            'admin_notes' => get_field('admin_notes', $post_id),
+            'driver_notes' => get_field('driver_notes', $post_id),
+            'car_plate' => get_field('vehicle_info_plate', $post_id),
+            'modified_at' => current_time('mysql')
+        );
+
+        // Process driver photos
+        $driver_photos = $this->get_driver_photos($post_id);
+        if (!empty($driver_photos)) {
+            $api_data['driver_photos'] = json_encode($driver_photos);
+        }
+
+        // Filter out null or empty values
+        $api_data = array_filter($api_data);
+
+        // Make the API request
+        $response = wp_remote_post($this->sync_endpoint, array(
+            'body' => [
+                'data' => $api_data,
+                'secure_key' => $this->secure_key
+            ],
+            'headers' => array(
+                'Content-Type' => 'application/x-www-form-urlencoded'
+            )
+        ));
+var_dump($response);exit;
+        if (is_wp_error($response)) {
+            error_log('Collection sync failed: ' . $response->get_error_message());
+        }
     }
 
     public function update_collection($request) {
@@ -32,50 +83,36 @@ class Api {
             return new WP_Error('invalid_key', 'Invalid secure key', array('status' => 401));
         }
 
-        // Find the collection post by plate number
-        $args = array(
-            'post_type' => 'sda-collection',
-            'meta_query' => array(
-                array(
-                    'key' => 'vehicle_info_plate',
-                    'value' => $data['car_plate'],
-                    'compare' => '='
-                )
-            ),
-            'posts_per_page' => 1
-        );
+        // Process the collection using shared method
+        $post_id = $this->process_collection($data);
 
-        $collections = get_posts($args);
-
-        if (empty($collections)) {
-            return new WP_Error('not_found', 'Collection not found', array('status' => 404));
-        }
-
-        $post_id = $collections[0]->ID;
-
-        // Update the collection data
-        $updates = array(
-            'status' => $data['status_id'],
-            'collection_date' => $data['collection_date'],
-            'assigned_driver' => $data['collection_driver'],
-            'admin_notes' => $data['admin_notes'],
-            'driver_notes' => $data['driver_notes']
-        );
-
-        foreach ($updates as $key => $value) {
-            update_field($key, $value, $post_id);
+        if (!$post_id) {
+            return new WP_Error('processing_failed', 'Failed to process collection', array('status' => 500));
         }
 
         return new WP_REST_Response(
             array(
                 'status' => 'success',
-                'message' => 'Collection updated successfully',
+                'message' => 'Collection processed successfully',
                 'post_id' => $post_id
             ), 
             200
         );
     }
 
+    private function get_driver_photos($post_id) {
+        $driver_photos = array();
+        if (have_rows('driver_uploaded_photos', $post_id)) {
+            while (have_rows('driver_uploaded_photos', $post_id)) {
+                the_row();
+                $photo = get_sub_field('photo');
+                if ($photo) {
+                    $driver_photos[] = $photo['url'];
+                }
+            }
+        }
+        return $driver_photos;
+    }
 }
 
 new Api();
