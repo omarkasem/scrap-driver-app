@@ -141,12 +141,43 @@ while (have_posts()) :
             <?php if ($can_edit) :
                 // Handle form submission
                 if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
-                    // Update collection status
+                    // Update collection status to completed (6)
+                    update_field('status', '6', $collection_id);
                     update_post_meta($collection_id, '_collection_status', 'completed');
                     
                     // Trigger collection completion action
                     do_action('sda_collection_completed', $collection_id, $current_user_id);
+
+                    // Get next collection in route
+                    $next_collection = get_posts(array(
+                        'post_type' => 'sda-collection',
+                        'meta_query' => array(
+                            array(
+                                'key' => 'assigned_driver',
+                                'value' => $current_user_id
+                            ),
+                            array(
+                                'key' => '_collection_status',
+                                'value' => 'completed',
+                                'compare' => '!='
+                            )
+                        ),
+                        'meta_key' => 'route_order',
+                        'orderby' => 'meta_value_num',
+                        'order' => 'ASC',
+                        'posts_per_page' => 1
+                    ));
+
+                    // Redirect to next collection or home
+                    if (!empty($next_collection)) {
+                        wp_redirect(get_permalink($next_collection[0]->ID));
+                        exit;
+                    } else {
+                        wp_redirect(home_url());
+                        exit;
+                    }
                 }
+                
                 echo '<div class="sda-section">';
                 // Show ACF form
                 acf_form([
@@ -156,9 +187,10 @@ while (have_posts()) :
                     'updated_message' => '',
                 ]); 
                 echo '</div>';
+                
                 // Only show complete button if collection is not already completed
-                $status = get_post_meta($collection_id, '_collection_status', true);
-                if ($status !== 'completed') :
+                $status = get_field('status', $collection_id);
+                if ($status !== '6') :
                 ?>
                     <!-- Complete Collection -->
                     <div class="sda-section">

@@ -30,6 +30,34 @@ if (!$is_admin && !$is_driver) {
     exit;
 }
 
+// Handle any POST updates
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_update'])) {
+    // Verify nonce
+    if (!isset($_POST['sda_collection_nonce']) || 
+        !wp_verify_nonce($_POST['sda_collection_nonce'], 'sda_update_collection')) {
+        wp_die('Security check failed');
+    }
+
+    $collection_id = intval($_POST['collection_id']);
+    
+    // Update the collection fields
+    if (isset($_POST['status'])) {
+        update_field('status', sanitize_text_field($_POST['status']), $collection_id);
+    }
+    
+    if (isset($_POST['assigned_driver'])) {
+        update_field('assigned_driver', sanitize_text_field($_POST['assigned_driver']), $collection_id);
+    }
+    
+    // Trigger the sync
+    $generator = new \ScrapDriver\Admin\Generator();
+    $generator->sync_collection_to_api($collection_id);
+    
+    // Redirect to prevent form resubmission
+    wp_redirect(add_query_arg('updated', '1', wp_get_referer()));
+    exit;
+}
+
 // Get collections based on user role
 $args = array(
     'post_type' => 'sda-collection',

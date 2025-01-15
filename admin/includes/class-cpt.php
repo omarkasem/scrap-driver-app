@@ -309,26 +309,35 @@ class CPT {
             return;
         }
 
-
         // Check post type
         if (get_post_type($post_id) !== 'sda-collection') {
             return;
         }
-
 
         // Check permissions
         if (!current_user_can('edit_post', $post_id)) {
             return;
         }
 
+        $updated = false;
+
         // Update assigned driver if changed
         if (isset($_REQUEST['assigned_driver']) && $_REQUEST['assigned_driver'] !== '-1') {
-            update_post_meta($post_id, 'assigned_driver', sanitize_text_field($_REQUEST['assigned_driver']));
+            update_field('assigned_driver', sanitize_text_field($_REQUEST['assigned_driver']), $post_id);
+            $updated = true;
         }
 
         // Update collection date if changed
         if (!empty($_REQUEST['collection_date'])) {
-            update_post_meta($post_id, 'collection_date', sanitize_text_field($_REQUEST['collection_date']));
+            update_field('collection_date', sanitize_text_field($_REQUEST['collection_date']), $post_id);
+            $updated = true;
+        }
+
+        // If any fields were updated, trigger the sync
+        if ($updated) {
+            // Get the Generator instance and sync
+            $generator = new \ScrapDriver\Admin\Generator();
+            $generator->sync_collection_to_api($post_id);
         }
     }
 

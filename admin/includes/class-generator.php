@@ -139,14 +139,25 @@ class Generator {
             return;
         }
 
-        // Get the required data
-        $status = get_field('status', $post_id);
-        $collection_date = get_field('collection_date', $post_id);
-        $assigned_driver = get_field('assigned_driver', $post_id);
-        $admin_notes = get_field('admin_notes', $post_id);
-        $driver_notes = get_field('driver_notes', $post_id);
-        $plate_number = get_field('vehicle_info', $post_id)['plate'];
- 
+        // Don't sync if this is an autosave
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+
+        // Get all the required fields
+        $vehicle_info = get_field('vehicle_info', $post_id);
+        
+        // Prepare the data for the API
+        $api_data = array(
+            'status_id' => get_field('status', $post_id),
+            'collection_date' => get_field('collection_date', $post_id),
+            'collection_driver' => get_field('assigned_driver', $post_id),
+            'admin_notes' => get_field('admin_notes', $post_id),
+            'driver_notes' => get_field('driver_notes', $post_id),
+            'car_plate' => is_array($vehicle_info) ? $vehicle_info['plate'] : get_field('vehicle_info_plate', $post_id),
+            'modified_at' => current_time('mysql')
+        );
+
         // Process driver photos
         $driver_photos = array();
         if (have_rows('driver_uploaded_photos', $post_id)) {
@@ -158,22 +169,22 @@ class Generator {
                 }
             }
         }
+        
+        if (!empty($driver_photos)) {
+            $api_data['driver_photos'] = json_encode($driver_photos);
+        }
 
-        // Prepare the data for the API
-        $api_data = array(
-            'status_id' => $status,
-            'collection_date' => $collection_date,
-            'collection_driver' => $assigned_driver,
-            'admin_notes' => $admin_notes,
-            'driver_notes' => $driver_notes,
-            'car_plate' => $plate_number,
-            'driver_photos' => !empty($driver_photos) ? json_encode($driver_photos) : null,
-            'modified_at' => current_time('mysql')
-        );
+        // Filter out null or empty values
+        $api_data = array_filter($api_data, function($value) {
+            return $value !== null && $value !== '';
+        });
 
         // Make the API request
         $response = wp_remote_post($this->sync_endpoint, array(
-            'body' => ['data' => $api_data,'secure_key' => 'a7f9e3b2c1d5h8j6k4m0p2q9r7s5t3u1v8w6x4y2z0'],
+            'body' => [
+                'data' => $api_data,
+                'secure_key' => 'a7f9e3b2c1d5h8j6k4m0p2q9r7s5t3u1v8w6x4y2z0'
+            ],
             'headers' => array(
                 'Content-Type' => 'application/x-www-form-urlencoded'
             )
