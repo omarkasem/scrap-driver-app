@@ -3,7 +3,7 @@ STARTED 5 Jan 2025 - Sunday
 
 
 
-API Integration (10-12h):
+API Integration (10-12h): DONE
 Create WordPress REST API endpoint in scrap site to fetch collections with fields: customer_name, phone, address, vehicle info, collection_date, collection_driver
 Create function to fetch only collections where collection_date exists AND date > current_date
 Store fetched collections as CPT 'collections' with ACF fields matching the data
@@ -12,7 +12,7 @@ Add manual sync button in admin to force refresh
 
 
 
-Collection CPT & Fields Setup (6-8h):
+Collection CPT & Fields Setup (6-8h): DONE
 Create 'collections' CPT with 
 Create ACF fields:statuses: pending, booked, in_progress, completed, customer_name, phone, address, vehicle_info (group), collection_date, assigned_driver, route_order, admin_notes, driver_notes
 Create driver/admin notes fields that sync back to scrap site
@@ -20,7 +20,7 @@ Add collection status field that syncs with scrap site status
 
 
 
-User Roles & Permissions (4-6h):
+User Roles & Permissions (4-6h): DONE
 Create 'driver' role with specific capabilities
 Create function to map WordPress users to drivers from scrap site
 Add driver selection field in user profile
@@ -28,7 +28,7 @@ Set up collection viewing permissions based on assigned driver
 
 
 MILESTONE 2: DRIVER FEATURE
-Shift Management (5-7h):
+Shift Management (5-7h): DONE
 Create 'Start Shift' button in driver dashboard
 Save shift_start_time in user meta when clicked
 Convert button to 'End Shift' after starting
@@ -37,7 +37,7 @@ Create 'shifts' CPT to store daily shift records
 Auto-redirect to first collection after shift start
 
 
-Collections View (8-10h):
+Collections View (8-10h): DONE
 Create custom template for single collection cpt
 Display vehicle info, customer details, address with copy button
 Add Google Maps link/button for address
@@ -46,13 +46,20 @@ Add photo upload button
 Create complete collection button
 
 
-Collections List (6-8h):
+Collections List (6-8h): DONE
 Create template showing today's collections only
 Order collections by route_order field
 Show collection status and basic info in list
 Add click-through to full collection details
 Make it sync all the time with scrap site
 
+
+Collection Assignment (8-10h): DONE
+Create unassigned collections page
+Show collections with dates but no driver
+Add bulk driver assignment capability
+Add date modification capability
+Update scrap site when assignments change
 
 
 MILESTONE 3: ROUTE PLANNING
@@ -72,13 +79,6 @@ Store distances in collection meta
 Calculate and display total route distance
 Add per-route fuel cost estimation
 
-
-Collection Assignment (8-10h):
-Create unassigned collections page
-Show collections with dates but no driver
-Add bulk driver assignment capability
-Add date modification capability
-Update scrap site when assignments change
 
 
 MILESTONE 4: HR SYSTEM

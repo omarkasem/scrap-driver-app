@@ -114,6 +114,7 @@ class CPT {
         $new_columns['title'] = $columns['title'];
         $new_columns['driver'] = __('Driver', 'scrap-driver');
         $new_columns['collection_date'] = __('Collection Date', 'scrap-driver');
+        $new_columns['status'] = __('Status', 'scrap-driver');
         $new_columns['date'] = $columns['date'];
         return $new_columns;
     }
@@ -129,11 +130,21 @@ class CPT {
                 $date = get_post_meta($post_id, 'collection_date', true);
                 echo $date ? esc_html(date('Y-m-d', strtotime($date))) : '—';
                 break;
+            case 'status':
+                $status_id = get_field('status', $post_id);
+                if ($status_id) {
+                    $statuses = $this->get_all_statuses();
+                    echo isset($statuses[$status_id]) ? esc_html($statuses[$status_id]) : esc_html($status_id);
+                } else {
+                    echo '—';
+                }
+                break;
         }
     }
 
     public function set_sortable_columns($columns) {
         $columns['collection_date'] = 'collection_date';
+        $columns['status'] = 'status';
         return $columns;
     }
 
@@ -156,7 +167,21 @@ class CPT {
         </select>
         <?php
 
-        // Get all unique collection dates
+        // Status filter
+        $current_status = isset($_GET['status_filter']) ? $_GET['status_filter'] : '';
+        $statuses = $this->get_all_statuses();
+        ?>
+        <select name="status_filter">
+            <option value=""><?php _e('All Statuses', 'scrap-driver'); ?></option>
+            <?php foreach ($statuses as $value => $label) : ?>
+                <option value="<?php echo esc_attr($value); ?>" <?php selected($current_status, $value); ?>>
+                    <?php echo esc_html($label); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <?php
+
+        // Collection date filter (existing code)
         global $wpdb;
         $dates = $wpdb->get_col(
             $wpdb->prepare(
@@ -197,6 +222,14 @@ class CPT {
             );
         }
 
+        // Filter by status
+        if (!empty($_GET['status_filter'])) {
+            $meta_query[] = array(
+                'key' => 'status',
+                'value' => sanitize_text_field($_GET['status_filter']),
+            );
+        }
+
         // Filter by date
         if (!empty($_GET['collection_date_filter'])) {
             $meta_query[] = array(
@@ -213,7 +246,10 @@ class CPT {
         if ($query->get('orderby') === 'collection_date') {
             $query->set('meta_key', 'collection_date');
             $query->set('orderby', 'meta_value');
-            $query->set('order', 'DESC'); // Default to showing newest first
+            $query->set('order', 'DESC');
+        } elseif ($query->get('orderby') === 'status') {
+            $query->set('meta_key', 'status');
+            $query->set('orderby', 'meta_value');
         }
     }
 
@@ -294,6 +330,33 @@ class CPT {
         if (!empty($_REQUEST['collection_date'])) {
             update_post_meta($post_id, 'collection_date', sanitize_text_field($_REQUEST['collection_date']));
         }
+    }
+
+    /**
+     * Get all statuses from API with caching
+     */
+    private function get_all_statuses() {
+        // Check for cached statuses
+        $statuses = get_transient('sda_all_statuses');
+        
+        if (false === $statuses) {
+            // Get fresh data from API
+            $response = wp_remote_get(SCRAP_DRIVER_API_URL . 'wp-json/vrmlookup/v1/get_all_statuses');
+            
+            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                $api_response = json_decode(wp_remote_retrieve_body($response), true);
+                if (isset($api_response['data']) && is_array($api_response['data'])) {
+                    $statuses = array();
+                    foreach ($api_response['data'] as $status) {
+                        $statuses[$status['id']] = $status['name'];
+                    }
+                    // Cache for 1 hour
+                    set_transient('sda_all_statuses', $statuses, HOUR_IN_SECONDS);
+                }
+            }
+        }
+        
+        return is_array($statuses) ? $statuses : array();
     }
 
 

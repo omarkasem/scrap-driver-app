@@ -27,8 +27,8 @@
             "aria-label": "",
             "type": "text",
             "instructions": "",
-            "required": 1,
-            "conditional_logic": false,
+            "required": 0,
+            "conditional_logic": 0,
             "wrapper": {
                 "width": "50",
                 "class": "",
@@ -36,6 +36,7 @@
             },
             "default_value": "",
             "maxlength": "",
+            "allow_in_bindings": 1,
             "placeholder": "",
             "prepend": "",
             "append": ""
@@ -47,8 +48,8 @@
             "aria-label": "",
             "type": "text",
             "instructions": "",
-            "required": 1,
-            "conditional_logic": false,
+            "required": 0,
+            "conditional_logic": 0,
             "wrapper": {
                 "width": "50",
                 "class": "",
@@ -56,6 +57,7 @@
             },
             "default_value": "",
             "maxlength": "",
+            "allow_in_bindings": 1,
             "placeholder": "",
             "prepend": "",
             "append": ""
@@ -67,18 +69,19 @@
             "aria-label": "",
             "type": "textarea",
             "instructions": "",
-            "required": 1,
-            "conditional_logic": false,
+            "required": 0,
+            "conditional_logic": 0,
             "wrapper": {
                 "width": "",
                 "class": "",
                 "id": ""
             },
-            "rows": 3,
             "default_value": "",
-            "new_lines": "",
             "maxlength": "",
-            "placeholder": ""
+            "allow_in_bindings": 1,
+            "rows": 3,
+            "placeholder": "",
+            "new_lines": ""
         },
         {
             "key": "field_677a4dbb75eb6",
@@ -424,5 +427,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1736870333
+    "modified": 1736957532
 }

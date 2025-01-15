@@ -107,7 +107,7 @@ class Generator {
 
         if ($post_id) {
             // Update ACF fields
-            update_field('status', 'pending', $post_id);
+            update_field('status', $collection['status_id'], $post_id);
             update_field('customer_name', $customer_name, $post_id);
             update_field('phone', isset($customer_info['phone']) ? $customer_info['phone'] : '', $post_id);
             update_field('address', isset($customer_info['address']) ? $customer_info['address'] : '', $post_id);
