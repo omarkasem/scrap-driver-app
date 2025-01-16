@@ -4,8 +4,8 @@ namespace ScrapDriver;
 class Admin {
 
     public function __construct() {
-        require_once plugin_dir_path(__FILE__) . 'includes/class-generator.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/class-api.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-helpers.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-sync.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-acf.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-cpt.php';
         

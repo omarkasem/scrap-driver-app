@@ -336,8 +336,8 @@ class CPT {
         // If any fields were updated, trigger the sync
         if ($updated) {
             // Get the Generator instance and sync
-            $API = new \ScrapDriver\Admin\API();
-            $API->sync_collection_to_api($post_id);
+            $API = new \ScrapDriver\Admin\Sync();
+            $API->sync_to_vrm($post_id);
         }
     }
 
@@ -345,27 +345,7 @@ class CPT {
      * Get all statuses from API with caching
      */
     private function get_all_statuses() {
-        // Check for cached statuses
-        $statuses = get_transient('sda_all_statuses');
-        
-        if (false === $statuses) {
-            // Get fresh data from API
-            $response = wp_remote_get(SCRAP_DRIVER_API_URL . 'wp-json/vrmlookup/v1/get_all_statuses');
-            
-            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
-                $api_response = json_decode(wp_remote_retrieve_body($response), true);
-                if (isset($api_response['data']) && is_array($api_response['data'])) {
-                    $statuses = array();
-                    foreach ($api_response['data'] as $status) {
-                        $statuses[$status['id']] = $status['name'];
-                    }
-                    // Cache for 1 hour
-                    set_transient('sda_all_statuses', $statuses, HOUR_IN_SECONDS);
-                }
-            }
-        }
-        
-        return is_array($statuses) ? $statuses : array();
+        return sda_get_all_statuses();
     }
 
 
