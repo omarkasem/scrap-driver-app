@@ -34,6 +34,12 @@ document.addEventListener('DOMContentLoaded', function() {
         eventResizableFromStart: false,
         eventDurationEditable: false,
         
+        eventContent: function(arg) {
+            return {
+                html: `<div class="fc-event-title">${arg.event.title}</div>`
+            };
+        },
+        
         views: {
             timeGridDay: {
                 type: 'timeGrid',

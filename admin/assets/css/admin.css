@@ -116,3 +116,13 @@
     color: #2271b1;
     text-decoration: underline;
 }
+
+.fc-timegrid-event .fc-event-title {
+    padding: 2px 4px;
+    white-space: normal;
+    overflow: visible;
+}
+
+.fc-timegrid-event .fc-event-time {
+    display: none;
+}
