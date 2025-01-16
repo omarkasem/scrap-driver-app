@@ -20,11 +20,8 @@ class Admin {
 
         if ('sda-collection_page_sda-route-planning' === $hook) {
             // FullCalendar Core
-            wp_enqueue_script('fullcalendar-core', 'https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.js', array(), '7.0.0', true);
-            wp_enqueue_script('fullcalendar-daygrid', 'https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid/main.min.js', array('fullcalendar-core'), '7.0.0', true);
-            wp_enqueue_script('fullcalendar-interaction', 'https://cdn.jsdelivr.net/npm/@fullcalendar/interaction/main.min.js', array('fullcalendar-core'), '7.0.0', true);
-            wp_enqueue_style('fullcalendar-core', 'https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.css', array(), '7.0.0');
-            wp_enqueue_style('fullcalendar-daygrid', 'https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid/main.min.css', array(), '7.0.0');
+            wp_enqueue_script('fullcalendar', 'https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js', array('jquery'), '5.11.3', true);
+            wp_enqueue_style('fullcalendar', 'https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css', array(), '5.11.3');
         }
 
         // Enqueue admin CSS

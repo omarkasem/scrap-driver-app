@@ -12,6 +12,7 @@ class SDA_Route {
         
         // Ajax handlers
         add_action('wp_ajax_update_collection_route', array($this, 'update_collection_route'));
+        add_action('wp_ajax_get_collections', array($this, 'ajax_get_collections'));
     }
 
     /**
@@ -98,6 +99,30 @@ class SDA_Route {
         update_post_meta($collection_id, 'route_order', $route_order);
 
         wp_send_json_success();
+    }
+
+
+
+    /**
+     * Ajax handler for getting collections
+     */
+    public function ajax_get_collections() {
+        check_ajax_referer('sda_route_nonce', 'nonce');
+        
+        $driver_id = isset($_POST['driver_id']) ? intval($_POST['driver_id']) : null;
+        $collections = $this->get_collections($driver_id);
+        
+        $events = array_map(function($collection) {
+            return array(
+                'id' => $collection['id'],
+                'title' => $collection['title'],
+                'start' => $collection['date'],
+                'driverId' => $collection['driver_id'],
+                'routeOrder' => $collection['route_order']
+            );
+        }, $collections);
+        
+        wp_send_json_success($events);
     }
 }
 

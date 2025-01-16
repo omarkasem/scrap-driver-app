@@ -15,13 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 'dayGridMonth,dayGridWeek'
         },
         editable: true,
-        droppable: true,
         eventDrop: function(info) {
             const event = info.event;
             const newDate = event.start.toISOString().split('T')[0];
             
-            // Get the new route order (you might want to implement your own logic here)
-            const routeOrder = 1;
+            // Calculate new route order
+            const routeOrder = event.extendedProps.routeOrder || 1;
 
             // Send AJAX request to update the collection
             jQuery.ajax({
@@ -38,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 success: function(response) {
                     if (response.success) {
                         // Optionally show success message
+                        console.log('Collection updated successfully');
                     }
                 },
                 error: function() {
@@ -45,6 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     info.revert();
                 }
             });
+        },
+        eventDidMount: function(info) {
+            // Add custom styling or tooltips if needed
+            info.el.title = info.event.title;
         }
     });
 
@@ -70,7 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             success: function(response) {
                 calendar.removeAllEvents();
-                calendar.addEventSource(response.data);
+                if (response.success && response.data) {
+                    calendar.addEventSource(response.data);
+                }
+            },
+            error: function() {
+                alert('Error loading collections');
             }
         });
     }
