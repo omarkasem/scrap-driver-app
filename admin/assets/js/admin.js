@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollTime: '08:00:00',
         eventDuration: '01:00',
         forceEventDuration: true,
+        eventResizableFromStart: false,
+        eventDurationEditable: false,
         
         views: {
             timeGridDay: {
