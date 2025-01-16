@@ -60,3 +60,18 @@
 .fc-event:hover {
     opacity: 0.9;
 } 
+
+.fc-dragging .fc-view-harness {
+    min-height: 600px;
+}
+.fc .fc-scroller {
+    overflow: visible !important;
+}
+/* Add styles for multi-month view */
+.fc-multiMonthYear-view {
+    height: auto !important;
+}
+.fc .fc-multimonth {
+    border: 1px solid #ddd;
+    margin-bottom: 1em;
+}

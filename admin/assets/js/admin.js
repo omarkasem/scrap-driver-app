@@ -12,32 +12,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize FullCalendar
     const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
+        initialView: 'multiMonthYear',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,dayGridWeek'
+            right: 'multiMonthYear,dayGridMonth,dayGridWeek'
         },
         editable: true,
+        selectMirror: true,
+        dayMaxEvents: true,
+        multiMonthMaxColumns: 1,
+        multiMonthMinWidth: 350,
+        dragScroll: true,
+        scrollTime: 1000,
+        dragScrolling: true,
+        eventDragStart: function(info) {
+            calendarEl.classList.add('fc-dragging');
+        },
+        eventDragStop: function(info) {
+            calendarEl.classList.remove('fc-dragging');
+        },
         validRange: {
-            start: today // Disable all dates before today
+            start: today
         },
         eventDrop: function(info) {
             const event = info.event;
-            // Format date as YYYY-MM-DD ensuring proper timezone
             const newDate = formatDate(event.start);
             
-            // Validate if the new date is not in the past
             if (event.start < today) {
                 alert('Cannot move collections to past dates');
                 info.revert();
                 return;
             }
 
-            // Calculate new route order
+            // Get the current driver ID from the event if no driver is selected
+            const currentDriverId = event.extendedProps.driverId;
+            const selectedDriverId = driverSelect.value;
+            
+            // Use the current driver ID if none is selected
+            const driverIdToUse = selectedDriverId || currentDriverId;
+
             const routeOrder = event.extendedProps.routeOrder || 1;
 
-            // Send AJAX request to update the collection
             jQuery.ajax({
                 url: sdaRoute.ajaxurl,
                 type: 'POST',
@@ -46,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     nonce: sdaRoute.nonce,
                     collection_id: event.id,
                     new_date: newDate,
-                    driver_id: driverSelect.value || null,
+                    driver_id: driverIdToUse,
                     route_order: routeOrder
                 },
                 success: function(response) {
