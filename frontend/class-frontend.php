@@ -15,7 +15,7 @@ class Frontend {
     }
 
     public function includes() {
-        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/includes/class-collection.php';
+ 
     }
 
     /**
