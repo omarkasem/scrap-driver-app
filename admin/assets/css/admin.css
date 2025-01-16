@@ -106,3 +106,13 @@
     background: #135e96;
     color: white;
 }
+
+/* Add these styles */
+.clickable-day {
+    cursor: pointer;
+}
+
+.fc-daygrid-day-number:hover {
+    color: #2271b1;
+    text-decoration: underline;
+}

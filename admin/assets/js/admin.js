@@ -151,6 +151,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Prevent dragging to past dates
         eventConstraint: {
             start: today
+        },
+        dayCellContent: function(arg) {
+            return {
+                html: `<div class="fc-daygrid-day-number clickable-day">${arg.dayNumberText}</div>`
+            };
+        },
+        dateClick: function(info) {
+            // Only handle clicks on day numbers
+            if (info.jsEvent.target.classList.contains('fc-daygrid-day-number')) {
+                calendar.changeView('timeGridDay', info.date);
+            }
         }
     });
 
