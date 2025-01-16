@@ -113,6 +113,25 @@ class Sync {
                     }
                 }
             }
+
+            // Set default start and end times if not already set
+            $start_time = get_post_meta($post_id, 'collection_start_time', true);
+            $end_time = get_post_meta($post_id, 'collection_end_time', true);
+
+            if (empty($start_time)) {
+                update_post_meta($post_id, 'collection_start_time', '08:00:00');
+            }
+            if (empty($end_time)) {
+                update_post_meta($post_id, 'collection_end_time', '09:00:00');
+            }
+
+            // If times are provided in the collection data, update them
+            if (!empty($collection['start_time'])) {
+                update_post_meta($post_id, 'collection_start_time', $collection['start_time']);
+            }
+            if (!empty($collection['end_time'])) {
+                update_post_meta($post_id, 'collection_end_time', $collection['end_time']);
+            }
         }
 
         return $post_id;

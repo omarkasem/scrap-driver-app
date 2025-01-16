@@ -79,6 +79,8 @@ class SDA_Route {
         
         $formatted_collections = array_map(function($collection) {
             $collection_date = get_post_meta($collection->ID, 'collection_date', true);
+            $start_time = get_post_meta($collection->ID, 'collection_start_time', true) ?: '08:00:00';
+            $end_time = get_post_meta($collection->ID, 'collection_end_time', true) ?: '09:00:00';
             
             // Debug log
             error_log(sprintf(
@@ -90,7 +92,8 @@ class SDA_Route {
             return array(
                 'id' => $collection->ID,
                 'title' => $collection->post_title,
-                'start' => $collection_date,
+                'start' => $collection_date . 'T' . $start_time,
+                'end' => $collection_date . 'T' . $end_time,
                 'driver_id' => get_post_meta($collection->ID, 'assigned_driver', true),
                 'route_order' => get_post_meta($collection->ID, 'route_order', true),
                 'url' => get_edit_post_link($collection->ID)
@@ -111,12 +114,35 @@ class SDA_Route {
 
         $collection_id = intval($_POST['collection_id']);
         $new_date = sanitize_text_field($_POST['new_date']);
+        $start_time = isset($_POST['start_time']) ? sanitize_text_field($_POST['start_time']) : '08:00:00';
+        $end_time = isset($_POST['end_time']) ? sanitize_text_field($_POST['end_time']) : '09:00:00';
         $driver_id = isset($_POST['driver_id']) ? intval($_POST['driver_id']) : 0;
         $route_order = intval($_POST['route_order']);
+
+        // Debug logs
+        error_log('Update collection request: ' . print_r([
+            'collection_id' => $collection_id,
+            'new_date' => $new_date,
+            'start_time' => $start_time,
+            'end_time' => $end_time,
+            'driver_id' => $driver_id,
+            'route_order' => $route_order
+        ], true));
+
+        // Validate inputs
+        if (!$collection_id || !$new_date || !$start_time || !$end_time) {
+            wp_send_json_error('Missing required fields');
+            return;
+        }
 
         // Validate the new date
         $new_date_timestamp = strtotime($new_date);
         $today_timestamp = strtotime(date('Y-m-d'));
+
+        if ($new_date_timestamp === false) {
+            wp_send_json_error('Invalid date format');
+            return;
+        }
 
         if ($new_date_timestamp < $today_timestamp) {
             wp_send_json_error('Cannot set collection date to past date');
@@ -126,23 +152,47 @@ class SDA_Route {
         // Format the date consistently
         $formatted_date = date('Y-m-d', $new_date_timestamp);
 
-        // Update the collection date
-        $updated = update_post_meta($collection_id, 'collection_date', $formatted_date);
-        
-        // Only update driver if a specific driver is selected
-        if ($driver_id > 0) {
-            update_post_meta($collection_id, 'assigned_driver', $driver_id);
-        }
-        
-        update_post_meta($collection_id, 'route_order', $route_order);
+        try {
+            // Get current values
+            $current_date = get_post_meta($collection_id, 'collection_date', true);
+            $current_start = get_post_meta($collection_id, 'collection_start_time', true);
+            $current_end = get_post_meta($collection_id, 'collection_end_time', true);
 
-        if ($updated) {
-            wp_send_json_success(array(
+            // Only update if values are different
+            $date_updated = ($current_date === $formatted_date) || update_post_meta($collection_id, 'collection_date', $formatted_date);
+            $start_updated = ($current_start === $start_time) || update_post_meta($collection_id, 'collection_start_time', $start_time);
+            $end_updated = ($current_end === $end_time) || update_post_meta($collection_id, 'collection_end_time', $end_time);
+            
+            // Only update driver if a specific driver is selected
+            if ($driver_id > 0) {
+                update_post_meta($collection_id, 'assigned_driver', $driver_id);
+            }
+            
+            update_post_meta($collection_id, 'route_order', $route_order);
+
+            // Log the update results
+            error_log('Update results: ' . print_r([
+                'date_updated' => $date_updated,
+                'start_updated' => $start_updated,
+                'end_updated' => $end_updated,
+                'current_date' => $current_date,
+                'new_date' => $formatted_date,
+                'current_start' => $current_start,
+                'new_start' => $start_time,
+                'current_end' => $current_end,
+                'new_end' => $end_time
+            ], true));
+
+            wp_send_json_success([
                 'message' => 'Collection updated successfully',
-                'date' => $formatted_date
-            ));
-        } else {
-            wp_send_json_error('Failed to update collection');
+                'date' => $formatted_date,
+                'start_time' => $start_time,
+                'end_time' => $end_time
+            ]);
+
+        } catch (Exception $e) {
+            error_log('Error updating collection: ' . $e->getMessage());
+            wp_send_json_error('Error updating collection: ' . $e->getMessage());
         }
     }
 
@@ -162,6 +212,7 @@ class SDA_Route {
                 'id' => $collection['id'],
                 'title' => $collection['title'],
                 'start' => $collection['start'],
+                'end' => $collection['end'],
                 'driverId' => $collection['driver_id'],
                 'routeOrder' => $collection['route_order'],
                 'url' => $collection['url']

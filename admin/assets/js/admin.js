@@ -16,16 +16,30 @@ document.addEventListener('DOMContentLoaded', function() {
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'multiMonthYear,dayGridMonth,dayGridWeek'
+            right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
         },
         editable: true,
         selectMirror: true,
         dayMaxEvents: true,
+        slotMinTime: '06:00:00',
+        slotMaxTime: '20:00:00',
+        slotDuration: '00:30:00',
+        allDaySlot: false,
         multiMonthMaxColumns: 1,
         multiMonthMinWidth: 350,
         dragScroll: true,
-        scrollTime: 1000,
-        dragScrolling: true,
+        scrollTime: '08:00:00',
+        eventDuration: '01:00',
+        forceEventDuration: true,
+        
+        views: {
+            timeGridDay: {
+                type: 'timeGrid',
+                dayMaxEvents: false,
+                dayMaxEventRows: false
+            }
+        },
+        
         eventDragStart: function(info) {
             calendarEl.classList.add('fc-dragging');
         },
@@ -37,7 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         eventDrop: function(info) {
             const event = info.event;
-            const newDate = formatDate(event.start);
+            const newDate = formatDateOnly(event.start);
+            const startTime = formatTime(event.start);
+            const endTime = formatTime(event.end);
             
             if (event.start < today) {
                 alert('Cannot move collections to past dates');
@@ -45,14 +61,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Get the current driver ID from the event if no driver is selected
             const currentDriverId = event.extendedProps.driverId;
             const selectedDriverId = driverSelect.value;
-            
-            // Use the current driver ID if none is selected
             const driverIdToUse = selectedDriverId || currentDriverId;
-
             const routeOrder = event.extendedProps.routeOrder || 1;
+
+            // Debug logs
+            console.log('Event drop details:', {
+                newDate,
+                startTime,
+                endTime,
+                event: event
+            });
 
             jQuery.ajax({
                 url: sdaRoute.ajaxurl,
@@ -62,18 +82,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     nonce: sdaRoute.nonce,
                     collection_id: event.id,
                     new_date: newDate,
+                    start_time: startTime,
+                    end_time: endTime,
                     driver_id: driverIdToUse,
                     route_order: routeOrder
                 },
                 success: function(response) {
-                    if (response.success) {
-                        console.log('Collection updated successfully');
-                    } else {
+                    console.log('Update response:', response); // Debug log
+                    if (!response.success) {
                         info.revert();
-                        alert('Error updating collection');
+                        alert('Error updating collection: ' + (response.data || 'Unknown error'));
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Update error:', {xhr, status, error}); // Debug log
                     alert('Error updating collection');
                     info.revert();
                 }
@@ -160,8 +182,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     const events = response.data.map(event => {
                         console.log('Processing event:', event); // Debug log
                         return {
-                            ...event,
-                            start: formatDate(event.start)
+                            id: event.id,
+                            title: event.title,
+                            start: event.start,
+                            end: event.end,
+                            driverId: event.driverId,
+                            routeOrder: event.routeOrder,
+                            url: event.url
                         };
                     });
                     console.log('Formatted events:', events); // Debug log
@@ -178,19 +205,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Helper function to format dates consistently
-    function formatDate(date) {
+    function formatDateOnly(date) {
         if (!date) {
-            console.warn('Empty date provided to formatDate'); // Debug log
+            console.warn('Empty date provided to formatDateOnly');
             return null;
         }
         const d = new Date(date);
         if (isNaN(d.getTime())) {
-            console.warn('Invalid date:', date); // Debug log
+            console.warn('Invalid date:', date);
             return null;
         }
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
+    }
+
+    // Add helper function to format time
+    function formatTime(date) {
+        if (!date) {
+            console.warn('Empty date provided to formatTime');
+            return null;
+        }
+        const d = new Date(date);
+        if (isNaN(d.getTime())) {
+            console.warn('Invalid date:', date);
+            return null;
+        }
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
     }
 });
