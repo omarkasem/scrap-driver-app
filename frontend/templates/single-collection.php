@@ -71,10 +71,10 @@ while (have_posts()) :
         'plate' => get_field('vehicle_info_plate')
     );
     $customer = array(
-        'name' => get_field('customer_name'),
-        'phone' => get_field('phone')
+        'name' => get_field('customer_info_name'),
+        'phone' => get_field('customer_info_phone')
     );
-    $address = get_field('address');
+    $address = get_field('customer_info_address');
     ?>
 
     <div class="wrap sda-collection-single">

@@ -336,8 +336,8 @@ class CPT {
         // If any fields were updated, trigger the sync
         if ($updated) {
             // Get the Generator instance and sync
-            $generator = new \ScrapDriver\Admin\Generator();
-            $generator->sync_collection_to_api($post_id);
+            $API = new \ScrapDriver\Admin\API();
+            $API->sync_collection_to_api($post_id);
         }
     }
 

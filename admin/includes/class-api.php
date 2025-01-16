@@ -42,6 +42,9 @@ class Api {
             'admin_notes' => get_field('admin_notes', $post_id),
             'driver_notes' => get_field('driver_notes', $post_id),
             'car_plate' => get_field('vehicle_info_plate', $post_id),
+            'customer_name' => get_field('customer_info_name', $post_id),
+            'customer_phone' => get_field('customer_info_phone', $post_id),
+            'customer_address' => get_field('customer_info_address', $post_id),
             'modified_at' => current_time('mysql')
         );
 
@@ -64,7 +67,6 @@ class Api {
                 'Content-Type' => 'application/x-www-form-urlencoded'
             )
         ));
-var_dump($response);exit;
         if (is_wp_error($response)) {
             error_log('Collection sync failed: ' . $response->get_error_message());
         }

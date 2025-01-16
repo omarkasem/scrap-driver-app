@@ -56,20 +56,20 @@ trait CollectionProcessor {
             );
 
             foreach ($field_mappings as $source => $target) {
-                if (!empty($collection[$source])) {
+                if (isset($collection[$source])) {
                     update_field($target, $collection[$source], $post_id);
                 }
             }
 
             // Update customer information
             if (!empty($customer_name)) {
-                update_field('customer_name', $customer_name, $post_id);
+                update_field('customer_info_name', $customer_name, $post_id);
             }
             if (!empty($customer_info['phone'])) {
-                update_field('phone', $customer_info['phone'], $post_id);
+                update_field('customer_info_phone', $customer_info['phone'], $post_id);
             }
             if (!empty($customer_info['address'])) {
-                update_field('address', $customer_info['address'], $post_id);
+                update_field('customer_info_address', $customer_info['address'], $post_id);
             }
 
             // Process driver photos if available
@@ -148,7 +148,9 @@ class Generator {
             }
 
             foreach ($data['data'] as $collection) {
-                $this->process_collection($collection);
+                if (!empty($collection['collection_date']) && strtotime($collection['collection_date']) !== false) {
+                    $this->process_collection($collection);
+                }
             }
 
             $page++;

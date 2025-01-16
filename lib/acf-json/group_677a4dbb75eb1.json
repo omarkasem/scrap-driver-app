@@ -21,53 +21,11 @@
             "selected": 0
         },
         {
-            "key": "field_677a4dbb75eb3",
-            "label": "Customer Name",
-            "name": "customer_name",
+            "key": "field_6787f37c439ee",
+            "label": "Customer Information",
+            "name": "customer_info",
             "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "50",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "allow_in_bindings": 1,
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_677a4dbb75eb4",
-            "label": "Phone",
-            "name": "phone",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "50",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "allow_in_bindings": 1,
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_677a4dbb75eb5",
-            "label": "Address",
-            "name": "address",
-            "aria-label": "",
-            "type": "textarea",
+            "type": "group",
             "instructions": "",
             "required": 0,
             "conditional_logic": 0,
@@ -76,12 +34,72 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "",
-            "maxlength": "",
-            "allow_in_bindings": 1,
-            "rows": 3,
-            "placeholder": "",
-            "new_lines": ""
+            "layout": "block",
+            "sub_fields": [
+                {
+                    "key": "field_6787f386439ef",
+                    "label": "Name",
+                    "name": "name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_6787f393439f0",
+                    "label": "Phone",
+                    "name": "phone",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_6787f397439f1",
+                    "label": "Address",
+                    "name": "address",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
         },
         {
             "key": "field_677a4dbb75eb6",
@@ -183,46 +201,6 @@
             ]
         },
         {
-            "key": "field_677a4dbb75eba",
-            "label": "Collection Date",
-            "name": "collection_date",
-            "aria-label": "",
-            "type": "date_picker",
-            "instructions": "",
-            "required": 1,
-            "conditional_logic": false,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "display_format": "F j, Y",
-            "return_format": "Y-m-d",
-            "first_day": 1
-        },
-        {
-            "key": "field_677a4dbb75ebb",
-            "label": "Assigned Driver",
-            "name": "assigned_driver",
-            "aria-label": "",
-            "type": "user",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": false,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "role": [
-                "driver"
-            ],
-            "allow_null": 1,
-            "multiple": 0,
-            "return_format": "id",
-            "bidirectional_target": []
-        },
-        {
             "key": "field_678679e62e6b6",
             "label": "Admin",
             "name": "",
@@ -300,6 +278,46 @@
             "placement": "top",
             "endpoint": 0,
             "selected": 0
+        },
+        {
+            "key": "field_677a4dbb75eba",
+            "label": "Collection Date",
+            "name": "collection_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 1,
+            "conditional_logic": false,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_677a4dbb75ebb",
+            "label": "Assigned Driver",
+            "name": "assigned_driver",
+            "aria-label": "",
+            "type": "user",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": false,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "role": [
+                "driver"
+            ],
+            "allow_null": 1,
+            "multiple": 0,
+            "return_format": "id",
+            "bidirectional_target": []
         },
         {
             "key": "field_677a4dbb75eb2",
@@ -427,5 +445,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1736957532
+    "modified": 1736963134
 }

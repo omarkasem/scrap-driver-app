@@ -72,6 +72,10 @@ class Acf {
         if (isset($field['parent']) && $field['parent'] === 'field_677a4dbb75eb6') {
             $field['readonly'] = true;
         }
+        // Check if the field is part of the customer_info group
+        if (isset($field['parent']) && $field['parent'] === 'field_6787f37c439ee') {
+            $field['readonly'] = true;
+        }
         return $field;
     }
 
