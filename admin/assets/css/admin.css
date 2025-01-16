@@ -75,3 +75,34 @@
     border: 1px solid #ddd;
     margin-bottom: 1em;
 }
+
+.clickable-event {
+    cursor: pointer;
+}
+
+.fc-event-popover {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.fc-event-popover h4 {
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.view-collection-link {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #2271b1;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+}
+
+.view-collection-link:hover {
+    background: #135e96;
+    color: white;
+}

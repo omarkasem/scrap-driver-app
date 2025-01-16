@@ -81,6 +81,50 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         eventDidMount: function(info) {
             info.el.title = info.event.title;
+            info.el.classList.add('clickable-event');
+        },
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            
+            const popoverContent = document.createElement('div');
+            popoverContent.innerHTML = `
+                <div class="fc-event-popover">
+                    <h4>${info.event.title}</h4>
+                    <a href="${info.event.url}" target="_blank" class="view-collection-link">View Collection</a>
+                </div>
+            `;
+            
+            // Remove any existing popovers
+            document.querySelectorAll('.fc-event-popover').forEach(el => el.remove());
+            
+            // Get the clicked element's position
+            const rect = info.el.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Position the popover just above the clicked event
+            popoverContent.style.position = 'absolute';
+            popoverContent.style.top = (rect.top + scrollTop - 10) + 'px'; // Position above the event with 10px offset
+            popoverContent.style.left = rect.left + 'px';
+            popoverContent.style.zIndex = 1000;
+            document.body.appendChild(popoverContent);
+            
+            // Adjust if popover goes above viewport
+            const popoverRect = popoverContent.getBoundingClientRect();
+            if (popoverRect.top < 0) {
+                // If popover would go above viewport, position it below the event instead
+                popoverContent.style.top = (rect.bottom + scrollTop + 10) + 'px';
+            }
+            
+            const closePopover = function(e) {
+                if (!popoverContent.contains(e.target) && !info.el.contains(e.target)) {
+                    popoverContent.remove();
+                    document.removeEventListener('click', closePopover);
+                }
+            };
+            
+            setTimeout(() => {
+                document.addEventListener('click', closePopover);
+            }, 100);
         },
         // Prevent dragging to past dates
         eventConstraint: {

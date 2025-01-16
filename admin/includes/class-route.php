@@ -92,7 +92,8 @@ class SDA_Route {
                 'title' => $collection->post_title,
                 'start' => $collection_date,
                 'driver_id' => get_post_meta($collection->ID, 'assigned_driver', true),
-                'route_order' => get_post_meta($collection->ID, 'route_order', true)
+                'route_order' => get_post_meta($collection->ID, 'route_order', true),
+                'url' => get_edit_post_link($collection->ID)
             );
         }, $collections);
 
@@ -162,7 +163,8 @@ class SDA_Route {
                 'title' => $collection['title'],
                 'start' => $collection['start'],
                 'driverId' => $collection['driver_id'],
-                'routeOrder' => $collection['route_order']
+                'routeOrder' => $collection['route_order'],
+                'url' => $collection['url']
             );
         }, $collections);
         
