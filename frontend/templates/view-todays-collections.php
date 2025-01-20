@@ -87,6 +87,7 @@ $collections = new WP_Query($args);
         <table id="collections-table" class="display">
             <thead>
                 <tr>
+                    <th><?php _e('Order', 'scrap-driver'); ?></th>
                     <th><?php _e('ID', 'scrap-driver'); ?></th>
                     <th><?php _e('Driver', 'scrap-driver'); ?></th>
                     <th><?php _e('Vehicle', 'scrap-driver'); ?></th>
@@ -97,6 +98,10 @@ $collections = new WP_Query($args);
             <tbody>
                 <?php
                 if ($collections->have_posts()) :
+                    // Get all collection IDs for ordering
+                    $collection_ids = wp_list_pluck($collections->posts, 'ID');
+                    $collection_orders = \ScrapDriver\Frontend\Collection::get_collections_order($collection_ids);
+
                     while ($collections->have_posts()) : $collections->the_post();
                         $collection_id = get_the_ID();
                         $driver_id = get_field('assigned_driver');
@@ -107,6 +112,7 @@ $collections = new WP_Query($args);
                         $status = get_post_meta($collection_id, '_collection_status', true) ?: 'pending';
                         ?>
                         <tr>
+                            <td><?php echo esc_html($collection_orders[$collection_id]); ?></td>
                             <td><?php echo esc_html($collection_id); ?></td>
                             <td><?php echo esc_html($driver_name); ?></td>
                             <td>

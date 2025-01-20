@@ -16,13 +16,11 @@ document.addEventListener('DOMContentLoaded', function() {
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
+            right: 'multiMonthYear,dayGridMonth,timeGridDay'
         },
         editable: true,
         selectMirror: true,
         dayMaxEvents: true,
-        slotMinTime: '06:00:00',
-        slotMaxTime: '20:00:00',
         slotDuration: '00:30:00',
         allDaySlot: false,
         multiMonthMaxColumns: 1,
