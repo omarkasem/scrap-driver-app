@@ -34,7 +34,7 @@ jQuery(document).ready(function($) {
 
     if ($('#collections-table').length) {
         $('#collections-table').DataTable({
-            order: [[3, 'asc']], // Sort by collection date by default
+            order: [[0, 'asc']], // Sort by Order column by default
             pageLength: 25,
             language: {
                 search: sdaDataTableTranslations.search,

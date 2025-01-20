@@ -106,7 +106,6 @@ $collections = new WP_Query($args);
             <thead>
                 <tr>
                     <th><?php _e('Order', 'scrap-driver'); ?></th>
-                    <th><?php _e('ID', 'scrap-driver'); ?></th>
                     <th><?php _e('Driver', 'scrap-driver'); ?></th>
                     <th><?php _e('Vehicle', 'scrap-driver'); ?></th>
                     <th><?php _e('Collection Date', 'scrap-driver'); ?></th>
@@ -133,7 +132,6 @@ $collections = new WP_Query($args);
                         ?>
                         <tr>
                             <td><?php echo esc_html($collection_orders[$collection_id]); ?></td>
-                            <td><?php echo esc_html($collection_id); ?></td>
                             <td><?php echo esc_html($driver_name); ?></td>
                             <td>
                                 <?php 
