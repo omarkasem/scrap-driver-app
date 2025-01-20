@@ -51,11 +51,13 @@ class Shift {
             'post_title' => $shift_title,
             'post_status' => 'publish',
             'meta_input' => array(
-                'driver_id' => $current_user_id,
-                'shift_start' => $shift_start
+                'driver_id' => $current_user_id
             )
         ));
 
+        // Save start time using ACF
+        update_field('start_time', $shift_start, $shift_id);
+        
         update_user_meta($current_user_id, 'current_shift_id', $shift_id);
 
         // Redirect to first collection
@@ -89,7 +91,7 @@ class Shift {
         // Update shift post
         $current_shift_id = get_user_meta($current_user_id, 'current_shift_id', true);
         if ($current_shift_id) {
-            update_post_meta($current_shift_id, 'shift_end', $shift_end);
+            update_field('end_time', $shift_end, $current_shift_id);
             delete_user_meta($current_user_id, 'current_shift_id');
         }
     }
@@ -101,13 +103,25 @@ class Shift {
         $current_shift_id = get_user_meta($driver_id, 'current_shift_id', true);
         
         if ($current_shift_id) {
-            $collections = get_post_meta($current_shift_id, 'collections_completed', true);
+            // Get existing collections
+            $collections = get_field('shift_collections', $current_shift_id);
             if (!is_array($collections)) {
                 $collections = array();
             }
             
-            $collections[$collection_id] = current_time('mysql');
-            update_post_meta($current_shift_id, 'collections_completed', $collections);
+            // Add new collection if not already included
+            if (!in_array($collection_id, $collections)) {
+                $collections[] = $collection_id;
+                update_field('shift_collections', $collections, $current_shift_id);
+            }
+            
+            // Keep tracking completion time separately
+            $completion_times = get_post_meta($current_shift_id, 'collections_completed', true);
+            if (!is_array($completion_times)) {
+                $completion_times = array();
+            }
+            $completion_times[$collection_id] = current_time('mysql');
+            update_post_meta($current_shift_id, 'collections_completed', $completion_times);
         }
     }
 

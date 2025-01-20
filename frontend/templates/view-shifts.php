@@ -89,10 +89,10 @@ $shifts = new WP_Query($args);
             </thead>
             <tbody>
                 <?php if ($shifts->have_posts()): while ($shifts->have_posts()): $shifts->the_post(); 
-                    $shift_start = get_post_meta(get_the_ID(), 'shift_start', true);
-                    $shift_end = get_post_meta(get_the_ID(), 'shift_end', true);
-                    $collections = get_post_meta(get_the_ID(), 'collections_completed', true);
-                    $collections_count = !empty($collections) ? count($collections) : 0;
+                    $shift_start = get_field('start_time');
+                    $shift_end = get_field('end_time');
+                    $collections = get_field('shift_collections');
+                    $collections_count = is_array($collections) ? count($collections) : 0;
                 ?>
                     <tr>
                         <td><?php echo date_i18n(get_option('date_format'), strtotime($shift_start)); ?></td>
