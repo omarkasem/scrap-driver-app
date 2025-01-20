@@ -13,6 +13,16 @@ class Shift {
         add_filter('theme_page_templates', array($this, 'add_shifts_template'));
         add_filter('template_include', array($this, 'load_shifts_template'));
         add_filter('single_template', array($this, 'load_single_shift_template'));
+        
+        // Add shift adjustment handling
+        add_action('init', array($this, 'handle_shift_adjustment_request'));
+        add_action('acf/save_post', array($this, 'update_shift_title_on_time_change'), 20);
+        
+        // Add metabox for adjustment requests
+        add_action('add_meta_boxes', array($this, 'add_adjustment_requests_metabox'));
+
+        // Add save adjustment request action
+        add_action('save_post_sda-shift', array($this, 'save_adjustment_requests'), 10, 2);
     }
 
     /**
@@ -160,6 +170,236 @@ class Shift {
         }
         
         return $template;
+    }
+
+    /**
+     * Add metabox for shift adjustment requests
+     */
+    public function add_adjustment_requests_metabox() {
+        add_meta_box(
+            'shift_adjustment_requests',
+            __('Shift Adjustment Requests', 'scrap-driver'),
+            array($this, 'render_adjustment_requests_metabox'),
+            'sda-shift',
+            'normal',
+            'default'
+        );
+    }
+
+    /**
+     * Render the adjustment requests metabox
+     */
+    public function render_adjustment_requests_metabox($post) {
+        $requests = get_post_meta($post->ID, 'shift_adjustment_request', true);
+        
+        if (empty($requests)) {
+            echo '<p>' . __('No adjustment requests for this shift.', 'scrap-driver') . '</p>';
+            return;
+        }
+
+        // If single request is stored (old format), convert to array
+        if (!isset($requests[0]) && isset($requests['requested_at'])) {
+            $requests = array($requests);
+        }
+
+        wp_nonce_field('save_shift_adjustments', 'shift_adjustments_nonce');
+
+        echo '<table class="widefat fixed striped">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th>' . __('Date', 'scrap-driver') . '</th>';
+        echo '<th>' . __('Comments', 'scrap-driver') . '</th>';
+        echo '<th>' . __('Status', 'scrap-driver') . '</th>';
+        echo '<th>' . __('Admin Response', 'scrap-driver') . '</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+
+        foreach ($requests as $index => $request) {
+            $driver = get_userdata($request['requested_by']);
+            $status = isset($request['status']) ? $request['status'] : 'pending';
+            $admin_response = isset($request['admin_response']) ? $request['admin_response'] : '';
+            
+            echo '<tr>';
+            echo '<td>' . date_i18n(get_option('date_format') . ' ' . get_option('time_format'), 
+                strtotime($request['requested_at'])) . '</td>';
+            echo '<td>' . esc_html($request['comments']) . '</td>';
+            echo '<td>';
+            echo '<select name="shift_adjustment[' . $index . '][status]">';
+            echo '<option value="pending" ' . selected($status, 'pending', false) . '>' . __('Pending', 'scrap-driver') . '</option>';
+            echo '<option value="approved" ' . selected($status, 'approved', false) . '>' . __('Approved', 'scrap-driver') . '</option>';
+            echo '<option value="denied" ' . selected($status, 'denied', false) . '>' . __('Denied', 'scrap-driver') . '</option>';
+            echo '</select>';
+            echo '</td>';
+            echo '<td>';
+            echo '<textarea name="shift_adjustment[' . $index . '][admin_response]" rows="2" style="width: 100%;">' . 
+                esc_textarea($admin_response) . '</textarea>';
+            echo '</td>';
+            echo '</tr>';
+        }
+
+        echo '</tbody>';
+        echo '</table>';
+
+        // Add save button
+        echo '<p><input type="submit" class="button button-primary" value="' . __('Update Requests', 'scrap-driver') . '"></p>';
+
+        // Add existing CSS...
+    }
+
+    /**
+     * Handle shift adjustment requests
+     */
+    public function handle_shift_adjustment_request() {
+        if (!isset($_POST['action']) || $_POST['action'] !== 'request_shift_adjustment') {
+            return;
+        }
+
+        // Verify nonce
+        if (!isset($_POST['shift_adjustment_nonce']) || 
+            !wp_verify_nonce($_POST['shift_adjustment_nonce'], 'shift_adjustment_request')) {
+            wp_die(__('Security check failed', 'scrap-driver'));
+        }
+
+        $shift_id = isset($_POST['shift_id']) ? intval($_POST['shift_id']) : 0;
+        $comments = isset($_POST['adjustment_comments']) ? sanitize_textarea_field($_POST['adjustment_comments']) : '';
+        
+        if (!$shift_id || !$comments) {
+            wp_die(__('Invalid request', 'scrap-driver'));
+        }
+
+        // Store the adjustment request
+        $request_data = array(
+            'comments' => $comments,
+            'requested_by' => get_current_user_id(),
+            'requested_at' => current_time('mysql'),
+            'status' => 'pending'
+        );
+        
+        // Get existing requests and add new one
+        $existing_requests = get_post_meta($shift_id, 'shift_adjustment_request', true);
+        if (!is_array($existing_requests)) {
+            $existing_requests = array();
+        }
+        // If old format (single request), convert to array
+        if (!empty($existing_requests) && !isset($existing_requests[0]) && isset($existing_requests['requested_at'])) {
+            $existing_requests = array($existing_requests);
+        }
+        
+        // Add new request
+        $existing_requests[] = $request_data;
+        
+        // Update post meta with all requests
+        update_post_meta($shift_id, 'shift_adjustment_request', $existing_requests);
+
+        // Send email notification to admin users
+        $admin_emails = $this->get_admin_emails();
+        $driver_name = get_userdata(get_current_user_id())->display_name;
+        $shift_url = get_edit_post_link($shift_id);
+        
+        $subject = sprintf(__('[%s] New Shift Adjustment Request', 'scrap-driver'), get_bloginfo('name'));
+        $message = sprintf(
+            __("Driver %s has requested a shift adjustment.\n\nShift: %s\nComments: %s\n\nView shift: %s", 'scrap-driver'),
+            $driver_name,
+            get_the_title($shift_id),
+            $comments,
+            $shift_url
+        );
+
+        foreach ($admin_emails as $email) {
+            wp_mail($email, $subject, $message);
+        }
+
+        // Redirect back to shift page with success message
+        wp_redirect(add_query_arg('adjustment_requested', '1', get_permalink($shift_id)));
+        exit;
+    }
+
+    /**
+     * Get admin user emails
+     */
+    private function get_admin_emails() {
+        $admin_emails = array();
+        $admin_users = get_users(array('role' => 'administrator'));
+        
+        foreach ($admin_users as $user) {
+            $admin_emails[] = $user->user_email;
+        }
+        
+        return $admin_emails;
+    }
+
+    /**
+     * Update shift title and URL when start time is changed
+     */
+    public function update_shift_title_on_time_change($post_id) {
+        if (get_post_type($post_id) !== 'sda-shift') {
+            return;
+        }
+
+        // Check if start time was changed
+        $start_time = get_field('start_time', $post_id);
+        if (!$start_time) {
+            return;
+        }
+
+        $driver_id = get_post_meta($post_id, 'driver_id', true);
+        $driver = get_userdata($driver_id);
+        
+        if (!$driver) {
+            return;
+        }
+
+        // Update shift title
+        $new_title = sprintf('Shift By %s on %s', 
+            $driver->display_name,
+            date('Y-m-d H:i', strtotime($start_time))
+        );
+
+        // Prevent infinite loop
+        remove_action('acf/save_post', array($this, 'update_shift_title_on_time_change'), 20);
+
+        wp_update_post(array(
+            'ID' => $post_id,
+            'post_title' => $new_title,
+            'post_name' => sanitize_title($new_title)
+        ));
+
+        add_action('acf/save_post', array($this, 'update_shift_title_on_time_change'), 20);
+    }
+
+    /**
+     * Save adjustment request updates
+     */
+    public function save_adjustment_requests($post_id, $post) {
+        // Verify nonce
+        if (!isset($_POST['shift_adjustments_nonce']) || 
+            !wp_verify_nonce($_POST['shift_adjustments_nonce'], 'save_shift_adjustments')) {
+            return;
+        }
+
+        // Check if we have adjustment data
+        if (!isset($_POST['shift_adjustment'])) {
+            return;
+        }
+
+        $requests = get_post_meta($post_id, 'shift_adjustment_request', true);
+        if (!is_array($requests)) {
+            if (isset($requests['requested_at'])) {
+                $requests = array($requests);
+            } else {
+                return;
+            }
+        }
+
+        foreach ($_POST['shift_adjustment'] as $index => $data) {
+            if (isset($requests[$index])) {
+                $requests[$index]['status'] = sanitize_text_field($data['status']);
+                $requests[$index]['admin_response'] = sanitize_textarea_field($data['admin_response']);
+            }
+        }
+
+        update_post_meta($post_id, 'shift_adjustment_request', $requests);
     }
 }
 

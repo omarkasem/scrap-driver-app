@@ -114,6 +114,129 @@ while (have_posts()) : the_post();
                 <?php endif; ?>
             </div>
         </div>
+
+        <?php if ($current_user_id == $shift_driver_id): ?>
+            <div class="sda-section">
+                <?php 
+                // Show success message if request was just submitted
+                if (isset($_GET['adjustment_requested']) && $_GET['adjustment_requested'] == '1'): ?>
+                    <div class="sda-notice sda-notice-success">
+                        <p><?php _e('Your adjustment request has been submitted and sent to administrators for review.', 'scrap-driver'); ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <h2><?php _e('Request Shift Adjustment', 'scrap-driver'); ?></h2>
+                
+                <?php
+                // Show existing requests
+                $requests = get_post_meta(get_the_ID(), 'shift_adjustment_request', true);
+                if (!empty($requests)) {
+                    if (!isset($requests[0])) {
+                        $requests = array($requests);
+                    }
+                    
+                    echo '<div class="sda-previous-requests">';
+                    echo '<h3>' . __('Previous Requests', 'scrap-driver') . '</h3>';
+                    
+                    foreach ($requests as $request) {
+                        $status_class = 'status-' . $request['status'];
+                        $status_label = ucfirst($request['status']);
+                        ?>
+                        <div class="sda-request-item">
+                            <div class="request-meta">
+                                <span class="request-date">
+                                    <?php echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), 
+                                        strtotime($request['requested_at'])); ?>
+                                </span>
+                                <span class="request-status <?php echo esc_attr($status_class); ?>">
+                                    <?php echo esc_html($status_label); ?>
+                                </span>
+                            </div>
+                            <div class="request-content">
+                                <strong><?php _e('Request:', 'scrap-driver'); ?></strong>
+                                <p><?php echo esc_html($request['comments']); ?></p>
+                                
+                                <?php if (!empty($request['admin_response'])): ?>
+                                    <div class="admin-response">
+                                        <strong><?php _e('Admin Response:', 'scrap-driver'); ?></strong>
+                                        <p><?php echo esc_html($request['admin_response']); ?></p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    echo '</div>';
+                }
+                ?>
+
+                <form method="post" class="sda-shift-adjustment-form">
+                    <?php wp_nonce_field('shift_adjustment_request', 'shift_adjustment_nonce'); ?>
+                    <input type="hidden" name="action" value="request_shift_adjustment">
+                    <input type="hidden" name="shift_id" value="<?php echo get_the_ID(); ?>">
+                    
+                    <div class="form-field">
+                        <label for="adjustment_comments"><?php _e('Reason for Adjustment:', 'scrap-driver'); ?></label>
+                        <textarea id="adjustment_comments" name="adjustment_comments" rows="4" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="button button-primary">
+                        <?php _e('Submit Adjustment Request', 'scrap-driver'); ?>
+                    </button>
+                </form>
+            </div>
+
+            <style>
+                .sda-notice {
+                    padding: 12px;
+                    margin-bottom: 20px;
+                    border-radius: 4px;
+                }
+                .sda-notice-success {
+                    background-color: #d4edda;
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                }
+                .sda-previous-requests {
+                    margin-bottom: 30px;
+                }
+                .sda-request-item {
+                    border: 1px solid #ddd;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                    border-radius: 4px;
+                }
+                .request-meta {
+                    margin-bottom: 10px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .request-status {
+                    padding: 3px 8px;
+                    border-radius: 3px;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
+                .status-pending {
+                    background: #ffeeba;
+                    color: #856404;
+                }
+                .status-approved {
+                    background: #d4edda;
+                    color: #155724;
+                }
+                .status-denied {
+                    background: #f8d7da;
+                    color: #721c24;
+                }
+                .admin-response {
+                    margin-top: 10px;
+                    padding-top: 10px;
+                    border-top: 1px solid #eee;
+                }
+            </style>
+        <?php endif; ?>
     </div>
 
     <?php
