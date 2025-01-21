@@ -3,6 +3,16 @@
  * Template for displaying single collection
  */
 
+use ScrapDriver\Frontend\Collection;
+
+// Process start collection - Move this to the top before any output
+if (isset($_POST['start_collection']) && isset($_POST['start_collection_nonce']) && 
+    wp_verify_nonce($_POST['start_collection_nonce'], 'start_collection')) {
+    Collection::start_collection(get_the_ID());
+    wp_safe_redirect(add_query_arg('started', 'true', get_permalink()));
+    exit;
+}
+
 acf_form_head();
 get_header();
 while (have_posts()) :
@@ -79,8 +89,14 @@ while (have_posts()) :
 
     <div class="wrap sda-collection-single">
         <?php if (isset($_GET['updated']) && $_GET['updated'] == 'true') : ?>
-            <div style="padding: 10px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
+            <div class="sda-notice sda-notice-success">
                 <?php _e('Collection updated successfully.', 'scrap-driver'); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['started']) && $_GET['started'] == 'true') : ?>
+            <div class="sda-notice sda-notice-success">
+                <?php _e('Collection started successfully.', 'scrap-driver'); ?>
             </div>
         <?php endif; ?>
 
@@ -90,10 +106,37 @@ while (have_posts()) :
             </div>
         <?php } ?>
 
-
         <h1><?php the_title(); ?></h1>
 
-        <div class="sda-collection-details">
+        <?php
+        $collection_status = get_post_meta($collection_id, '_collection_status', true);
+        
+        // Show start collection button if not started
+        if (!$collection_status || $collection_status === 'pending') {
+            $can_start = Collection::can_start_collection($collection_id, $current_user_id);
+            
+            if ($can_start === true) {
+                ?>
+                <div class="sda-section sda-start-collection">
+                    <form method="POST">
+                        <?php wp_nonce_field('start_collection', 'start_collection_nonce'); ?>
+                        <button type="submit" name="start_collection" class="button button-primary button-large">
+                            <?php _e('Start Collection', 'scrap-driver'); ?>
+                        </button>
+                    </form>
+                </div>
+                <?php
+            } else {
+                ?>
+                <div class="sda-section sda-error-message">
+                    <p><?php echo esc_html($can_start); ?></p>
+                </div>
+                <?php
+            }
+        }
+        ?>
+
+        <div class="sda-collection-details<?php echo (!$collection_status || $collection_status === 'pending') ? ' collection-not-started' : ''; ?>">
             <!-- Vehicle Information -->
             <div class="sda-section">
                 <h2><?php _e('Vehicle Information', 'scrap-driver'); ?></h2>

@@ -108,3 +108,33 @@ Implement distance traveled calculations
 Create driver performance graphs
 Add CSV/PDF export functionality
 Create comparison reports between drivers
+
+
+
+Create a Page: Driver statistics template inside frontend/templates and any php code should be added at frontend/includes/class-stats. This should
+show each driver (allowing 
+selection of individual drivers, or 
+all drivers). Their data of miles 
+travelled (based on collections completed and the collection address) and , vehicles collected per 
+day/per hour of driving. Average 
+time taken per mile travelled. 
+Using maps API for data of 
+distance. The time aspect is taken 
+per day using each day’s clock 
+in/out times for each shift.
+View driver statistics data as a 
+table using datatables and as a graph using chartjs showing each
+shift as a data point (showing 
+collections per hour). Allowing 
+multiple drivers.
+ Export data from driver statistics 
+as CSV or PDFs using datatables.
+
+--------------------------------------
+Add a new text autocomplete by google field inside route-page called Starting point which will the default will always be taken from google address field in option-page and another next to it called ending point which also be a text autocomplete field which will be empty
+
+
+
+Rout planner page should calculate miles between each stop. 
+Add a new Starting point “home” will be set in admin, but can be changed on the route planning. Same with ending point. Then use google maps API to calculate miles between each stop and give us a total journey in miles 
+

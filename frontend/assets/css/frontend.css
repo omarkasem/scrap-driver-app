@@ -246,3 +246,40 @@ table.dataTable tbody td {
     color: #155724;
     border: 1px solid #c3e6cb;
 }
+
+/* Add these styles */
+.collection-not-started .sda-section:not(.sda-start-collection) {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.sda-start-collection {
+    text-align: center;
+    padding: 2em;
+    margin-bottom: 2em;
+}
+
+.sda-start-collection .button {
+    padding: 1em 2em;
+    font-size: 1.2em;
+}
+
+.collection-not-started {
+    position: relative;
+}
+
+.collection-not-started::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.5);
+    z-index: 1;
+}
+
+.sda-start-collection {
+    position: relative;
+    z-index: 2;
+}

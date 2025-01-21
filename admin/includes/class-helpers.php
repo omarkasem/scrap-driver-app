@@ -8,7 +8,7 @@ function sda_get_all_statuses() {
             $statuses = json_decode(wp_remote_retrieve_body($response), true);
             $stat_array = array();
             foreach ($statuses['data'] as $status) {
-                $stat_array[$status['id']] = $status['name'];
+                $stat_array[$status['name']] = $status['name'];
             }
             set_transient('sda_all_statuses', $stat_array, 5);
         }

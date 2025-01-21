@@ -36,4 +36,69 @@ class Collection {
         
         return $order;
     }
+
+    /**
+     * Check if a collection can be started based on route order
+     *
+     * @param int $collection_id The collection ID to check
+     * @param int $driver_id The driver ID
+     * @return bool|string True if can start, error message if cannot
+     */
+    public static function can_start_collection($collection_id, $driver_id) {
+        // Get all collections for this driver
+        $driver_collections = get_posts(array(
+            'post_type' => 'sda-collection',
+            'meta_query' => array(
+                array(
+                    'key' => 'assigned_driver',
+                    'value' => $driver_id
+                ),
+                array(
+                    'key' => '_collection_status',
+                    'value' => 'completed',
+                    'compare' => '!='
+                )
+            ),
+            'posts_per_page' => -1
+        ));
+
+        if (empty($driver_collections)) {
+            return true;
+        }
+
+        // Get order for all collections
+        $collection_ids = wp_list_pluck($driver_collections, 'ID');
+        $orders = self::get_collections_order($collection_ids);
+
+        // Get current collection's order
+        $current_order = $orders[$collection_id] ?? 0;
+
+        // Check for any incomplete collections with lower order numbers
+        foreach ($driver_collections as $collection) {
+            $status = get_post_meta($collection->ID, '_collection_status', true);
+            if ($collection->ID !== $collection_id && 
+                $orders[$collection->ID] < $current_order && 
+                $status !== 'completed') {
+                return sprintf(
+                    __('You must complete collection #%s before starting this one.', 'scrap-driver'),
+                    $collection->ID
+                );
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Start a collection
+     *
+     * @param int $collection_id The collection ID
+     * @return bool Whether the collection was started successfully
+     */
+    public static function start_collection($collection_id) {
+        update_post_meta($collection_id, '_collection_status', 'in_progress');
+        update_field('status', 'Collection in Progress', $collection_id); 
+        
+        return true;
+    }
 } 
