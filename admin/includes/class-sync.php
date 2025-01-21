@@ -75,7 +75,6 @@ class Sync {
                 'status_id' => 'status',
                 'collection_date' => 'collection_date',
                 'collection_driver' => 'assigned_driver',
-                'staff_notes' => 'admin_notes',
                 'admin_notes' => 'admin_notes',
                 'driver_notes' => 'driver_notes',
                 'car_make' => 'vehicle_info_make',
@@ -83,6 +82,9 @@ class Sync {
                 'car_year' => 'vehicle_info_year',
                 'car_plate' => 'vehicle_info_plate',
             );
+
+            $statuses = sda_get_statuses_ids();
+            $collection['status_id'] = $statuses[$collection['status_id']];
 
             foreach ($fields as $source => $target) {
                 if (isset($collection[$source])) {
@@ -178,8 +180,11 @@ class Sync {
             return;
         }
 
+        $statuses = array_flip(sda_get_statuses_ids());
+        $status_id = $statuses[get_field('status', $post_id)];
+
         $api_data = array(
-            'status_id' => get_field('status', $post_id),
+            'status_id' => $status_id,
             'collection_date' => get_field('collection_date', $post_id),
             'collection_driver' => get_field('assigned_driver', $post_id),
             'admin_notes' => get_field('admin_notes', $post_id),

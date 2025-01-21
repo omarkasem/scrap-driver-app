@@ -54,8 +54,8 @@ class Collection {
                     'value' => $driver_id
                 ),
                 array(
-                    'key' => '_collection_status',
-                    'value' => 'completed',
+                    'key' => 'status',
+                    'value' => 'Completed',
                     'compare' => '!='
                 )
             ),
@@ -75,14 +75,11 @@ class Collection {
 
         // Check for any incomplete collections with lower order numbers
         foreach ($driver_collections as $collection) {
-            $status = get_post_meta($collection->ID, '_collection_status', true);
+            $status = get_field('status', $collection->ID);
             if ($collection->ID !== $collection_id && 
                 $orders[$collection->ID] < $current_order && 
-                $status !== 'completed') {
-                return sprintf(
-                    __('You must complete collection #%s before starting this one.', 'scrap-driver'),
-                    $collection->ID
-                );
+                $status !== 'Completed') {
+                return '<h4>You must follow the order of collections. <br>Complete this <a href="' . get_the_permalink($collection->ID) . '">Collection</a> first</h4>';
             }
         }
 
@@ -96,9 +93,8 @@ class Collection {
      * @return bool Whether the collection was started successfully
      */
     public static function start_collection($collection_id) {
-        update_post_meta($collection_id, '_collection_status', 'in_progress');
-        update_field('status', 'Collection in Progress', $collection_id); 
-        
+        update_field('status', 'Collection in Progress', $collection_id);
+        do_action('acf/save_post', $collection_id);
         return true;
     }
 } 

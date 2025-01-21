@@ -84,7 +84,7 @@ class Acf {
         // Handle status select field
         if ($field['key'] === 'field_677a4dbb75eb2') {
 
-            $statuses = sda_get_all_statuses();
+            $statuses = sda_get_statuses_names();
             $field['choices'] = $statuses;
         }
         

@@ -108,7 +108,7 @@ $collections = new WP_Query($args);
                         $vehicle_make = get_field('vehicle_info_make');
                         $vehicle_model = get_field('vehicle_info_model');
                         $vehicle_plate = get_field('vehicle_info_plate');
-                        $status = get_post_meta($collection_id, '_collection_status', true) ?: 'pending';
+                        $status = get_post_meta($collection_id, 'status', true);
                         ?>
                         <tr>
                             <td><?php echo esc_html($collection_orders[$collection_id]); ?></td>

@@ -131,10 +131,9 @@ class CPT {
                 echo $date ? esc_html(date('Y-m-d', strtotime($date))) : '—';
                 break;
             case 'status':
-                $status_id = get_field('status', $post_id);
-                if ($status_id) {
-                    $statuses = $this->get_all_statuses();
-                    echo isset($statuses[$status_id]) ? esc_html($statuses[$status_id]) : esc_html($status_id);
+                $status = get_field('status', $post_id);
+                if ($status) {
+                    echo $status;
                 } else {
                     echo '—';
                 }
@@ -169,7 +168,7 @@ class CPT {
 
         // Status filter
         $current_status = isset($_GET['status_filter']) ? $_GET['status_filter'] : '';
-        $statuses = $this->get_all_statuses();
+        $statuses = sda_get_statuses_names();
         ?>
         <select name="status_filter">
             <option value=""><?php _e('All Statuses', 'scrap-driver'); ?></option>
@@ -339,13 +338,6 @@ class CPT {
             $API = new \ScrapDriver\Admin\Sync();
             $API->sync_to_vrm($post_id);
         }
-    }
-
-    /**
-     * Get all statuses from API with caching
-     */
-    private function get_all_statuses() {
-        return sda_get_all_statuses();
     }
 
 

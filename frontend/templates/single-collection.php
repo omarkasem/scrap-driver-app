@@ -106,13 +106,12 @@ while (have_posts()) :
             </div>
         <?php } ?>
 
-        <h1><?php the_title(); ?></h1>
 
         <?php
-        $collection_status = get_post_meta($collection_id, '_collection_status', true);
+        $collection_status = get_field('status', $collection_id);
         
         // Show start collection button if not started
-        if (!$collection_status || $collection_status === 'pending') {
+        if (!in_array($collection_status, array('Completed', 'Collection in Progress'))) {
             $can_start = Collection::can_start_collection($collection_id, $current_user_id);
             
             if ($can_start === true) {
@@ -129,14 +128,16 @@ while (have_posts()) :
             } else {
                 ?>
                 <div class="sda-section sda-error-message">
-                    <p><?php echo esc_html($can_start); ?></p>
+                    <p><?php echo $can_start; ?></p>
                 </div>
                 <?php
             }
         }
         ?>
 
-        <div class="sda-collection-details<?php echo (!$collection_status || $collection_status === 'pending') ? ' collection-not-started' : ''; ?>">
+        <h1><?php the_title(); ?></h1>
+
+        <div class="sda-collection-details">
             <!-- Vehicle Information -->
             <div class="sda-section">
                 <h2><?php _e('Vehicle Information', 'scrap-driver'); ?></h2>
@@ -181,71 +182,72 @@ while (have_posts()) :
                 </div>
             </div>
 
-            <?php if ($can_edit) :
-                // Handle form submission
-                if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
-                    // Update collection status to completed (6)
-                    update_field('status', '6', $collection_id);
-                    update_post_meta($collection_id, '_collection_status', 'completed');
-                    
-                    // Trigger collection completion action
-                    do_action('sda_collection_completed', $collection_id, $current_user_id);
+            <div class="edit-section" <?php echo (!in_array($collection_status, array('Completed', 'Collection in Progress'))) ? ' style="display: none;"' : ''; ?>>
+                <?php if ($can_edit) :
+                    // Handle form submission
+                    if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
+                        // Update collection status to completed
+                        update_field('status', 'Completed', $collection_id);
+                        
+                        // Trigger collection completion action
+                        do_action('sda_collection_completed', $collection_id, $current_user_id);
 
-                    // Get next collection in route
-                    $next_collection = get_posts(array(
-                        'post_type' => 'sda-collection',
-                        'meta_query' => array(
-                            array(
-                                'key' => 'assigned_driver',
-                                'value' => $current_user_id
+                        // Get next collection in route
+                        $next_collection = get_posts(array(
+                            'post_type' => 'sda-collection',
+                            'meta_query' => array(
+                                array(
+                                    'key' => 'assigned_driver',
+                                    'value' => $current_user_id
+                                ),
+                                array(
+                                    'key' => 'status',
+                                    'value' => 'Completed',
+                                    'compare' => '!='
+                                )
                             ),
-                            array(
-                                'key' => '_collection_status',
-                                'value' => 'completed',
-                                'compare' => '!='
-                            )
-                        ),
-                        'meta_key' => 'route_order',
-                        'orderby' => 'meta_value_num',
-                        'order' => 'ASC',
-                        'posts_per_page' => 1
-                    ));
+                            'meta_key' => 'route_order',
+                            'orderby' => 'meta_value_num',
+                            'order' => 'ASC',
+                            'posts_per_page' => 1
+                        ));
 
-                    // Redirect to next collection or home
-                    if (!empty($next_collection)) {
-                        wp_redirect(get_permalink($next_collection[0]->ID));
-                        exit;
-                    } else {
-                        wp_redirect(home_url());
-                        exit;
+                        // Redirect to next collection or home
+                        if (!empty($next_collection)) {
+                            wp_redirect(get_permalink($next_collection[0]->ID));
+                            exit;
+                        } else {
+                            wp_redirect(home_url());
+                            exit;
+                        }
                     }
-                }
-                
-                echo '<div class="sda-section">';
-                // Show ACF form
-                acf_form([
-                    'fields'=>['status','driver_notes','driver_uploaded_photos'],
-                    'uploader' => 'basic',
-                    'new_post' => false,
-                    'updated_message' => '',
-                ]); 
-                echo '</div>';
-                
-                // Only show complete button if collection is not already completed
-                $status = get_field('status', $collection_id);
-                if ($status !== '6') :
-                ?>
-                    <!-- Complete Collection -->
-                    <div class="sda-section">
-                        <form method="POST" onsubmit="return confirm('<?php echo esc_js(__('Are you sure you want to complete this collection?', 'scrap-driver')); ?>');">
-                            <?php wp_nonce_field('complete_collection', 'complete_collection_nonce'); ?>
-                            <button type="submit" name="complete_collection" class="button button-primary button-large">
-                                <?php _e('Complete Collection', 'scrap-driver'); ?>
-                            </button>
-                        </form>
-                    </div>
+                    
+                    echo '<div class="sda-section">';
+                    // Show ACF form
+                    acf_form([
+                        'fields'=>['status','driver_notes','driver_uploaded_photos'],
+                        'uploader' => 'basic',
+                        'new_post' => false,
+                        'updated_message' => '',
+                    ]); 
+                    echo '</div>';
+                    
+                    // Only show complete button if collection is not already completed
+                    $status = get_field('status', $collection_id);
+                    if ($status !== 'Completed') :
+                    ?>
+                        <!-- Complete Collection -->
+                        <div class="sda-section">
+                            <form method="POST" onsubmit="return confirm('<?php echo esc_js(__('Are you sure you want to complete this collection?', 'scrap-driver')); ?>');">
+                                <?php wp_nonce_field('complete_collection', 'complete_collection_nonce'); ?>
+                                <button type="submit" name="complete_collection" class="button button-primary button-large">
+                                    <?php _e('Complete Collection', 'scrap-driver'); ?>
+                                </button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
-            <?php endif; ?>
+            </div>
         </div>
     </div>
 
