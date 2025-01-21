@@ -92,12 +92,26 @@ while (have_posts()) :
             <div class="sda-notice sda-notice-success">
                 <?php _e('Collection updated successfully.', 'scrap-driver'); ?>
             </div>
+            <script>
+                if (window.history.replaceState) {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('updated');
+                    window.history.replaceState({}, document.title, url.toString());
+                }
+            </script>
         <?php endif; ?>
 
         <?php if (isset($_GET['started']) && $_GET['started'] == 'true') : ?>
             <div class="sda-notice sda-notice-success">
                 <?php _e('Collection started successfully.', 'scrap-driver'); ?>
             </div>
+            <script>
+                if (window.history.replaceState) {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('started');
+                    window.history.replaceState({}, document.title, url.toString());
+                }
+            </script>
         <?php endif; ?>
 
         <?php if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {?>

@@ -219,28 +219,6 @@
             "selected": 0
         },
         {
-            "key": "field_677a4dbb75ebc",
-            "label": "Route Order",
-            "name": "route_order",
-            "aria-label": "",
-            "type": "number",
-            "instructions": "Order in the driver's route for the day",
-            "required": 0,
-            "conditional_logic": false,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "min": 1,
-            "step": 1,
-            "default_value": "",
-            "max": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
             "key": "field_677a4dbb75ebd",
             "label": "Admin Notes",
             "name": "admin_notes",
@@ -334,17 +312,21 @@
                 "id": ""
             },
             "choices": {
-                "1": "COD Issued",
-                "2": "Offer accepted",
-                "3": "Pending info",
-                "4": "Pending payment",
-                "5": "Pending Collection",
-                "6": "Completed",
-                "8": "Quote Enquiry",
-                "9": "Out of Range",
-                "10": "Out of Range - Contact",
-                "11": "Payment Complete",
-                "12": "Cancelled"
+                "COD Issued": "COD Issued",
+                "Offer accepted": "Offer accepted",
+                "Pending info": "Pending info",
+                "Pending payment": "Pending payment",
+                "Pending Collection": "Pending Collection",
+                "Completed": "Completed",
+                "Quote Enquiry": "Quote Enquiry",
+                "Out of Range": "Out of Range",
+                "Out of Range - Contact": "Out of Range - Contact",
+                "Payment Complete": "Payment Complete",
+                "Cancelled": "Cancelled",
+                "Booked Pending Uplift\t": "Booked Pending Uplift\t",
+                "No Contact\t": "No Contact\t",
+                "Needs Rebooking\t": "Needs Rebooking\t",
+                "Collection in Progress": "Collection in Progress"
             },
             "default_value": "pending",
             "allow_null": 0,
@@ -445,5 +427,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1736963134
+    "modified": 1737491177
 }
