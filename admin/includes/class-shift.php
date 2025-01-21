@@ -110,6 +110,9 @@ class Shift {
      * Track collection completion during shift
      */
     public function track_collection_completion($collection_id, $driver_id) {
+
+        update_field('status', 'Completed', $collection_id);
+
         $current_shift_id = get_user_meta($driver_id, 'current_shift_id', true);
         
         if ($current_shift_id) {

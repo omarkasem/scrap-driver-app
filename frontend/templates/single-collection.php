@@ -200,40 +200,9 @@ while (have_posts()) :
                 <?php if ($can_edit) :
                     // Handle form submission
                     if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
-                        // Update collection status to completed
-                        update_field('status', 'Completed', $collection_id);
-                        
                         // Trigger collection completion action
                         do_action('sda_collection_completed', $collection_id, $current_user_id);
 
-                        // Get next collection in route
-                        $next_collection = get_posts(array(
-                            'post_type' => 'sda-collection',
-                            'meta_query' => array(
-                                array(
-                                    'key' => 'assigned_driver',
-                                    'value' => $current_user_id
-                                ),
-                                array(
-                                    'key' => 'status',
-                                    'value' => 'Completed',
-                                    'compare' => '!='
-                                )
-                            ),
-                            'meta_key' => 'route_order',
-                            'orderby' => 'meta_value_num',
-                            'order' => 'ASC',
-                            'posts_per_page' => 1
-                        ));
-
-                        // Redirect to next collection or home
-                        if (!empty($next_collection)) {
-                            wp_redirect(get_permalink($next_collection[0]->ID));
-                            exit;
-                        } else {
-                            wp_redirect(home_url());
-                            exit;
-                        }
                     }
                     
                     echo '<div class="sda-section">';
