@@ -189,6 +189,7 @@ class Sync {
         $api_data = array(
             'status_id' => $status_id,
             'collection_date' => get_field('collection_date', $post_id),
+            'car_plate' => get_field('vehicle_info_plate', $post_id),
             'collection_driver' => get_field('assigned_driver', $post_id),
             'admin_notes' => get_field('admin_notes', $post_id),
             'driver_notes' => get_field('driver_notes', $post_id),

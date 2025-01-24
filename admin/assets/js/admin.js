@@ -270,7 +270,84 @@ class RoutePlanning {
     }
 }
 
+class Distance {
+    constructor() {
+        this.$calendar = jQuery('#calendar');
+        this.$shiftDate = jQuery('input[name="acf[field_67938e50736a3]"]');
+        this.$driverField = jQuery('select[name="acf[field_67938b4d7f418]"]');
+        this.$startingPoint = jQuery('input[name="acf[field_67938b627f419]"]');
+        this.$endingPoint = jQuery('input[name="acf[field_67938b777f41b]"]');
+        
+        // Only initialize if calendar exists
+        if (!this.$calendar.length) {
+            return;
+        }
+        
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        const self = this;
+        
+        // Listen to FullCalendar's eventChange events
+        if (window.routePlanning && window.routePlanning.calendar) {
+            window.routePlanning.calendar.on('eventChange', (info) => {
+                setTimeout(() => {
+                    self.calculateDistance();
+                }, 500);
+            });
+        }
+    }
+
+    calculateDistance() {
+        const shiftDate = this.$shiftDate.val();
+        const driverId = this.$driverField.val();
+        const startingPoint = this.$startingPoint.val();
+        const endingPoint = this.$endingPoint.val();
+
+        if (!shiftDate || !driverId || !startingPoint || !endingPoint) {
+            console.warn('Missing required fields for distance calculation');
+            return;
+        }
+
+        jQuery('.distance-total').html(`<img src="${sdaRoute.loader}" alt="Loading..." />`);
+        jQuery.ajax({
+            url: sdaRoute.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'calculate_route_distance',
+                nonce: sdaRoute.nonce,
+                shift_date: shiftDate,
+                driver_id: driverId,
+                starting_point: startingPoint,
+                ending_point: endingPoint,
+                post_id: sdaRoute.postId
+            },
+            success: function(response) {
+                if (response.success) {
+                    const distanceElement = document.querySelector('.distance-total');
+                    if (distanceElement) {
+                        distanceElement.innerHTML = `Total Distance: ${response.data.distance} miles`;
+                    }
+                } else {
+                    console.error('Error calculating distance:', response.data);
+                    distanceElement.innerHTML = `Total Distance: 0 miles`;
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Ajax error:', {xhr, status, error});
+            }
+        });
+    }
+}
+
 // Initialize when DOM is ready
 jQuery(document).ready(function() {
-    new RoutePlanning();
+    // Store routePlanning instance globally
+    window.routePlanning = new RoutePlanning();
+    new Distance();
 });

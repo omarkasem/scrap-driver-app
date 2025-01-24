@@ -101,7 +101,7 @@
                 },
                 {
                     "key": "field_67939e462bc22",
-                    "label": "postcode",
+                    "label": "Postal Code",
                     "name": "postcode",
                     "aria-label": "",
                     "type": "text",
@@ -448,5 +448,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737728292
+    "modified": 1737733988
 }

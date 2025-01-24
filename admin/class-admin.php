@@ -40,9 +40,18 @@ class Admin {
             true
         );
 
+        $post_id = 0;
+        if($post) {
+            $post_id = $post->ID;
+        }
+
+        $ajax_loader_img = includes_url('images/spinner.gif');
+
         wp_localize_script('scrap-driver-admin', 'sdaRoute', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('sda_route_nonce'),
+            'postId' => $post_id,
+            'loader' => $ajax_loader_img
         ));
 
 
