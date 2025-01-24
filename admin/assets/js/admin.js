@@ -1,228 +1,146 @@
-document.addEventListener('DOMContentLoaded', function() {
-    if (!document.getElementById('calendar')) {
-        return;
+class CollectionCalendar {
+    constructor() {
+        this.$calendar = jQuery('#calendar');
+        this.calendar = null;
+        this.today = new Date();
+        this.today.setHours(0, 0, 0, 0);
+        this.$driverField = jQuery('select[name="acf[field_67938b4d7f418]"]');
+        this.driverId = this.$driverField.val();
+        
+        // Only check for calendar existence
+        if (!this.$calendar.length) {
+            return;
+        }
+        
+        this.init();
     }
 
-    const calendarEl = document.getElementById('calendar');
-    const driverSelect = document.getElementById('driver-select');
-
-    // Get today's date at midnight for validation
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Initialize FullCalendar
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'multiMonthYear',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'multiMonthYear,dayGridMonth,timeGridDay'
-        },
-        editable: true,
-        selectMirror: true,
-        dayMaxEvents: true,
-        slotDuration: '00:30:00',
-        allDaySlot: false,
-        multiMonthMaxColumns: 1,
-        multiMonthMinWidth: 350,
-        dragScroll: true,
-        scrollTime: '08:00:00',
-        eventDuration: '01:00',
-        forceEventDuration: true,
-        eventResizableFromStart: false,
-        eventDurationEditable: false,
-        
-        eventContent: function(arg) {
-            return {
-                html: `<div class="fc-event-title">${arg.event.title}</div>`
-            };
-        },
-        
-        views: {
-            timeGridDay: {
-                type: 'timeGrid',
-                dayMaxEvents: false,
-                dayMaxEventRows: false
-            }
-        },
-        
-        eventDragStart: function(info) {
-            calendarEl.classList.add('fc-dragging');
-        },
-        eventDragStop: function(info) {
-            calendarEl.classList.remove('fc-dragging');
-        },
-        validRange: {
-            start: today
-        },
-        eventDrop: function(info) {
-            const event = info.event;
-            const newDate = formatDateOnly(event.start);
-            const startTime = formatTime(event.start);
-            const endTime = formatTime(event.end);
-            
-            if (event.start < today) {
-                alert('Cannot move collections to past dates');
-                info.revert();
-                return;
-            }
-
-            const currentDriverId = event.extendedProps.driverId;
-            const selectedDriverId = driverSelect.value;
-            const driverIdToUse = selectedDriverId || currentDriverId;
-            const routeOrder = event.extendedProps.routeOrder || 1;
-
-            // Debug logs
-            console.log('Event drop details:', {
-                newDate,
-                startTime,
-                endTime,
-                event: event
-            });
-
-            jQuery.ajax({
-                url: sdaRoute.ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'update_collection_route',
-                    nonce: sdaRoute.nonce,
-                    collection_id: event.id,
-                    new_date: newDate,
-                    start_time: startTime,
-                    end_time: endTime,
-                    driver_id: driverIdToUse,
-                    route_order: routeOrder
-                },
-                success: function(response) {
-                    console.log('Update response:', response); // Debug log
-                    if (!response.success) {
-                        info.revert();
-                        alert('Error updating collection: ' + (response.data || 'Unknown error'));
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Update error:', {xhr, status, error}); // Debug log
-                    alert('Error updating collection');
-                    info.revert();
-                }
-            });
-        },
-        eventDidMount: function(info) {
-            info.el.title = info.event.title;
-            info.el.classList.add('clickable-event');
-        },
-        eventClick: function(info) {
-            info.jsEvent.preventDefault();
-            
-            const popoverContent = document.createElement('div');
-            popoverContent.innerHTML = `
-                <div class="fc-event-popover">
-                    <h4>${info.event.title}</h4>
-                    <a href="${info.event.url}" target="_blank" class="view-collection-link">View Collection</a>
-                </div>
-            `;
-            
-            // Remove any existing popovers
-            document.querySelectorAll('.fc-event-popover').forEach(el => el.remove());
-            
-            // Get the clicked element's position
-            const rect = info.el.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            // Position the popover just above the clicked event
-            popoverContent.style.position = 'absolute';
-            popoverContent.style.top = (rect.top + scrollTop - 10) + 'px'; // Position above the event with 10px offset
-            popoverContent.style.left = rect.left + 'px';
-            popoverContent.style.zIndex = 1000;
-            document.body.appendChild(popoverContent);
-            
-            // Adjust if popover goes above viewport
-            const popoverRect = popoverContent.getBoundingClientRect();
-            if (popoverRect.top < 0) {
-                // If popover would go above viewport, position it below the event instead
-                popoverContent.style.top = (rect.bottom + scrollTop + 10) + 'px';
-            }
-            
-            const closePopover = function(e) {
-                if (!popoverContent.contains(e.target) && !info.el.contains(e.target)) {
-                    popoverContent.remove();
-                    document.removeEventListener('click', closePopover);
-                }
-            };
-            
-            setTimeout(() => {
-                document.addEventListener('click', closePopover);
-            }, 100);
-        },
-        // Prevent dragging to past dates
-        eventConstraint: {
-            start: today
-        },
-        dayCellContent: function(arg) {
-            return {
-                html: `<div class="fc-daygrid-day-number clickable-day">${arg.dayNumberText}</div>`
-            };
-        },
-        dateClick: function(info) {
-            // Only handle clicks on day numbers
-            if (info.jsEvent.target.classList.contains('fc-daygrid-day-number')) {
-                calendar.changeView('timeGridDay', info.date);
-            }
+    init() {
+        this.initCalendar();
+        this.bindEvents();
+        // Only load events if we have a driver ID
+        if (this.driverId) {
+            this.loadEvents();
         }
-    });
+    }
 
-    // Load initial events
-    loadEvents();
-    calendar.render();
-
-    // Handle driver selection change
-    driverSelect.addEventListener('change', function() {
-        loadEvents();
-    });
-
-    function loadEvents() {
-        const driverId = driverSelect.value;
+    initCalendar() {
+        const self = this;
+        this.calendar = new FullCalendar.Calendar(this.$calendar[0], {
+            initialView: 'multiMonthYear',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'multiMonthYear,dayGridMonth,timeGridDay'
+            },
+            editable: true,
+            selectMirror: true,
+            dayMaxEvents: true,
+            slotDuration: '00:30:00',
+            allDaySlot: false,
+            multiMonthMaxColumns: 1,
+            multiMonthMinWidth: 350,
+            dragScroll: true,
+            scrollTime: '08:00:00',
+            eventDuration: '01:00',
+            forceEventDuration: true,
+            eventResizableFromStart: false,
+            eventDurationEditable: false,
+            
+            eventContent: function(arg) {
+                return {
+                    html: `<div class="fc-event-title">${arg.event.title}</div>`
+                };
+            },
+            
+            views: {
+                timeGridDay: {
+                    type: 'timeGrid',
+                    dayMaxEvents: false,
+                    dayMaxEventRows: false
+                }
+            },
+            
+            eventDragStart: function(info) {
+                self.$calendar.addClass('fc-dragging');
+            },
+            eventDragStop: function(info) {
+                self.$calendar.removeClass('fc-dragging');
+            },
+            validRange: {
+                start: self.today
+            },
+            eventDrop: function(info) {
+                self.handleEventDrop(info);
+            },
+            eventDidMount: function(info) {
+                info.el.title = info.event.title;
+                info.el.classList.add('clickable-event');
+            },
+            eventClick: function(info) {
+                self.handleEventClick(info);
+            },
+            // Prevent dragging to past dates
+            eventConstraint: {
+                start: self.today
+            },
+            dayCellContent: function(arg) {
+                return {
+                    html: `<div class="fc-daygrid-day-number clickable-day">${arg.dayNumberText}</div>`
+                };
+            },
+            dateClick: function(info) {
+                // Only handle clicks on day numbers
+                if (info.jsEvent.target.classList.contains('fc-daygrid-day-number')) {
+                    self.calendar.changeView('timeGridDay', info.date);
+                }
+            }
+        });
         
+        this.calendar.render();
+    }
+
+    bindEvents() {
+        const self = this;
+        this.$driverField.on('change', () => this.loadEvents());
+    }
+
+    loadEvents() {
+        const self = this;
+        this.driverId = this.$driverField.val();
         jQuery.ajax({
             url: sdaRoute.ajaxurl,
             type: 'POST',
             data: {
                 action: 'get_collections',
                 nonce: sdaRoute.nonce,
-                driver_id: driverId
+                driver_id: this.driverId
             },
             success: function(response) {
-                console.log('Raw response:', response); // Debug log
-                calendar.removeAllEvents();
+                console.log('Raw response:', response);
+                self.calendar.removeAllEvents();
                 if (response.success && response.data) {
-                    // Format dates properly before adding to calendar
-                    const events = response.data.map(event => {
-                        console.log('Processing event:', event); // Debug log
-                        return {
-                            id: event.id,
-                            title: event.title,
-                            start: event.start,
-                            end: event.end,
-                            driverId: event.driverId,
-                            routeOrder: event.routeOrder,
-                            url: event.url
-                        };
-                    });
-                    console.log('Formatted events:', events); // Debug log
-                    calendar.addEventSource(events);
-                } else {
-                    console.error('Invalid response:', response); // Debug log
+                    const events = response.data.map(event => ({
+                        id: event.id,
+                        title: event.title,
+                        start: event.start,
+                        end: event.end,
+                        driverId: event.driverId,
+                        routeOrder: event.routeOrder,
+                        url: event.url
+                    }));
+                    self.calendar.addEventSource(events);
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Ajax error:', {xhr, status, error}); // Debug log
+                console.error('Ajax error:', {xhr, status, error});
                 alert('Error loading collections');
             }
         });
     }
 
-    // Helper function to format dates consistently
-    function formatDateOnly(date) {
+    // Helper methods
+    formatDateOnly(date) {
         if (!date) {
             console.warn('Empty date provided to formatDateOnly');
             return null;
@@ -238,8 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${year}-${month}-${day}`;
     }
 
-    // Add helper function to format time
-    function formatTime(date) {
+    formatTime(date) {
         if (!date) {
             console.warn('Empty date provided to formatTime');
             return null;
@@ -254,41 +171,106 @@ document.addEventListener('DOMContentLoaded', function() {
         const seconds = String(d.getSeconds()).padStart(2, '0');
         return `${hours}:${minutes}:${seconds}`;
     }
-});
 
-// Google Maps Autocomplete for Settings Page
-(function($) {
-    'use strict';
-
-    let autocomplete;
-
-    function initAutocomplete() {
-        const addressInput = document.getElementById('sd_address_autocomplete');
-        if (addressInput) {
-            autocomplete = new google.maps.places.Autocomplete(addressInput, {
-                types: ['address']
-            });
+    handleEventDrop(info) {
+        const event = info.event;
+        const newDate = this.formatDateOnly(event.start);
+        const startTime = this.formatTime(event.start);
+        const endTime = this.formatTime(event.end);
+        
+        if (event.start < this.today) {
+            alert('Cannot move collections to past dates');
+            info.revert();
+            return;
         }
+
+        const currentDriverId = event.extendedProps.driverId;
+        const selectedDriverId = this.$driverField.val();
+        const driverIdToUse = selectedDriverId || currentDriverId;
+        const routeOrder = event.extendedProps.routeOrder || 1;
+
+        // Debug logs
+        console.log('Event drop details:', {
+            newDate,
+            startTime,
+            endTime,
+            event: event
+        });
+
+        jQuery.ajax({
+            url: sdaRoute.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'update_collection_route',
+                nonce: sdaRoute.nonce,
+                collection_id: event.id,
+                new_date: newDate,
+                start_time: startTime,
+                end_time: endTime,
+                driver_id: driverIdToUse,
+                route_order: routeOrder
+            },
+            success: function(response) {
+                console.log('Update response:', response); // Debug log
+                if (!response.success) {
+                    info.revert();
+                    alert('Error updating collection: ' + (response.data || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Update error:', {xhr, status, error}); // Debug log
+                alert('Error updating collection');
+                info.revert();
+            }
+        });
     }
 
-    $(document).ready(function() {
-        // Only run on settings page
-        if (typeof sdAdminOptions !== 'undefined') {
-            // Handle API key field changes
-            $(sdAdminOptions.apiKeyField).on('change', function() {
-                const apiKey = $(this).val();
-                if (apiKey) {
-                    $(sdAdminOptions.addressWrapper).show();
-                } else {
-                    $(sdAdminOptions.addressWrapper).hide();
-                }
-            });
-
-            // Initialize autocomplete if API key exists
-            if (typeof google !== 'undefined' && google.maps) {
-                initAutocomplete();
-            }
+    handleEventClick(info) {
+        info.jsEvent.preventDefault();
+        
+        const popoverContent = document.createElement('div');
+        popoverContent.innerHTML = `
+            <div class="fc-event-popover">
+                <h4>${info.event.title}</h4>
+                <a href="${info.event.url}" target="_blank" class="view-collection-link">View Collection</a>
+            </div>
+        `;
+        
+        // Remove any existing popovers
+        document.querySelectorAll('.fc-event-popover').forEach(el => el.remove());
+        
+        // Get the clicked element's position
+        const rect = info.el.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Position the popover just above the clicked event
+        popoverContent.style.position = 'absolute';
+        popoverContent.style.top = (rect.top + scrollTop - 10) + 'px'; // Position above the event with 10px offset
+        popoverContent.style.left = rect.left + 'px';
+        popoverContent.style.zIndex = 1000;
+        document.body.appendChild(popoverContent);
+        
+        // Adjust if popover goes above viewport
+        const popoverRect = popoverContent.getBoundingClientRect();
+        if (popoverRect.top < 0) {
+            // If popover would go above viewport, position it below the event instead
+            popoverContent.style.top = (rect.bottom + scrollTop + 10) + 'px';
         }
-    });
+        
+        const closePopover = function(e) {
+            if (!popoverContent.contains(e.target) && !info.el.contains(e.target)) {
+                popoverContent.remove();
+                document.removeEventListener('click', closePopover);
+            }
+        };
+        
+        setTimeout(() => {
+            document.addEventListener('click', closePopover);
+        }, 100);
+    }
+}
 
-})(jQuery);
+// Initialize when DOM is ready
+jQuery(document).ready(function() {
+    new CollectionCalendar();
+});

@@ -1,5 +1,5 @@
 <?php
-namespace ScrapDriver\Admin;
+namespace ScrapDriver;
 
 class Shift {
     public function __construct() {
@@ -16,13 +16,16 @@ class Shift {
         
         // Add shift adjustment handling
         add_action('init', array($this, 'handle_shift_adjustment_request'));
-        add_action('acf/save_post', array($this, 'update_shift_title_on_time_change'), 20);
         
         // Add metabox for adjustment requests
         add_action('add_meta_boxes', array($this, 'add_adjustment_requests_metabox'));
 
         // Add save adjustment request action
         add_action('save_post_sda-shift', array($this, 'save_adjustment_requests'), 10, 2);
+
+        // Add hooks for automatic shift title
+        add_filter('default_title', array($this, 'set_default_shift_title'), 10, 2);
+        add_action('save_post_sda-shift', array($this, 'update_shift_title'), 10, 3);
     }
 
     /**
@@ -332,44 +335,6 @@ class Shift {
         return $admin_emails;
     }
 
-    /**
-     * Update shift title and URL when start time is changed
-     */
-    public function update_shift_title_on_time_change($post_id) {
-        if (get_post_type($post_id) !== 'sda-shift') {
-            return;
-        }
-
-        // Check if start time was changed
-        $start_time = get_field('start_time', $post_id);
-        if (!$start_time) {
-            return;
-        }
-
-        $driver_id = get_post_meta($post_id, 'driver_id', true);
-        $driver = get_userdata($driver_id);
-        
-        if (!$driver) {
-            return;
-        }
-
-        // Update shift title
-        $new_title = sprintf('Shift By %s on %s', 
-            $driver->display_name,
-            date('Y-m-d H:i', strtotime($start_time))
-        );
-
-        // Prevent infinite loop
-        remove_action('acf/save_post', array($this, 'update_shift_title_on_time_change'), 20);
-
-        wp_update_post(array(
-            'ID' => $post_id,
-            'post_title' => $new_title,
-            'post_name' => sanitize_title($new_title)
-        ));
-
-        add_action('acf/save_post', array($this, 'update_shift_title_on_time_change'), 20);
-    }
 
     /**
      * Save adjustment request updates
@@ -403,6 +368,50 @@ class Shift {
         }
 
         update_post_meta($post_id, 'shift_adjustment_request', $requests);
+    }
+
+    /**
+     * Set default title for new shifts in admin dashboard
+     */
+    public function set_default_shift_title($post_title, $post) {
+        if ($post->post_type !== 'sda-shift') {
+            return $post_title;
+        }
+
+        return sprintf('Shift By %s on %s', 
+            '{driver}',
+            '{date}'
+        );
+    }
+
+    /**
+     * Update shift title when published or updated
+     */
+    public function update_shift_title($post_id, $post, $update) {
+        // Prevent recursive updates
+        remove_action('save_post_sda-shift', array($this, 'update_shift_title'), 10);
+
+        // Get driver and shift date
+        $driver_id = get_field('assigned_driver', $post_id);
+        $shift_date = get_field('shift_date', $post_id);
+
+        if ($driver_id && $shift_date) {
+            $driver = get_userdata($driver_id);
+            $new_title = sprintf('Shift By %s on %s',
+                $driver->display_name,
+                $shift_date
+            );
+
+            // Update post title and slug
+            wp_update_post(array(
+                'ID' => $post_id,
+                'post_title' => $new_title,
+                'post_name' => sanitize_title($new_title)
+            ));
+        }
+
+        // Re-add the action
+        add_action('save_post_sda-shift', array($this, 'update_shift_title'), 10, 3);
     }
 }
 

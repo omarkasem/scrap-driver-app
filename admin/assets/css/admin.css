@@ -126,3 +126,26 @@
 .fc-timegrid-event .fc-event-time {
     display: none;
 }
+
+/* Shift route planning styles */
+#shift_route_planning {
+    display: none; /* Hidden by default until driver is selected */
+}
+
+#shift_route_planning.has-driver {
+    display: block;
+}
+
+.sda-route-container {
+    margin: 15px 0;
+}
+
+.sda-route-header h3 {
+    margin-top: 0;
+}
+
+/* Ensure calendar fits within metabox */
+#shift_route_planning #calendar {
+    margin: 0;
+    padding: 15px;
+}

@@ -1,5 +1,5 @@
 <?php
-namespace ScrapDriver\Admin;
+namespace ScrapDriver;
 
 class CPT {
     public function __construct() {

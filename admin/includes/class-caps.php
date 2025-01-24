@@ -1,4 +1,5 @@
 <?php
+namespace ScrapDriver;
 /**
  * Class for handling custom roles and capabilities
  *
@@ -9,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
 
-class Scrap_Driver_Caps {
+class Caps {
 
     /**
      * Initialize the class
@@ -157,3 +158,5 @@ class Scrap_Driver_Caps {
         }
     }
 } 
+
+new Caps();

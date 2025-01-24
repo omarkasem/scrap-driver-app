@@ -60,7 +60,7 @@
         },
         {
             "key": "field_678e20befc9b1",
-            "label": "Completed Shift Collections",
+            "label": "Completed Collections",
             "name": "shift_collections",
             "aria-label": "",
             "type": "post_object",
@@ -110,7 +110,7 @@
             "aria-label": "",
             "type": "user",
             "instructions": "",
-            "required": 0,
+            "required": 1,
             "conditional_logic": 0,
             "wrapper": {
                 "width": "",
@@ -134,15 +134,15 @@
             "aria-label": "",
             "type": "date_picker",
             "instructions": "",
-            "required": 0,
+            "required": 1,
             "conditional_logic": 0,
             "wrapper": {
                 "width": "",
                 "class": "",
                 "id": ""
             },
-            "display_format": "d\/m\/Y",
-            "return_format": "d\/m\/Y",
+            "display_format": "F j, Y",
+            "return_format": "F j, Y",
             "first_day": 1,
             "allow_in_bindings": 0
         },
@@ -171,7 +171,7 @@
             "aria-label": "",
             "type": "google_map",
             "instructions": "",
-            "required": 0,
+            "required": 1,
             "conditional_logic": 0,
             "wrapper": {
                 "width": "",
@@ -191,7 +191,7 @@
             "aria-label": "",
             "type": "google_map",
             "instructions": "",
-            "required": 0,
+            "required": 1,
             "conditional_logic": 0,
             "wrapper": {
                 "width": "",
@@ -236,7 +236,7 @@
                 "class": "",
                 "id": ""
             },
-            "message": "",
+            "message": "<div class=\"sda-route-container\"><div id=\"calendar\"><\/div><\/div>",
             "new_lines": "wpautop",
             "esc_html": 0
         }
@@ -259,5 +259,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737723832
+    "modified": 1737726340
 }

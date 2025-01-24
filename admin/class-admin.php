@@ -7,16 +7,19 @@ class Admin {
         require_once plugin_dir_path(__FILE__) . 'includes/class-helpers.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-sync.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-acf.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/class-cpt.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-route.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-cpt.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-caps.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-shift.php';
     }
 
     public function init() {
         add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
     }
 
-    public function enqueue_assets($hook) {
-        if ('sda-collection_page_sda-route-planning' === $hook) {
+    public function enqueue_assets() {
+        global $post;
+        if ($post && 'sda-shift' === $post->post_type) {
             // FullCalendar Bundle (includes all plugins)
             wp_enqueue_script(
                 'fullcalendar',
@@ -25,15 +28,13 @@ class Admin {
                 '6.1.8',
                 true
             );
-  
-
         }
 
         // Make sure admin.js loads after FullCalendar
         wp_enqueue_script(
             'scrap-driver-admin',
             SCRAP_DRIVER_PLUGIN_URL . 'admin/assets/js/admin.js',
-            array('jquery', 'fullcalendar'),
+            array('jquery'),
             SCRAP_DRIVER_VERSION,
             true
         );

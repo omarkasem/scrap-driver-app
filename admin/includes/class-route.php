@@ -1,40 +1,34 @@
 <?php
+namespace ScrapDriver;
 /**
  * Route Planning Class
  */
-class SDA_Route {
+class Route {
     
     /**
      * Constructor
      */
     public function __construct() {
-        add_action('admin_menu', array($this, 'add_route_page'));
         
         // Ajax handlers
         add_action('wp_ajax_update_collection_route', array($this, 'update_collection_route'));
         add_action('wp_ajax_get_collections', array($this, 'ajax_get_collections'));
+
+        add_filter('acf/load_field', array($this, 'render_route_planning'));
     }
 
     /**
-     * Add Route Planning page
+     * Render the route planning interface within shift
      */
-    public function add_route_page() {
-        add_submenu_page(
-            'edit.php?post_type=sda-collection',
-            'Route Planning',
-            'Route Planning',
-            'manage_options',
-            'sda-route-planning',
-            array($this, 'render_route_page')
-        );
-    }
-
-
-    /**
-     * Render the route planning page
-     */
-    public function render_route_page() {
-        include plugin_dir_path(__FILE__) . '../templates/route-page.php';
+    public function render_route_planning($field) {
+        if($field['key'] === 'field_67938eec736a9') {
+            $value = '';
+            $value.= '<div class="sda-route-container">';
+            $value.= '<div id="calendar"></div>';
+            $value.= '</div>';
+            $field['message'] = $value;
+        }
+        return $field;
     }
 
     /**
@@ -59,23 +53,26 @@ class SDA_Route {
             'posts_per_page' => -1,
             'post_status' => 'publish',
             'meta_query' => array(
+                'relation' => 'AND',
                 array(
                     'key' => 'collection_date',
                     'value' => date('Y-m-d'),
                     'compare' => '>=',
                     'type' => 'DATE'
+                ),
+                array(
+                    'key' => 'assigned_driver',
+                    'value' => $driver_id
                 )
             )
         );
 
-        if ($driver_id) {
-            $args['meta_query'][] = array(
-                'key' => 'assigned_driver',
-                'value' => $driver_id
-            );
-        }
 
         $collections = get_posts($args);
+
+        if(empty($collections)) {
+            return array();
+        }
         
         $formatted_collections = array_map(function($collection) {
             $collection_date = get_post_meta($collection->ID, 'collection_date', true);
@@ -196,8 +193,6 @@ class SDA_Route {
         }
     }
 
-
-
     /**
      * Ajax handler for getting collections
      */
@@ -223,4 +218,4 @@ class SDA_Route {
     }
 }
 
-new SDA_Route(); 
+new Route(); 
