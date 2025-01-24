@@ -55,17 +55,30 @@ class Distance {
     /**
      * Get latitude and longitude from address using Google Geocoding API
      *
-     * @param string $address Address string.
+     * @param string $address  Street address.
+     * @param string $postcode Postal code.
      * @return array|WP_Error Array with lat/lng or WP_Error on failure.
      */
-    public function get_lat_lng_by_address($address) {
+    public function get_lat_lng_by_address($address, $postcode = '') {
         $api_key = get_field('google_maps_api_key','option');
         if (empty($api_key)) {
             return new \WP_Error('no_api_key', __('Google Maps API key is not set', 'scrap-driver-app'));
         }
 
-        $address = urlencode($address);
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$address}&key={$api_key}";
+        // Always include UK as the country component
+        $components = 'country:GB';
+        
+        // Add postcode component if provided
+        if (!empty($postcode)) {
+            $components .= '|postal_code:' . urlencode(trim($postcode));
+        }
+
+        if (!empty($address)) {
+            $address = urlencode(trim($address));
+            $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$address}&components={$components}&key={$api_key}";
+        } else {
+            $url = "https://maps.googleapis.com/maps/api/geocode/json?components={$components}&key={$api_key}";
+        }
 
         $response = wp_remote_get($url);
 
@@ -81,10 +94,14 @@ class Distance {
         }
 
         $location = $data['results'][0]['geometry']['location'];
+        
+        // Add viewport data for more precise location information
+        $viewport = $data['results'][0]['geometry']['viewport'];
 
         return array(
             'lat' => $location['lat'],
-            'lng' => $location['lng']
+            'lng' => $location['lng'],
+            'viewport' => $viewport // This can be useful for determining the precision of the location
         );
     }
 
