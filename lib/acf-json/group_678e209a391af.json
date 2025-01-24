@@ -117,7 +117,9 @@
                 "class": "",
                 "id": ""
             },
-            "role": "",
+            "role": [
+                "driver"
+            ],
             "return_format": "id",
             "multiple": 0,
             "allow_null": 0,
@@ -257,5 +259,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737723648
+    "modified": 1737723832
 }
