@@ -1,4 +1,4 @@
-class CollectionCalendar {
+class RoutePlanning {
     constructor() {
         this.$calendar = jQuery('#calendar');
         this.calendar = null;
@@ -272,5 +272,5 @@ class CollectionCalendar {
 
 // Initialize when DOM is ready
 jQuery(document).ready(function() {
-    new CollectionCalendar();
+    new RoutePlanning();
 });

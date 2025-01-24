@@ -11,6 +11,7 @@ class Admin {
         require_once plugin_dir_path(__FILE__) . 'includes/class-cpt.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-caps.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-shift.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-distance.php';
     }
 
     public function init() {
