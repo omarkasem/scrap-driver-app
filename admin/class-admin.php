@@ -9,7 +9,6 @@ class Admin {
         require_once plugin_dir_path(__FILE__) . 'includes/class-acf.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-cpt.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-route.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/class-option-page.php';
     }
 
     public function init() {

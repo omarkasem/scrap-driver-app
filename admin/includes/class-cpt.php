@@ -71,9 +71,6 @@ class CPT {
             'rewrite'             => array('slug' => 'shift', 'with_front' => false),
             'menu_icon'           => 'dashicons-clock',
             'capability_type'     => 'post',
-            'capabilities'        => array(
-                'create_posts' => false, // Disable manual creation
-            ),
             'map_meta_cap'        => true,
         );
 

@@ -30,6 +30,12 @@ class Acf {
         // Hide the ACF Updates menu
         add_filter( 'acf/settings/show_updates', '__return_false', 100 );
 
+        // Add Google Maps API key
+        add_filter('acf/settings/google_api_key', function() {
+            return get_field('google_maps_api_key', 'option');
+        });
+
+
         add_filter( 'acf/settings/save_json', array($this,'my_acf_json_save_point') );
         add_filter( 'acf/settings/load_json', array($this,'my_acf_json_load_point') );
 
@@ -38,6 +44,21 @@ class Acf {
 
         // Add filter for loading field choices
         add_filter('acf/load_field', array($this, 'load_vehicle_statuses'));
+
+        // Add filter to set default map center
+        add_filter('acf/load_field', array($this, 'set_default_map_center'));
+
+        // Add ACF Options Page under Settings
+        if( function_exists('acf_add_options_page') ) {
+            acf_add_options_page(array(
+                'page_title'    => 'Scrap Driver Settings',
+                'menu_title'    => 'Scrap Driver',
+                'menu_slug'     => 'scrap-driver-settings',
+                'capability'    => 'manage_options',
+                'redirect'      => false,
+                'parent_slug'   => 'options-general.php'  // This places it under Settings
+            ));
+        }
     }
 
     function my_acf_json_load_point( $paths ) {
@@ -88,6 +109,18 @@ class Acf {
             $field['choices'] = $statuses;
         }
         
+        return $field;
+    }
+
+    public function set_default_map_center($field) {
+        // Check if field is one of our target map fields
+        if (in_array($field['key'], ['field_67938b627f419', 'field_67938b777f41b'])) {
+            $default_location = get_field('default_shifts_location', 'option');
+            if ($default_location) {
+                $field['center_lat'] = $default_location['lat'];
+                $field['center_lng'] = $default_location['lng'];
+            }
+        }
         return $field;
     }
 
