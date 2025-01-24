@@ -102,6 +102,9 @@ class Sync {
             if (!empty($customer_info['address'])) {
                 update_field('customer_info_address', $customer_info['address'], $post_id);
             }
+            if (!empty($customer_info['postcode'])) {
+                update_field('customer_info_postcode', $customer_info['postcode'], $post_id);
+            }
 
             // Process photos
             if (!empty($collection['driver_photos'])) {
@@ -189,10 +192,6 @@ class Sync {
             'collection_driver' => get_field('assigned_driver', $post_id),
             'admin_notes' => get_field('admin_notes', $post_id),
             'driver_notes' => get_field('driver_notes', $post_id),
-            'car_plate' => get_field('vehicle_info_plate', $post_id),
-            'customer_name' => get_field('customer_info_name', $post_id),
-            'customer_phone' => get_field('customer_info_phone', $post_id),
-            'customer_address' => get_field('customer_info_address', $post_id),
             'modified_at' => current_time('mysql')
         );
 

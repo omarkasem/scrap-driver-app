@@ -27,7 +27,7 @@ class RoutePlanning {
     initCalendar() {
         const self = this;
         this.calendar = new FullCalendar.Calendar(this.$calendar[0], {
-            initialView: 'multiMonthYear',
+            initialView: 'timeGridDay',
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
