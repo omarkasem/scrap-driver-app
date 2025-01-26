@@ -19,6 +19,9 @@ class Schedule {
         
         // Run initial schedule creation for existing drivers
         add_action('admin_init', array($this, 'create_schedules_for_existing_drivers'));
+        add_action('add_meta_boxes', array($this, 'add_schedule_meta_box'));
+        add_action('wp_ajax_save_schedule_dates', array($this, 'save_schedule_dates'));
+        add_action('wp_ajax_get_schedule_dates', array($this, 'get_schedule_dates'));
     }
 
     /**
@@ -204,6 +207,94 @@ class Schedule {
             // Add driver ID as post meta
             update_post_meta($post_id, 'driver_id', $user->ID);
         }
+    }
+
+    /**
+     * Add Schedule Meta Box
+     */
+    public function add_schedule_meta_box() {
+        add_meta_box(
+            'driver_schedule_details',
+            __('Schedule Details', 'mdtl'),
+            array($this, 'render_schedule_meta_box'),
+            'driver_schedule',
+            'normal',
+            'high'
+        );
+    }
+
+    /**
+     * Render Schedule Meta Box
+     */
+    public function render_schedule_meta_box($post) {
+        wp_nonce_field('schedule_meta_box', 'schedule_meta_box_nonce');
+        
+        $annual_leave = get_post_meta($post->ID, 'annual_leave_allowance', true);
+        $leave_year_start = get_post_meta($post->ID, 'leave_year_start', true);
+        
+        ?>
+        <div class="schedule-meta-box">
+            <p>
+                <label for="annual_leave_allowance"><?php _e('Total Annual Leave Allowance (days)', 'mdtl'); ?></label>
+                <input type="number" id="annual_leave_allowance" name="annual_leave_allowance" 
+                       value="<?php echo esc_attr($annual_leave); ?>" min="0" step="0.5">
+            </p>
+            
+            <p>
+                <label for="leave_year_start"><?php _e('Leave Year Start Date', 'mdtl'); ?></label>
+                <input type="date" id="leave_year_start" name="leave_year_start" 
+                       value="<?php echo esc_attr($leave_year_start); ?>">
+            </p>
+            
+            <div id="schedule-calendar"></div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Save schedule dates via AJAX
+     */
+    public function save_schedule_dates() {
+        check_ajax_referer('schedule_dates_nonce', 'nonce');
+        
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error('Permission denied');
+        }
+        
+        $post_id = intval($_POST['post_id']);
+        $dates = sanitize_text_field($_POST['dates']);
+        $status = sanitize_text_field($_POST['status']);
+        
+        // Save the schedule data
+        $schedule_data = get_post_meta($post_id, 'schedule_dates', true) ?: array();
+        $dates_array = explode(',', $dates);
+        
+        foreach ($dates_array as $date) {
+            $schedule_data[$date] = $status;
+        }
+        
+        update_post_meta($post_id, 'schedule_dates', $schedule_data);
+        wp_send_json_success();
+    }
+
+    /**
+     * Get schedule dates via AJAX
+     */
+    public function get_schedule_dates() {
+        check_ajax_referer('schedule_dates_nonce', 'nonce');
+        
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error('Permission denied');
+        }
+        
+        $post_id = intval($_POST['post_id']);
+        $schedule_data = get_post_meta($post_id, 'schedule_dates', true);
+        
+        if (!$schedule_data) {
+            $schedule_data = array();
+        }
+        
+        wp_send_json_success($schedule_data);
     }
 }
 

@@ -149,3 +149,55 @@
     margin: 0;
     padding: 15px;
 }
+
+.schedule-meta-box {
+    margin: 15px 0;
+}
+
+.schedule-meta-box label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.schedule-meta-box input {
+    width: 200px;
+}
+
+#schedule-calendar {
+    margin-top: 20px;
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ddd;
+}
+
+#status-dialog {
+    padding: 15px;
+}
+
+#status-dialog select {
+    width: 100%;
+    margin: 10px 0;
+}
+
+#status-dialog button {
+    margin-right: 10px;
+}
+
+.fc-event {
+    cursor: pointer;
+    padding: 2px 5px;
+}
+
+.fc-day-today {
+    background-color: #f0f8ff !important;
+}
+
+.schedule-meta-box .fc-toolbar-title {
+    font-size: 1.2em;
+}
+
+.schedule-meta-box .fc-button {
+    padding: 5px 10px;
+    font-size: 0.9em;
+}

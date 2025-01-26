@@ -202,7 +202,7 @@ class RoutePlanning {
             type: 'POST',
             data: {
                 action: 'update_collection_route',
-                nonce: sdaRoute.nonce,
+                nonce: sdaRoute.schedule_nonce,
                 collection_id: event.id,
                 new_date: newDate,
                 start_time: startTime,
@@ -345,9 +345,169 @@ class Distance {
     }
 }
 
+class DriverSchedule {
+    constructor() {
+        this.$calendar = jQuery('#schedule-calendar');
+        if (!this.$calendar.length) return;
+        
+        this.postId = sdaRoute.postId;
+        this.calendar = null;
+        this.selectedDates = [];
+        
+        this.init();
+    }
+    
+    init() {
+        this.initCalendar();
+        this.loadScheduleDates();
+    }
+    
+    initCalendar() {
+        const self = this;
+        this.calendar = new FullCalendar.Calendar(this.$calendar[0], {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            selectable: true,
+            select: (info) => this.handleDateSelect(info),
+            unselect: () => this.handleUnselect(),
+            eventDidMount: (info) => {
+                info.el.title = info.event.title;
+            }
+        });
+        
+        this.calendar.render();
+        this.createStatusDialog();
+    }
+    
+    createStatusDialog() {
+        const dialog = `
+            <div id="status-dialog" style="display:none;">
+                <h3>Set Status for Selected Dates</h3>
+                <select id="date-status">
+                    <option value="full_day">Full Day</option>
+                    <option value="half_day">Half Day</option>
+                    <option value="not_working">Not Working</option>
+                </select>
+                <button class="button button-primary" id="save-status">Save</button>
+                <button class="button" id="cancel-status">Cancel</button>
+            </div>
+        `;
+        
+        jQuery('body').append(dialog);
+        
+        jQuery('#save-status').on('click', () => this.saveSelectedDates());
+        jQuery('#cancel-status').on('click', () => this.closeDialog());
+    }
+    
+    handleDateSelect(info) {
+        this.selectedDates = [];
+        let current = new Date(info.start);
+        const end = new Date(info.end);
+        
+        while (current < end) {
+            this.selectedDates.push(this.formatDate(current));
+            current.setDate(current.getDate() + 1);
+        }
+        
+        jQuery('#status-dialog').dialog({
+            modal: true,
+            width: 300,
+            close: () => this.calendar.unselect()
+        });
+    }
+    
+    handleUnselect() {
+        this.selectedDates = [];
+        jQuery('#status-dialog').dialog('close');
+    }
+    
+    saveSelectedDates() {
+        const status = jQuery('#date-status').val();
+        
+        jQuery.ajax({
+            url: sdaRoute.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'save_schedule_dates',
+                nonce: sdaRoute.schedule_nonce,
+                post_id: this.postId,
+                dates: this.selectedDates.join(','),
+                status: status
+            },
+            success: (response) => {
+                if (response.success) {
+                    this.loadScheduleDates();
+                    this.closeDialog();
+                }
+            }
+        });
+    }
+    
+    loadScheduleDates() {
+        jQuery.ajax({
+            url: sdaRoute.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'get_schedule_dates',
+                post_id: this.postId,
+                nonce: sdaRoute.schedule_nonce
+            },
+            success: (response) => {
+                if (response.success) {
+                    this.calendar.removeAllEvents();
+                    this.renderScheduleDates(response.data);
+                }
+            }
+        });
+    }
+    
+    renderScheduleDates(dates) {
+        const events = [];
+        const colors = {
+            full_day: '#2196F3',
+            half_day: '#FFC107',
+            not_working: '#F44336'
+        };
+        
+        for (const [date, status] of Object.entries(dates)) {
+            events.push({
+                title: this.getStatusLabel(status),
+                start: date,
+                backgroundColor: colors[status],
+                allDay: true
+            });
+        }
+        
+        this.calendar.addEventSource(events);
+    }
+    
+    getStatusLabel(status) {
+        const labels = {
+            full_day: 'Full Day',
+            half_day: 'Half Day',
+            not_working: 'Not Working'
+        };
+        return labels[status] || status;
+    }
+    
+    closeDialog() {
+        jQuery('#status-dialog').dialog('close');
+        this.calendar.unselect();
+    }
+    
+    formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+}
+
 // Initialize when DOM is ready
 jQuery(document).ready(function() {
     // Store routePlanning instance globally
     window.routePlanning = new RoutePlanning();
     new Distance();
+    new DriverSchedule();
 });

@@ -21,7 +21,7 @@ class Admin {
 
     public function enqueue_assets() {
         global $post;
-        if ($post && 'sda-shift' === $post->post_type) {
+        if ($post && 'sda-shift' === $post->post_type || 'driver_schedule' === $post->post_type) {
             // FullCalendar Bundle (includes all plugins)
             wp_enqueue_script(
                 'fullcalendar',
@@ -36,7 +36,7 @@ class Admin {
         wp_enqueue_script(
             'scrap-driver-admin',
             SCRAP_DRIVER_PLUGIN_URL . 'admin/assets/js/admin.js',
-            array('jquery'),
+            array('jquery','jquery-ui-dialog','jquery-ui-datepicker'),
             SCRAP_DRIVER_VERSION,
             true
         );
@@ -51,6 +51,7 @@ class Admin {
         wp_localize_script('scrap-driver-admin', 'sdaRoute', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('sda_route_nonce'),
+            'schedule_nonce' => wp_create_nonce('schedule_dates_nonce'),
             'postId' => $post_id,
             'loader' => $ajax_loader_img
         ));
