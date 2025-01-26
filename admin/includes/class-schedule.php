@@ -25,6 +25,15 @@ class Schedule {
 
         add_action('acf/load_field/key=field_67963b5a4e33f', array($this, 'set_default_value_start_of_year_date'),);
         add_filter('single_template', array($this, 'register_schedule_template'));
+
+        // Add holiday request handling
+        add_action('init', array($this, 'handle_holiday_request'));
+        
+        // Add metabox for holiday requests
+        add_action('add_meta_boxes', array($this, 'add_holiday_requests_metabox'));
+        
+        // Add save holiday request action
+        add_action('save_post_driver_schedule', array($this, 'save_holiday_requests'), 10, 2);
     }
 
     public function set_default_value_start_of_year_date($field) {
@@ -296,6 +305,261 @@ class Schedule {
             }
         }
         return $template;
+    }
+
+    /**
+     * Add metabox for holiday requests
+     */
+    public function add_holiday_requests_metabox() {
+        add_meta_box(
+            'holiday_requests',
+            __('Holiday Requests', 'scrap-driver'),
+            array($this, 'render_holiday_requests_metabox'),
+            'driver_schedule',
+            'normal',
+            'default'
+        );
+    }
+
+    /**
+     * Render the holiday requests metabox
+     */
+    public function render_holiday_requests_metabox($post) {
+        $requests = get_post_meta($post->ID, 'holiday_requests', true);
+        
+        if (empty($requests)) {
+            echo '<p>' . __('No holiday requests for this schedule.', 'scrap-driver') . '</p>';
+            return;
+        }
+
+        // If single request is stored (old format), convert to array
+        if (!isset($requests[0]) && isset($requests['requested_at'])) {
+            $requests = array($requests);
+        }
+
+        wp_nonce_field('save_holiday_requests', 'holiday_requests_nonce');
+
+        echo '<table class="widefat fixed striped">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th>' . __('Date Requested', 'scrap-driver') . '</th>';
+        echo '<th>' . __('Period', 'scrap-driver') . '</th>';
+        echo '<th>' . __('Days', 'scrap-driver') . '</th>';
+        echo '<th>' . __('Comments', 'scrap-driver') . '</th>';
+        echo '<th>' . __('Status', 'scrap-driver') . '</th>';
+        echo '<th>' . __('Admin Response', 'scrap-driver') . '</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+
+        foreach ($requests as $index => $request) {
+            $status = isset($request['status']) ? $request['status'] : 'pending';
+            $admin_response = isset($request['admin_response']) ? $request['admin_response'] : '';
+            $days = $this->calculate_working_days($request['start_date'], $request['end_date']);
+            
+            echo '<tr>';
+            echo '<td>' . date_i18n(get_option('date_format') . ' ' . get_option('time_format'), 
+                strtotime($request['requested_at'])) . '</td>';
+            echo '<td>' . date_i18n(get_option('date_format'), strtotime($request['start_date'])) . ' - ' . 
+                date_i18n(get_option('date_format'), strtotime($request['end_date'])) . '</td>';
+            echo '<td>' . $days . '</td>';
+            echo '<td>' . esc_html($request['comments']) . '</td>';
+            echo '<td>';
+            echo '<select name="holiday_request[' . $index . '][status]">';
+            echo '<option value="pending" ' . selected($status, 'pending', false) . '>' . __('Pending', 'scrap-driver') . '</option>';
+            echo '<option value="approved" ' . selected($status, 'approved', false) . '>' . __('Approved', 'scrap-driver') . '</option>';
+            echo '<option value="denied" ' . selected($status, 'denied', false) . '>' . __('Denied', 'scrap-driver') . '</option>';
+            echo '</select>';
+            echo '</td>';
+            echo '<td>';
+            echo '<textarea name="holiday_request[' . $index . '][admin_response]" rows="2" style="width: 100%;">' . 
+                esc_textarea($admin_response) . '</textarea>';
+            echo '</td>';
+            echo '</tr>';
+        }
+
+        echo '</tbody>';
+        echo '</table>';
+
+        // Add save button
+        echo '<p><input type="submit" class="button button-primary" value="' . __('Update Requests', 'scrap-driver') . '"></p>';
+    }
+
+    /**
+     * Get admin user emails
+     */
+    private function get_admin_emails() {
+        $admin_emails = array();
+        $admin_users = get_users(array('role' => 'administrator'));
+        
+        foreach ($admin_users as $user) {
+            $admin_emails[] = $user->user_email;
+        }
+        
+        return $admin_emails;
+    }
+
+
+    /**
+     * Handle holiday request submission
+     */
+    public function handle_holiday_request() {
+        if (!isset($_POST['action']) || $_POST['action'] !== 'request_holiday') {
+            return;
+        }
+
+        // Verify nonce
+        if (!isset($_POST['holiday_request_nonce']) || 
+            !wp_verify_nonce($_POST['holiday_request_nonce'], 'holiday_request')) {
+            wp_die(__('Security check failed', 'scrap-driver'));
+        }
+
+        $schedule_id = isset($_POST['schedule_id']) ? intval($_POST['schedule_id']) : 0;
+        $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : '';
+        $end_date = isset($_POST['end_date']) ? sanitize_text_field($_POST['end_date']) : '';
+        $comments = isset($_POST['comments']) ? sanitize_textarea_field($_POST['comments']) : '';
+        
+        if (!$schedule_id || !$start_date || !$end_date || !$comments) {
+            wp_die(__('Invalid request', 'scrap-driver'));
+        }
+
+        // Calculate working days
+        $days = $this->calculate_working_days($start_date, $end_date);
+
+        // Store the holiday request
+        $request_data = array(
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'days' => $days,
+            'comments' => $comments,
+            'requested_by' => get_current_user_id(),
+            'requested_at' => current_time('mysql'),
+            'status' => 'pending'
+        );
+        
+        // Get existing requests and add new one
+        $existing_requests = get_post_meta($schedule_id, 'holiday_requests', true);
+        if (!is_array($existing_requests)) {
+            $existing_requests = array();
+        }
+        
+        // Add new request
+        $existing_requests[] = $request_data;
+        
+        // Update post meta with all requests
+        update_post_meta($schedule_id, 'holiday_requests', $existing_requests);
+
+        // Send email notification to admin users
+        $admin_emails = $this->get_admin_emails();
+        $driver_name = get_userdata(get_current_user_id())->display_name;
+        $schedule_url = get_edit_post_link($schedule_id);
+        
+        $subject = sprintf(__('[%s] New Holiday Request', 'scrap-driver'), get_bloginfo('name'));
+        $message = sprintf(
+            __("Driver %s has requested holiday leave.\n\nPeriod: %s to %s\nDays: %d\nComments: %s\n\nView schedule: %s", 'scrap-driver'),
+            $driver_name,
+            $start_date,
+            $end_date,
+            $days,
+            $comments,
+            $schedule_url
+        );
+
+        foreach ($admin_emails as $email) {
+            wp_mail($email, $subject, $message);
+        }
+
+        // Redirect back to schedule page with success message
+        wp_redirect(add_query_arg('holiday_requested', '1', get_permalink($schedule_id)));
+        exit;
+    }
+
+    /**
+     * Calculate working days between two dates
+     */
+    private function calculate_working_days($start_date, $end_date) {
+        $start = new \DateTime($start_date);
+        $end = new \DateTime($end_date);
+        $days = 0;
+
+        while ($start <= $end) {
+            // Check if it's not a weekend
+            if ($start->format('N') < 6) {
+                $days++;
+            }
+            $start->modify('+1 day');
+        }
+
+        return $days;
+    }
+
+    /**
+     * Save holiday request updates
+     */
+    public function save_holiday_requests($post_id, $post) {
+        // Verify nonce
+        if (!isset($_POST['holiday_requests_nonce']) || 
+            !wp_verify_nonce($_POST['holiday_requests_nonce'], 'save_holiday_requests')) {
+            return;
+        }
+
+        // Check if we have holiday request data
+        if (!isset($_POST['holiday_request'])) {
+            return;
+        }
+
+        $requests = get_post_meta($post_id, 'holiday_requests', true);
+        if (!is_array($requests)) {
+            if (isset($requests['requested_at'])) {
+                $requests = array($requests);
+            } else {
+                return;
+            }
+        }
+
+        $total_allowance = get_field('total_annual_leave_allowance_days', $post_id);
+        $days_taken = $this->get_days_taken($post_id);
+
+        foreach ($_POST['holiday_request'] as $index => $data) {
+            if (isset($requests[$index])) {
+                $old_status = $requests[$index]['status'];
+                $new_status = sanitize_text_field($data['status']);
+                
+                // If approving a request, check if enough days are available
+                if ($new_status === 'approved' && $old_status !== 'approved') {
+                    $request_days = $requests[$index]['days'];
+                    if (($days_taken + $request_days) > $total_allowance) {
+                        // Add admin note about exceeding allowance
+                        $data['admin_response'] = __('Cannot approve - exceeds annual leave allowance.', 'scrap-driver');
+                        $new_status = 'denied';
+                    }
+                }
+                
+                $requests[$index]['status'] = $new_status;
+                $requests[$index]['admin_response'] = sanitize_textarea_field($data['admin_response']);
+            }
+        }
+
+        update_post_meta($post_id, 'holiday_requests', $requests);
+    }
+
+    /**
+     * Get total days taken from approved requests
+     */
+    private function get_days_taken($schedule_id) {
+        $requests = get_post_meta($schedule_id, 'holiday_requests', true);
+        if (!is_array($requests)) {
+            return 0;
+        }
+
+        $days_taken = 0;
+        foreach ($requests as $request) {
+            if (isset($request['status']) && $request['status'] === 'approved') {
+                $days_taken += $request['days'];
+            }
+        }
+
+        return $days_taken;
     }
 }
 

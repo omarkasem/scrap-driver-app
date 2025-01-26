@@ -67,6 +67,120 @@ $leave_start = get_field('leave_year_start_date', get_the_ID());
                 ?>
             </div>
         </div>
+
+        <div class="sda-section holiday-requests">
+            <h3><?php _e('Annual Leave', 'scrap-driver'); ?></h3>
+            
+            <?php
+            $total_allowance = get_field('total_annual_leave_allowance_days', get_the_ID());
+            $requests = get_post_meta(get_the_ID(), 'holiday_requests', true);
+            $days_taken = 0;
+            
+            if (is_array($requests)) {
+                foreach ($requests as $request) {
+                    if (isset($request['status']) && $request['status'] === 'approved') {
+                        $days_taken += $request['days'];
+                    }
+                }
+            }
+            
+            $days_remaining = $total_allowance - $days_taken;
+            ?>
+            
+            <div class="leave-summary">
+                <div class="leave-stat">
+                    <span class="label"><?php _e('Total Allowance:', 'scrap-driver'); ?></span>
+                    <span class="value"><?php echo esc_html($total_allowance); ?> <?php _e('days', 'scrap-driver'); ?></span>
+                </div>
+                <div class="leave-stat">
+                    <span class="label"><?php _e('Days Taken:', 'scrap-driver'); ?></span>
+                    <span class="value"><?php echo esc_html($days_taken); ?> <?php _e('days', 'scrap-driver'); ?></span>
+                </div>
+                <div class="leave-stat">
+                    <span class="label"><?php _e('Days Remaining:', 'scrap-driver'); ?></span>
+                    <span class="value"><?php echo esc_html($days_remaining); ?> <?php _e('days', 'scrap-driver'); ?></span>
+                </div>
+            </div>
+
+            <?php if ($current_user_id == $driver_id): ?>
+                <?php 
+                // Show success message if request was just submitted
+                if (isset($_GET['holiday_requested']) && $_GET['holiday_requested'] == '1'): ?>
+                    <div class="sda-notice sda-notice-success">
+                        <p><?php _e('Your holiday request has been submitted and sent to administrators for review.', 'scrap-driver'); ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <?php
+                // Show existing requests
+                if (!empty($requests)) {
+                    if (!isset($requests[0])) {
+                        $requests = array($requests);
+                    }
+                    
+                    echo '<div class="holiday-previous-requests">';
+                    echo '<h4>' . __('Previous Requests', 'scrap-driver') . '</h4>';
+                    
+                    foreach ($requests as $request) {
+                        $status_class = 'status-' . $request['status'];
+                        $status_label = ucfirst($request['status']);
+                        ?>
+                        <div class="holiday-request-item <?php echo esc_attr($status_class); ?>">
+                            <div class="request-meta">
+                                <span class="request-period">
+                                    <?php echo date_i18n(get_option('date_format'), strtotime($request['start_date'])); ?> - 
+                                    <?php echo date_i18n(get_option('date_format'), strtotime($request['end_date'])); ?>
+                                    (<?php echo $request['days']; ?> <?php _e('days', 'scrap-driver'); ?>)
+                                </span>
+                                <span class="request-status">
+                                    <?php echo esc_html($status_label); ?>
+                                </span>
+                            </div>
+                            <div class="request-content">
+                                <p class="request-comments"><?php echo esc_html($request['comments']); ?></p>
+                                <?php if (!empty($request['admin_response'])): ?>
+                                    <div class="admin-response">
+                                        <strong><?php _e('Admin Response:', 'scrap-driver'); ?></strong>
+                                        <p><?php echo esc_html($request['admin_response']); ?></p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    echo '</div>';
+                }
+                ?>
+
+                <h4><?php _e('Request Annual Leave', 'scrap-driver'); ?></h4>
+                <form method="post" class="holiday-request-form">
+                    <?php wp_nonce_field('holiday_request', 'holiday_request_nonce'); ?>
+                    <input type="hidden" name="action" value="request_holiday">
+                    <input type="hidden" name="schedule_id" value="<?php echo get_the_ID(); ?>">
+                    
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="start_date"><?php _e('Start Date:', 'scrap-driver'); ?></label>
+                            <input type="date" id="start_date" name="start_date" required>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label for="end_date"><?php _e('End Date:', 'scrap-driver'); ?></label>
+                            <input type="date" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="comments"><?php _e('Comments:', 'scrap-driver'); ?></label>
+                        <textarea id="comments" name="comments" rows="4" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="button button-primary">
+                        <?php _e('Submit Request', 'scrap-driver'); ?>
+                    </button>
+                </form>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 

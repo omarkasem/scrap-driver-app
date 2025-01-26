@@ -444,3 +444,128 @@ table.dataTable tbody td {
         padding: 1.5rem;
     }
 }
+
+/* Holiday Requests Styles */
+.holiday-requests {
+    margin-top: 2rem;
+}
+
+.leave-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.leave-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.leave-stat .label {
+    font-size: 0.9em;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.leave-stat .value {
+    font-size: 1.5em;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.holiday-request-form {
+    margin-top: 2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-field {
+    margin-bottom: 1rem;
+}
+
+.form-field label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-field input[type="date"],
+.form-field textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+}
+
+.holiday-previous-requests {
+    margin: 2rem 0;
+}
+
+.holiday-request-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.holiday-request-item .request-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.request-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-pending .request-status {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-approved .request-status {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-denied .request-status {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.request-comments {
+    margin: 0.5rem 0;
+    color: #4b5563;
+}
+
+.admin-response {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.admin-response strong {
+    color: #2d3748;
+}
+
+@media (max-width: 640px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
