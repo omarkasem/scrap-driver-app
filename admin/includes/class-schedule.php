@@ -480,9 +480,10 @@ class Schedule {
     private function calculate_working_days($start_date, $end_date) {
         $start = new \DateTime($start_date);
         $end = new \DateTime($end_date);
+        $end->modify('+1 day'); // Include the end date in the calculation
         $days = 0;
 
-        while ($start <= $end) {
+        while ($start < $end) {
             // Check if it's not a weekend
             if ($start->format('N') < 6) {
                 $days++;

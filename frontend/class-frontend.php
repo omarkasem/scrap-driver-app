@@ -84,11 +84,14 @@ class Frontend {
             SCRAP_DRIVER_VERSION
         );
 
+        // enqueue jquery ui styles
+        wp_enqueue_style('jquery-ui', 'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
+
         // Enqueue frontend JavaScript
         wp_enqueue_script(
             'scrap-driver-frontend',
             SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/frontend.js',
-            array('jquery'),
+            array('jquery','jquery-ui-datepicker'),
             SCRAP_DRIVER_VERSION,
             true
         );

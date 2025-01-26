@@ -19,10 +19,38 @@ if (!current_user_can('administrator') && $current_user_id != $driver_id) {
 
 get_header();
 
+
 // Get schedule data
 $schedule = get_field('schedule', get_the_ID());
 $total_leave = get_field('total_annual_leave_allowance_days', get_the_ID());
 $leave_start = get_field('leave_year_start_date', get_the_ID());
+$total_allowance = get_field('total_annual_leave_allowance_days', get_the_ID());
+$requests = get_post_meta(get_the_ID(), 'holiday_requests', true);
+
+
+
+// Get all approved holiday dates
+$approved_dates = array();
+if (is_array($requests)) {
+    foreach ($requests as $request) {
+        if (isset($request['status']) && $request['status'] === 'approved') {
+            $start = new \DateTime($request['start_date']);
+            $end = new \DateTime($request['end_date']);
+            $end->modify('+1 day');
+            $interval = new \DateInterval('P1D');
+            $daterange = new \DatePeriod($start, $interval, $end);
+            
+            foreach ($daterange as $date) {
+                if ($date->format('N') < 6) { // Only add weekdays
+                    $approved_dates[] = $date->format('Y-m-d');
+                }
+            }
+        }
+    }
+}
+
+// Convert to JSON for JavaScript
+$approved_dates_json = json_encode($approved_dates);
 
 ?>
 
@@ -72,8 +100,6 @@ $leave_start = get_field('leave_year_start_date', get_the_ID());
             <h3><?php _e('Annual Leave', 'scrap-driver'); ?></h3>
             
             <?php
-            $total_allowance = get_field('total_annual_leave_allowance_days', get_the_ID());
-            $requests = get_post_meta(get_the_ID(), 'holiday_requests', true);
             $days_taken = 0;
             
             if (is_array($requests)) {
@@ -154,19 +180,22 @@ $leave_start = get_field('leave_year_start_date', get_the_ID());
 
                 <h4><?php _e('Request Annual Leave', 'scrap-driver'); ?></h4>
                 <form method="post" class="holiday-request-form">
-                    <?php wp_nonce_field('holiday_request', 'holiday_request_nonce'); ?>
+                    <?php 
+                    $today = date('Y-m-d');
+                    wp_nonce_field('holiday_request', 'holiday_request_nonce'); 
+                    ?>
                     <input type="hidden" name="action" value="request_holiday">
                     <input type="hidden" name="schedule_id" value="<?php echo get_the_ID(); ?>">
                     
                     <div class="form-row">
                         <div class="form-field">
                             <label for="start_date"><?php _e('Start Date:', 'scrap-driver'); ?></label>
-                            <input type="date" id="start_date" name="start_date" required>
+                            <input type="date" id="start_date" name="start_date" min="<?php echo $today; ?>" required>
                         </div>
                         
                         <div class="form-field">
                             <label for="end_date"><?php _e('End Date:', 'scrap-driver'); ?></label>
-                            <input type="date" id="end_date" name="end_date" required>
+                            <input type="date" id="end_date" name="end_date" min="<?php echo $today; ?>" required>
                         </div>
                     </div>
                     
@@ -186,3 +215,54 @@ $leave_start = get_field('leave_year_start_date', get_the_ID());
 
 
 <?php get_footer(); ?> 
+
+
+<!-- Replace the existing JavaScript section with this simpler version -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const approvedDates = <?php echo $approved_dates_json; ?>;
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    
+    // Function to check if a date should be disabled
+    function isDateDisabled(dateStr) {
+        const date = new Date(dateStr);
+        const day = date.getDay();
+        
+        // Disable weekends
+        if (day === 0 || day === 6) {
+            return true;
+        }
+        
+        // Disable approved holiday dates
+        return approvedDates.includes(dateStr);
+    }
+
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    startDate.min = today;
+    endDate.min = today;
+
+    // Initialize datepickers
+    jQuery(startDate).datepicker({
+        dateFormat: 'yy-mm-dd',
+        minDate: 0,
+        beforeShowDay: function(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            return [!isDateDisabled(dateStr), ''];
+        },
+        onSelect: function(selectedDate) {
+            $(endDate).datepicker('option', 'minDate', selectedDate);
+        }
+    });
+
+    jQuery(endDate).datepicker({
+        dateFormat: 'yy-mm-dd',
+        minDate: 0,
+        beforeShowDay: function(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            return [!isDateDisabled(dateStr), ''];
+        }
+    });
+});
+</script>
