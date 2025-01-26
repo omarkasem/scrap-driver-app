@@ -13,6 +13,8 @@ class CPT {
         add_action('pre_get_posts', array($this, 'filter_collections_by_meta'));
         add_action('bulk_edit_custom_box', array($this, 'add_bulk_edit_fields'), 10, 2);
         add_action('save_post', array($this, 'save_bulk_edit_fields'));
+        add_filter('manage_sda-shift_posts_columns', array($this, 'set_shift_columns'));
+        add_action('manage_sda-shift_posts_custom_column', array($this, 'render_shift_columns'), 10, 2);
     }
 
     public function register_collection_post_type() {
@@ -337,8 +339,48 @@ class CPT {
         }
     }
 
+    public function set_shift_columns($columns) {
+        $new_columns = array();
+        
+        foreach ($columns as $key => $value) {
+            if ($key === 'date') {
+                continue; // Skip the date column
+            }
+            $new_columns[$key] = $value;
+            
+            // Add Adjustment Requests column after title
+            if ($key === 'title') {
+                $new_columns['adjustment_requests'] = __('Adjustment Requests', 'scrap-driver');
+            }
+        }
+        
+        return $new_columns;
+    }
 
-
+    public function render_shift_columns($column, $post_id) {
+        if ($column === 'adjustment_requests') {
+            $requests = get_post_meta($post_id, 'shift_adjustment_request', true);
+            
+            if (!is_array($requests) || empty($requests)) {
+                echo '<span class="adjustment-status none">' . __('None', 'scrap-driver') . '</span>';
+                return;
+            }
+            
+            $has_pending = false;
+            foreach ($requests as $request) {
+                if (isset($request['status']) && $request['status'] === 'pending') {
+                    $has_pending = true;
+                    break;
+                }
+            }
+            
+            if ($has_pending) {
+                echo '<span class="adjustment-status pending">' . __('Pending', 'scrap-driver') . '</span>';
+            } else {
+                echo '<span class="adjustment-status none">' . __('None', 'scrap-driver') . '</span>';
+            }
+        }
+    }
 }
 
 new CPT();
