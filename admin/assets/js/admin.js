@@ -6,16 +6,27 @@ class RoutePlanning {
         this.today.setHours(0, 0, 0, 0);
         this.$driverField = jQuery('select[name="acf[field_67938b4d7f418]"]');
         this.driverId = this.$driverField.val();
-        
         // Only check for calendar existence
         if (!this.$calendar.length) {
             return;
         }
-        
+
         this.init();
+        var that = this;
+        jQuery('.acf-tab-button[data-key="field_67938ed0736a8"]').on('click', function() {
+            setTimeout(function() {
+                // Force the calendar container to have a specific minimum height
+                that.$calendar.css('min-height', '600px');
+                // Force a resize after initialization
+                if (that.calendar) {
+                    that.calendar.updateSize();
+                }
+            }, 100); // Reduced timeout since we're handling sizing explicitly
+        });
     }
 
     init() {
+        console.log(this);
         this.initCalendar();
         this.bindEvents();
         // Only load events if we have a driver ID
@@ -202,7 +213,7 @@ class RoutePlanning {
             type: 'POST',
             data: {
                 action: 'update_collection_route',
-                nonce: sdaRoute.schedule_nonce,
+                nonce: sdaRoute.nonce,
                 collection_id: event.id,
                 new_date: newDate,
                 start_time: startTime,
