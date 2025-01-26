@@ -222,3 +222,74 @@
 .swal2-actions .button {
     margin: 0 4px;
 }
+
+/* Holiday Request Status Styles */
+.holiday-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.holiday-status.pending {
+    background-color: #fcf9e8;
+    color: #974c00;
+    border: 1px solid #f0dbb4;
+}
+
+.holiday-status.none {
+    background-color: #f0f0f1;
+    color: #50575e;
+    border: 1px solid #c3c4c7;
+}
+
+/* Holiday Requests Metabox Styles */
+#holiday_requests .widefat tr {
+    transition: background-color 0.2s ease;
+}
+
+#holiday_requests .widefat tr:hover {
+    background-color: #f8f9fa;
+}
+
+#holiday_requests select[name^="holiday_request"] {
+    width: 100%;
+}
+
+#holiday_requests select[value="pending"] {
+    color: #974c00;
+}
+
+#holiday_requests select[value="approved"] {
+    color: #2a5f2d;
+}
+
+#holiday_requests select[value="denied"] {
+    color: #9c2323;
+}
+
+/* Status-based row colors */
+#holiday_requests .widefat tr.status-pending {
+    background-color: rgba(252, 249, 232, 0.5);
+}
+
+#holiday_requests .widefat tr.status-pending:hover {
+    background-color: rgba(252, 249, 232, 0.7);
+}
+
+#holiday_requests .widefat tr.status-approved {
+    background-color: rgba(227, 243, 228, 0.5);
+}
+
+#holiday_requests .widefat tr.status-approved:hover {
+    background-color: rgba(227, 243, 228, 0.7);
+}
+
+#holiday_requests .widefat tr.status-denied {
+    background-color: rgba(251, 232, 232, 0.5);
+}
+
+#holiday_requests .widefat tr.status-denied:hover {
+    background-color: rgba(251, 232, 232, 0.7);
+}

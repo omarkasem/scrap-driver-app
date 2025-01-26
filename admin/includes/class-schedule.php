@@ -38,6 +38,10 @@ class Schedule {
         // Add the page template to the templates list
         add_filter('theme_page_templates', array($this, 'add_driver_schedule_template'));
         add_filter('template_include', array($this, 'load_driver_schedule_template'));
+        
+        // Add custom columns to driver schedule list
+        add_filter('manage_driver_schedule_posts_columns', array($this, 'add_custom_columns'));
+        add_action('manage_driver_schedule_posts_custom_column', array($this, 'render_custom_columns'), 10, 2);
     }
 
     public function set_default_value_start_of_year_date($field) {
@@ -392,7 +396,7 @@ class Schedule {
             $admin_response = isset($request['admin_response']) ? $request['admin_response'] : '';
             $days = $this->calculate_working_days($request['start_date'], $request['end_date']);
             
-            echo '<tr>';
+            echo '<tr class="status-' . esc_attr($status) . '">';
             echo '<td>' . date_i18n(get_option('date_format') . ' ' . get_option('time_format'), 
                 strtotime($request['requested_at'])) . '</td>';
             echo '<td>' . date_i18n(get_option('date_format'), strtotime($request['start_date'])) . ' - ' . 
@@ -630,6 +634,55 @@ class Schedule {
         }
         
         return $template;
+    }
+
+    /**
+     * Add custom columns to driver schedule list
+     */
+    public function add_custom_columns($columns) {
+        $new_columns = array();
+        
+        foreach ($columns as $key => $value) {
+            if ($key === 'date') {
+                continue; // Skip the date column
+            }
+            $new_columns[$key] = $value;
+            
+            // Add Holiday Requests column after title
+            if ($key === 'title') {
+                $new_columns['holiday_requests'] = __('Holiday Requests', 'scrap-driver');
+            }
+        }
+        
+        return $new_columns;
+    }
+
+    /**
+     * Render custom columns content
+     */
+    public function render_custom_columns($column, $post_id) {
+        if ($column === 'holiday_requests') {
+            $requests = get_post_meta($post_id, 'holiday_requests', true);
+            
+            if (!is_array($requests) || empty($requests)) {
+                echo '<span class="holiday-status none">' . __('None', 'scrap-driver') . '</span>';
+                return;
+            }
+            
+            $has_pending = false;
+            foreach ($requests as $request) {
+                if (isset($request['status']) && $request['status'] === 'pending') {
+                    $has_pending = true;
+                    break;
+                }
+            }
+            
+            if ($has_pending) {
+                echo '<span class="holiday-status pending">' . __('Pending', 'scrap-driver') . '</span>';
+            } else {
+                echo '<span class="holiday-status none">' . __('None', 'scrap-driver') . '</span>';
+            }
+        }
     }
 }
 

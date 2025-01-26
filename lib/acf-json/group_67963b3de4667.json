@@ -3,24 +3,6 @@
     "title": "Driver Schedule",
     "fields": [
         {
-            "key": "field_67963b654e340",
-            "label": "Schedule",
-            "name": "",
-            "aria-label": "",
-            "type": "tab",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "placement": "top",
-            "endpoint": 0,
-            "selected": 0
-        },
-        {
             "key": "field_67963b3e4e33e",
             "label": "Total Annual Leave Allowance (days)",
             "name": "total_annual_leave_allowance_days",
@@ -275,24 +257,6 @@
                     "placeholder": ""
                 }
             ]
-        },
-        {
-            "key": "field_67963e0ba64c6",
-            "label": "Holiday Requests",
-            "name": "",
-            "aria-label": "",
-            "type": "tab",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "placement": "top",
-            "endpoint": 0,
-            "selected": 0
         }
     ],
     "location": [
@@ -313,5 +277,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737899608
+    "modified": 1737903877
 }
