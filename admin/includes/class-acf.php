@@ -119,6 +119,11 @@ class Acf {
             if ($default_location) {
                 $field['center_lat'] = $default_location['lat'];
                 $field['center_lng'] = $default_location['lng'];
+                
+                // Set default value for specific field if empty
+                if ($field['key'] === 'field_67938b627f419') {
+                    $field['value'] = empty($field['value']) ? $default_location : $field['value'];
+                }
             }
         }
         return $field;

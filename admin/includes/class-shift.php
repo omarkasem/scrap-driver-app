@@ -50,31 +50,38 @@ class Shift {
      * Start a new shift
      */
     private function start_shift($current_user, $current_user_id) {
-        $shift_start = current_time('mysql');
-        update_user_meta($current_user_id, 'shift_start_time', $shift_start);
-        
-        // Create shift post
-        $shift_title = sprintf('Shift By %s on %s', 
-            $current_user->display_name,
-            date('Y-m-d H:i', strtotime($shift_start))
-        );
-        
-        $shift_id = wp_insert_post(array(
+        // Check if user has a shift assigned for today
+        $today = date('Ymd');
+        $today_shift = get_posts(array(
             'post_type' => 'sda-shift',
-            'post_title' => $shift_title,
-            'post_status' => 'publish',
-            'meta_input' => array(
-                'driver_id' => $current_user_id
-            )
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'assigned_driver',
+                    'value' => $current_user_id
+                ),
+                array(
+                    'key' => 'shift_date',
+                    'value' => $today
+                )
+            ),
+            'posts_per_page' => 1
         ));
 
-        // Save start time using ACF
-        update_field('start_time', $shift_start, $shift_id);
+        if (empty($today_shift)) {
+            wp_die(__('You don\'t have any shifts assigned for today.', 'scrap-driver'));
+        }
+
+        $shift_id = $today_shift[0]->ID;
+        $shift_start = current_time('mysql');
         
+        // Update shift start time
+        update_field('start_time', $shift_start, $shift_id);
+        update_user_meta($current_user_id, 'shift_start_time', $shift_start);
         update_user_meta($current_user_id, 'current_shift_id', $shift_id);
 
         // Redirect to first collection
-        $first_collection = get_posts(array(
+        $all_collections = get_posts(array(
             'post_type' => 'sda-collection',
             'meta_query' => array(
                 array(
@@ -82,14 +89,16 @@ class Shift {
                     'value' => $current_user_id
                 )
             ),
-            'meta_key' => 'route_order',
-            'orderby' => 'meta_value_num',
-            'order' => 'ASC',
-            'posts_per_page' => 1
+            'fields'=>'ids',
+            'posts_per_page' => -1
         ));
 
+        $collections_order = \ScrapDriver\Frontend\Collection::get_collections_order($all_collections);
+        $collections_order = array_flip($collections_order);
+        $first_collection = array_shift($collections_order);
+
         if (!empty($first_collection)) {
-            wp_redirect(get_permalink($first_collection[0]->ID));
+            wp_redirect(get_permalink($first_collection));
             exit;
         }
     }

@@ -7,7 +7,7 @@ get_header();
 
 // Get current user info
 $current_user_id = get_current_user_id();
-$shift_driver_id = get_post_meta(get_the_ID(), 'driver_id', true);
+$shift_driver_id = get_post_meta(get_the_ID(), 'assigned_driver', true);
 
 // Check if user has permission to view
 if ($current_user_id != $shift_driver_id && !current_user_can('manage_options')) {
@@ -73,7 +73,6 @@ while (have_posts()) : the_post();
                         <thead>
                             <tr>
                                 <th><?php _e('Collection ID', 'scrap-driver'); ?></th>
-                                <th><?php _e('Customer', 'scrap-driver'); ?></th>
                                 <th><?php _e('Vehicle', 'scrap-driver'); ?></th>
                                 <th><?php _e('Time Completed', 'scrap-driver'); ?></th>
                             </tr>
@@ -82,7 +81,6 @@ while (have_posts()) : the_post();
                             <?php foreach ($collections as $collection): 
                                 if ($collection):
                                     $collection_id = $collection->ID;
-                                    $customer_name = get_field('customer_name', $collection_id);
                                     $vehicle_make = get_field('vehicle_info_make', $collection_id);
                                     $vehicle_model = get_field('vehicle_info_model', $collection_id);
                                     $vehicle_plate = get_field('vehicle_info_plate', $collection_id);
@@ -90,7 +88,6 @@ while (have_posts()) : the_post();
                             ?>
                                 <tr>
                                     <td><?php echo esc_html($collection_id); ?></td>
-                                    <td><?php echo esc_html($customer_name); ?></td>
                                     <td>
                                         <?php 
                                         echo esc_html(sprintf(
