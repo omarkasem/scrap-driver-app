@@ -63,11 +63,11 @@
             "allow_in_bindings": 0
         },
         {
-            "key": "field_67963b704e341",
-            "label": "Driver schhedule",
-            "name": "",
+            "key": "field_67963cba90d08",
+            "label": "Week Schedule",
+            "name": "schedule",
             "aria-label": "",
-            "type": "message",
+            "type": "group",
             "instructions": "",
             "required": 0,
             "conditional_logic": 0,
@@ -76,9 +76,205 @@
                 "class": "",
                 "id": ""
             },
-            "message": "",
-            "new_lines": "wpautop",
-            "esc_html": 0
+            "layout": "block",
+            "sub_fields": [
+                {
+                    "key": "field_67963cda90d0a",
+                    "label": "Saturday",
+                    "name": "saturday",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Full Day": "Full Day",
+                        "Half Day": "Half Day",
+                        "Not Working": "Not Working"
+                    },
+                    "default_value": "Not Working",
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "allow_in_bindings": 1,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_67963d1b4c284",
+                    "label": "Sunday",
+                    "name": "sunday",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Full Day": "Full Day",
+                        "Half Day": "Half Day",
+                        "Not Working": "Not Working"
+                    },
+                    "default_value": "Not Working",
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "allow_in_bindings": 1,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_67963d224c285",
+                    "label": "Monday",
+                    "name": "monday",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Full Day": "Full Day",
+                        "Half Day": "Half Day",
+                        "Not Working": "Not Working"
+                    },
+                    "default_value": false,
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "allow_in_bindings": 1,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_67963d5573cd0",
+                    "label": "Tuesday",
+                    "name": "tuesday",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Full Day": "Full Day",
+                        "Half Day": "Half Day",
+                        "Not Working": "Not Working"
+                    },
+                    "default_value": false,
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "allow_in_bindings": 1,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_67963d5d73cd1",
+                    "label": "Wednesday",
+                    "name": "wednesday",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Full Day": "Full Day",
+                        "Half Day": "Half Day",
+                        "Not Working": "Not Working"
+                    },
+                    "default_value": false,
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "allow_in_bindings": 1,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_67963d6c73cd3",
+                    "label": "Thursday",
+                    "name": "thursday",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Full Day": "Full Day",
+                        "Half Day": "Half Day",
+                        "Not Working": "Not Working"
+                    },
+                    "default_value": false,
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "allow_in_bindings": 1,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_67963d7473cd4",
+                    "label": "Friday",
+                    "name": "friday",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "49",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Full Day": "Full Day",
+                        "Half Day": "Half Day",
+                        "Not Working": "Not Working"
+                    },
+                    "default_value": false,
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "allow_in_bindings": 1,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": ""
+                }
+            ]
         }
     ],
     "location": [
@@ -99,5 +295,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737898884
+    "modified": 1737899485
 }

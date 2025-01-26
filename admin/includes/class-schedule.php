@@ -21,7 +21,7 @@ class Schedule {
         add_action('wp_ajax_save_schedule_dates', array($this, 'save_schedule_dates'));
         add_action('wp_ajax_get_schedule_dates', array($this, 'get_schedule_dates'));
 
-        add_filter('acf/load_field/key=field_67963b704e341', array($this, 'load_calendar_schedule_field'));
+        // add_filter('acf/load_field/key=field_67963b704e341', array($this, 'load_calendar_schedule_field'));
 
         add_action('acf/load_field/key=field_67963b5a4e33f', array($this, 'set_default_value_start_of_year_date'),);
     }
@@ -219,48 +219,6 @@ class Schedule {
             // Add driver ID as post meta
             update_post_meta($post_id, 'driver_id', $user->ID);
         }
-    }
-
-    /**
-     * Add Schedule Meta Box
-     */
-    public function add_schedule_meta_box() {
-        add_meta_box(
-            'driver_schedule_details',
-            __('Schedule Details', 'mdtl'),
-            array($this, 'render_schedule_meta_box'),
-            'driver_schedule',
-            'normal',
-            'high'
-        );
-    }
-
-    /**
-     * Render Schedule Meta Box
-     */
-    public function render_schedule_meta_box($post) {
-        wp_nonce_field('schedule_meta_box', 'schedule_meta_box_nonce');
-        
-        $annual_leave = get_post_meta($post->ID, 'annual_leave_allowance', true);
-        $leave_year_start = get_post_meta($post->ID, 'leave_year_start', true);
-        
-        ?>
-        <div class="schedule-meta-box">
-            <p>
-                <label for="annual_leave_allowance"><?php _e('Total Annual Leave Allowance (days)', 'mdtl'); ?></label>
-                <input type="number" id="annual_leave_allowance" name="annual_leave_allowance" 
-                       value="<?php echo esc_attr($annual_leave); ?>" min="0" step="0.5">
-            </p>
-            
-            <p>
-                <label for="leave_year_start"><?php _e('Leave Year Start Date', 'mdtl'); ?></label>
-                <input type="date" id="leave_year_start" name="leave_year_start" 
-                       value="<?php echo esc_attr($leave_year_start); ?>">
-            </p>
-            
-            <div id="schedule-calendar"></div>
-        </div>
-        <?php
     }
 
     /**
