@@ -23,10 +23,26 @@ class Shift {
         // Add save adjustment request action
         add_action('save_post_sda-shift', array($this, 'save_adjustment_requests'), 10, 2);
 
-        // Add hooks for automatic shift title
+        // Remove the old action
+        remove_action('save_post_sda-shift', array($this, 'update_shift_title'), 10, 3);
+        
+        // Add hook for automatic shift title with later priority (20)
         add_filter('default_title', array($this, 'set_default_shift_title'), 10, 2);
-        add_action('save_post_sda-shift', array($this, 'update_shift_title'), 10, 3);
+        add_action('acf/save_post', array($this, 'update_shift_title'), 20, 1);
     }
+
+    public function set_default_shift_title($post_title, $post) {
+        if ($post->post_type !== 'sda-shift') {
+            return $post_title;
+        }
+
+        return sprintf('Shift By %s on %s', 
+            '{driver}',
+            '{date}'
+        );
+    }
+
+
 
     /**
      * Handle shift start/end actions
@@ -380,47 +396,39 @@ class Shift {
     }
 
     /**
-     * Set default title for new shifts in admin dashboard
-     */
-    public function set_default_shift_title($post_title, $post) {
-        if ($post->post_type !== 'sda-shift') {
-            return $post_title;
-        }
-
-        return sprintf('Shift By %s on %s', 
-            '{driver}',
-            '{date}'
-        );
-    }
-
-    /**
      * Update shift title when published or updated
      */
-    public function update_shift_title($post_id, $post, $update) {
-        // Prevent recursive updates
-        remove_action('save_post_sda-shift', array($this, 'update_shift_title'), 10);
+    public function update_shift_title($post_id) {
+        // Get post type
+        $post_type = get_post_type($post_id);
+        if ($post_type !== 'sda-shift') {
+            return;
+        }
 
-        // Get driver and shift date
+        // Skip autosaves and revisions
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+        if (wp_is_post_revision($post_id)) return;
+
+        // Get driver and shift date after ACF has saved them
         $driver_id = get_field('assigned_driver', $post_id);
         $shift_date = get_field('shift_date', $post_id);
 
         if ($driver_id && $shift_date) {
             $driver = get_userdata($driver_id);
-            $new_title = sprintf('Shift By %s on %s',
-                $driver->display_name,
-                $shift_date
-            );
+            if ($driver) {
+                $new_title = sprintf('Shift By %s on %s',
+                    $driver->display_name,
+                    $shift_date
+                );
 
-            // Update post title and slug
-            wp_update_post(array(
-                'ID' => $post_id,
-                'post_title' => $new_title,
-                'post_name' => sanitize_title($new_title)
-            ));
+                // Update post title and slug
+                wp_update_post(array(
+                    'ID' => $post_id,
+                    'post_title' => $new_title,
+                    'post_name' => sanitize_title($new_title)
+                ));
+            }
         }
-
-        // Re-add the action
-        add_action('save_post_sda-shift', array($this, 'update_shift_title'), 10, 3);
     }
 }
 
