@@ -122,14 +122,13 @@ $shifts = new WP_Query($args);
                 <?php if ($shifts->have_posts()): while ($shifts->have_posts()): $shifts->the_post(); 
                     $shift_start = get_field('start_time');
                     $shift_end = get_field('end_time');
-                    $collections = get_field('shift_collections');
-                    $collections_count = is_array($collections) ? count($collections) : 0;
+                    $completed_collections_count = ScrapDriver\Admin\Collection::get_collection_number_completed_by_driver(get_the_ID());
                 ?>
                     <tr>
                         <td><?php echo date_i18n(get_option('date_format'), strtotime($shift_start)); ?></td>
                         <td><?php echo date_i18n(get_option('time_format'), strtotime($shift_start)); ?></td>
                         <td><?php echo $shift_end ? date_i18n(get_option('time_format'), strtotime($shift_end)) : '-'; ?></td>
-                        <td><?php echo $collections_count; ?></td>
+                        <td><?php echo $completed_collections_count; ?></td>
                         <td>
                             <a href="<?php echo get_permalink(); ?>" class="button button-small">
                                 <?php _e('View Details', 'scrap-driver'); ?>

@@ -13,6 +13,7 @@ class Admin {
         require_once plugin_dir_path(__FILE__) . 'includes/class-shift.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-distance.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-schedule.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-collection.php';
     }
 
     public function init() {

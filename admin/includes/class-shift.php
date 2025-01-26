@@ -141,29 +141,6 @@ class Shift {
 
         update_field('status', 'Completed', $collection_id);
 
-        $current_shift_id = get_user_meta($driver_id, 'current_shift_id', true);
-        
-        if ($current_shift_id) {
-            // Get existing collections
-            $collections = get_field('shift_collections', $current_shift_id);
-            if (!is_array($collections)) {
-                $collections = array();
-            }
-            
-            // Add new collection if not already included
-            if (!in_array($collection_id, $collections)) {
-                $collections[] = $collection_id;
-                update_field('shift_collections', $collections, $current_shift_id);
-            }
-            
-            // Keep tracking completion time separately
-            $completion_times = get_post_meta($current_shift_id, 'collections_completed', true);
-            if (!is_array($completion_times)) {
-                $completion_times = array();
-            }
-            $completion_times[$collection_id] = current_time('mysql');
-            update_post_meta($current_shift_id, 'collections_completed', $completion_times);
-        }
     }
 
     /**
