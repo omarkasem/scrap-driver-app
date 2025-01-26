@@ -21,7 +21,7 @@ class Admin {
 
     public function enqueue_assets() {
         global $post;
-        if ($post && 'sda-shift' === $post->post_type || 'driver_schedule' === $post->post_type) {
+        if ($post && ('sda-shift' === $post->post_type || 'driver_schedule' === $post->post_type)) {
             // FullCalendar Bundle (includes all plugins)
             wp_enqueue_script(
                 'fullcalendar',
@@ -30,6 +30,16 @@ class Admin {
                 '6.1.8',
                 true
             );
+
+            // Enqueue SweetAlert2
+            wp_enqueue_script(
+                'sweetalert2',
+                SCRAP_DRIVER_PLUGIN_URL . 'admin/assets/js/sweetalert2@11.js',
+                array(),
+                '11.0.0',
+                true
+            );
+
         }
 
         // Make sure admin.js loads after FullCalendar

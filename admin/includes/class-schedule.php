@@ -18,10 +18,22 @@ class Schedule {
         add_filter('enter_title_here', array($this, 'change_title_placeholder'), 10, 2);
         
         // Run initial schedule creation for existing drivers
-        add_action('admin_init', array($this, 'create_schedules_for_existing_drivers'));
-        add_action('add_meta_boxes', array($this, 'add_schedule_meta_box'));
         add_action('wp_ajax_save_schedule_dates', array($this, 'save_schedule_dates'));
         add_action('wp_ajax_get_schedule_dates', array($this, 'get_schedule_dates'));
+
+        add_filter('acf/load_field/key=field_67963b704e341', array($this, 'load_calendar_schedule_field'));
+
+        add_action('acf/load_field/key=field_67963b5a4e33f', array($this, 'set_default_value_start_of_year_date'),);
+    }
+
+    public function set_default_value_start_of_year_date($field) {
+        $field['value'] = date('Y-01-01');
+        return $field;
+    }
+
+    public function load_calendar_schedule_field($field) {
+        $field['message'] = '<div id="schedule-calendar"></div>';
+        return $field;
     }
 
     /**
@@ -265,16 +277,36 @@ class Schedule {
         $dates = sanitize_text_field($_POST['dates']);
         $status = sanitize_text_field($_POST['status']);
         
-        // Save the schedule data
-        $schedule_data = get_post_meta($post_id, 'schedule_dates', true) ?: array();
-        $dates_array = explode(',', $dates);
-        
-        foreach ($dates_array as $date) {
-            $schedule_data[$date] = $status;
+        if (empty($dates)) {
+            wp_send_json_error('No dates provided');
         }
         
-        update_post_meta($post_id, 'schedule_dates', $schedule_data);
-        wp_send_json_success();
+        // Get existing schedule data
+        $schedule_data = get_post_meta($post_id, 'schedule_dates', true);
+        if (!is_array($schedule_data)) {
+            $schedule_data = array();
+        }
+        
+        // Process the dates
+        $dates_array = explode(',', $dates);
+        foreach ($dates_array as $date) {
+            $date = sanitize_text_field(trim($date));
+            if (!empty($date)) {
+                $schedule_data[$date] = $status;
+            }
+        }
+        
+        // Save the updated schedule data
+        $updated = update_post_meta($post_id, 'schedule_dates', $schedule_data);
+        
+        if ($updated) {
+            wp_send_json_success(array(
+                'message' => 'Schedule dates updated successfully',
+                'dates' => $schedule_data
+            ));
+        } else {
+            wp_send_json_error('Failed to update schedule dates');
+        }
     }
 
     /**

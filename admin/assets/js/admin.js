@@ -353,6 +353,7 @@ class DriverSchedule {
         this.postId = sdaRoute.postId;
         this.calendar = null;
         this.selectedDates = [];
+        this.isDialogOpen = false;
         
         this.init();
     }
@@ -363,70 +364,125 @@ class DriverSchedule {
     }
     
     initCalendar() {
-        const self = this;
         this.calendar = new FullCalendar.Calendar(this.$calendar[0], {
             initialView: 'dayGridMonth',
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,dayGridWeek'
+                right: 'dayGridMonth'
             },
             selectable: true,
             select: (info) => this.handleDateSelect(info),
-            unselect: () => this.handleUnselect(),
+            unselect: (info) => this.handleUnselect(info),
             eventDidMount: (info) => {
                 info.el.title = info.event.title;
             }
         });
         
         this.calendar.render();
-        this.createStatusDialog();
     }
     
-    createStatusDialog() {
-        const dialog = `
-            <div id="status-dialog" style="display:none;">
-                <h3>Set Status for Selected Dates</h3>
-                <select id="date-status">
+    handleDateSelect(info) {
+        // Store dates in a temporary variable
+        const datesToSave = [];
+        
+        let current = new Date(info.start);
+        const end = new Date(info.end);
+        
+        // Adjust for timezone to prevent date shifting
+        current.setMinutes(current.getMinutes() - current.getTimezoneOffset());
+        end.setMinutes(end.getMinutes() - end.getTimezoneOffset());
+        
+        // Subtract one day from end date since FullCalendar's end date is exclusive
+        end.setDate(end.getDate() - 1);
+        
+        // Collect all dates in the range
+        while (current <= end) {
+            datesToSave.push(this.formatDate(new Date(current)));
+            current.setDate(current.getDate() + 1);
+        }
+        
+        // Only update selectedDates after collecting all dates
+        this.selectedDates = datesToSave;
+        
+        console.log('Selected dates before dialog:', this.selectedDates);
+        
+        // Set dialog open flag
+        this.isDialogOpen = true;
+        
+        // Show SweetAlert2 dialog
+        Swal.fire({
+            title: 'Set Status for Selected Dates',
+            html: `
+                <select id="date-status" class="swal2-select">
                     <option value="full_day">Full Day</option>
                     <option value="half_day">Half Day</option>
                     <option value="not_working">Not Working</option>
                 </select>
-                <button class="button button-primary" id="save-status">Save</button>
-                <button class="button" id="cancel-status">Cancel</button>
-            </div>
-        `;
-        
-        jQuery('body').append(dialog);
-        
-        jQuery('#save-status').on('click', () => this.saveSelectedDates());
-        jQuery('#cancel-status').on('click', () => this.closeDialog());
-    }
-    
-    handleDateSelect(info) {
-        this.selectedDates = [];
-        let current = new Date(info.start);
-        const end = new Date(info.end);
-        
-        while (current < end) {
-            this.selectedDates.push(this.formatDate(current));
-            current.setDate(current.getDate() + 1);
-        }
-        
-        jQuery('#status-dialog').dialog({
-            modal: true,
-            width: 300,
-            close: () => this.calendar.unselect()
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Save',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                confirmButton: 'button button-primary',
+                cancelButton: 'button'
+            },
+            didOpen: () => {
+                console.log('Dialog opened, dates:', this.selectedDates);
+            },
+            willClose: () => {
+                this.isDialogOpen = false;
+            }
+        }).then((result) => {
+            console.log('Dialog result:', result, 'Selected dates:', this.selectedDates);
+            if (result.isConfirmed && this.selectedDates.length > 0) {
+                const status = document.getElementById('date-status').value;
+                this.saveSelectedDates(status);
+            } else {
+                this.handleUnselect();
+            }
         });
     }
     
-    handleUnselect() {
-        this.selectedDates = [];
-        jQuery('#status-dialog').dialog('close');
+    handleUnselect(info) {
+        // Only clear dates if dialog is not open
+        if (!this.isDialogOpen) {
+            console.log('Unselecting dates, dialog closed');
+            this.selectedDates = [];
+            this.calendar.unselect();
+        } else {
+            console.log('Preventing unselect while dialog is open');
+        }
     }
     
-    saveSelectedDates() {
-        const status = jQuery('#date-status').val();
+    saveSelectedDates(status) {
+        console.log('saveSelectedDates called with dates:', this.selectedDates); // Debug log
+        
+        if (!this.selectedDates || !this.selectedDates.length) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Dates Selected',
+                text: 'Please select at least one date.',
+                timer: 2000
+            });
+            return;
+        }
+
+        // Create a copy of selected dates to prevent them from being cleared too early
+        const datesToSave = [...this.selectedDates];
+        
+        console.log('Saving dates:', datesToSave, 'with status:', status); // Debug log
+        
+        // Show loading state
+        Swal.fire({
+            title: 'Saving...',
+            didOpen: () => {
+                Swal.showLoading();
+            },
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false
+        });
         
         jQuery.ajax({
             url: sdaRoute.ajaxurl,
@@ -435,14 +491,36 @@ class DriverSchedule {
                 action: 'save_schedule_dates',
                 nonce: sdaRoute.schedule_nonce,
                 post_id: this.postId,
-                dates: this.selectedDates.join(','),
+                dates: datesToSave.join(','),
                 status: status
             },
             success: (response) => {
+                console.log('Save response:', response); // Debug log
                 if (response.success) {
                     this.loadScheduleDates();
-                    this.closeDialog();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Saved!',
+                        text: 'Schedule dates have been updated.',
+                        timer: 1500
+                    });
+                    // Only clear dates after successful save
+                    this.selectedDates = [];
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.data || 'Failed to save schedule dates'
+                    });
                 }
+            },
+            error: (xhr, status, error) => {
+                console.error('Ajax error:', {xhr, status, error});
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to save schedule dates'
+                });
             }
         });
     }
@@ -492,11 +570,6 @@ class DriverSchedule {
             not_working: 'Not Working'
         };
         return labels[status] || status;
-    }
-    
-    closeDialog() {
-        jQuery('#status-dialog').dialog('close');
-        this.calendar.unselect();
     }
     
     formatDate(date) {
