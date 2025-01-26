@@ -34,6 +34,10 @@ class Schedule {
         
         // Add save holiday request action
         add_action('save_post_driver_schedule', array($this, 'save_holiday_requests'), 10, 2);
+
+        // Add the page template to the templates list
+        add_filter('theme_page_templates', array($this, 'add_driver_schedule_template'));
+        add_filter('template_include', array($this, 'load_driver_schedule_template'));
     }
 
     public function set_default_value_start_of_year_date($field) {
@@ -189,7 +193,7 @@ class Schedule {
     /**
      * Helper function to get driver schedule
      */
-    private function get_driver_schedule($driver_id) {
+    public function get_driver_schedule($driver_id) {
         $args = array(
             'post_type' => 'driver_schedule',
             'meta_query' => array(
@@ -298,12 +302,43 @@ class Schedule {
     }
 
     public function register_schedule_template($template) {
+        // Check if this is the my_account page
+        if (is_page('my_account')) {
+            // Only proceed if user is logged in and is a driver
+            if (is_user_logged_in()) {
+                $current_user = wp_get_current_user();
+                if (in_array('driver', (array) $current_user->roles)) {
+                    // Get the driver's schedule
+                    $schedule = $this->get_driver_schedule($current_user->ID);
+                    if ($schedule) {
+                        // Set global post to the schedule post
+                        global $post;
+                        $post = get_post($schedule->ID);
+                        setup_postdata($post);
+                        
+                        $new_template = plugin_dir_path(dirname(__FILE__)) . '../frontend/templates/single-driver_schedule.php';
+                        if (file_exists($new_template)) {
+                            return $new_template;
+                        }
+                    }
+                }
+                // If user is logged in but not a driver, redirect to home
+                wp_redirect(home_url());
+                exit;
+            }
+            // If not logged in, redirect to home
+            wp_redirect(home_url());
+            exit;
+        }
+        
+        // Handle regular driver schedule URLs
         if (is_singular('driver_schedule')) {
             $new_template = plugin_dir_path(dirname(__FILE__)) . '../frontend/templates/single-driver_schedule.php';
             if (file_exists($new_template)) {
                 return $new_template;
             }
         }
+        
         return $template;
     }
 
@@ -561,6 +596,40 @@ class Schedule {
         }
 
         return $days_taken;
+    }
+
+    /**
+     * Add the driver schedule template to the page template dropdown
+     */
+    public function add_driver_schedule_template($templates) {
+        $templates['driver-schedule-template.php'] = __('Driver Schedule Template', 'scrap-driver');
+        return $templates;
+    }
+
+    /**
+     * Load the driver schedule template when selected
+     */
+    public function load_driver_schedule_template($template) {
+        // Return the search template if we're processing a search
+        if (is_page()) {
+            $template_name = get_post_meta(get_the_ID(), '_wp_page_template', true);
+            if ('driver-schedule-template.php' === $template_name) {
+                $template_path = plugin_dir_path(dirname(__FILE__)) . '../frontend/templates/page-driver-schedule.php';
+                if (file_exists($template_path)) {
+                    return $template_path;
+                }
+            }
+        }
+        
+        // For the existing driver/{name} URLs
+        if (is_singular('driver_schedule')) {
+            $new_template = plugin_dir_path(dirname(__FILE__)) . '../frontend/templates/single-driver_schedule.php';
+            if (file_exists($new_template)) {
+                return $new_template;
+            }
+        }
+        
+        return $template;
     }
 }
 
