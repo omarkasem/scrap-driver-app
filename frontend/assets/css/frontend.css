@@ -289,3 +289,158 @@ table.dataTable tbody td {
     color: #383d41;
     border: 1px solid #d6d8db;
 }
+
+.driver-schedule-wrapper {
+    padding: 2rem 0;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.driver-schedule-wrapper .container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+    padding: 0 20px;
+}
+
+@media (max-width: 768px) {
+    .driver-schedule-wrapper .container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.schedule-title {
+    grid-column: 1 / -1;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 2.5em;
+    color: #2d3748;
+}
+
+/* Left column boxes */
+.leave-allowance-box {
+    background: white;
+    border-radius: 12px;
+    padding: 1.8rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+}
+
+.leave-info h3 {
+    color: #2d3748;
+    font-size: 1.5em;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 0.5rem;
+}
+
+.leave-info p {
+    margin-bottom: 1rem;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.days-count {
+    font-size: 1.3em;
+    color: #4299e1;
+    font-weight: 600;
+}
+
+/* Right column - Weekly Schedule */
+.weekly-schedule {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+}
+
+.weekly-schedule h3 {
+    color: #2d3748;
+    font-size: 1.5em;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 0.5rem;
+}
+
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+}
+
+.schedule-day {
+    background: #f7fafc;
+    padding: 1.2rem;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.schedule-day:hover {
+    transform: translateY(-2px);
+}
+
+.schedule-day h4 {
+    margin: 0 0 0.8rem 0;
+    color: #2d3748;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.95em;
+    transition: all 0.2s ease;
+}
+
+/* Status colors with improved contrast */
+.full-day {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.half-day {
+    background: #feebc8;
+    color: #744210;
+}
+
+.not-working {
+    background: #fed7d7;
+    color: #822727;
+}
+
+/* Hover effects for status badges */
+.status-badge:hover {
+    transform: scale(1.05);
+}
+
+/* Astra theme specific adjustments */
+.ast-container {
+    max-width: none !important;
+    padding: 0 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .schedule-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .driver-schedule-wrapper {
+        padding: 1rem 0;
+    }
+    
+    .schedule-title {
+        font-size: 2em;
+    }
+    
+    .leave-allowance-box,
+    .weekly-schedule {
+        padding: 1.5rem;
+    }
+}

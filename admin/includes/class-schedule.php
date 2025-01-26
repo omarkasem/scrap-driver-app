@@ -24,6 +24,7 @@ class Schedule {
         // add_filter('acf/load_field/key=field_67963b704e341', array($this, 'load_calendar_schedule_field'));
 
         add_action('acf/load_field/key=field_67963b5a4e33f', array($this, 'set_default_value_start_of_year_date'),);
+        add_filter('single_template', array($this, 'register_schedule_template'));
     }
 
     public function set_default_value_start_of_year_date($field) {
@@ -285,6 +286,16 @@ class Schedule {
         }
         
         wp_send_json_success($schedule_data);
+    }
+
+    public function register_schedule_template($template) {
+        if (is_singular('driver_schedule')) {
+            $new_template = plugin_dir_path(dirname(__FILE__)) . '../frontend/templates/single-driver_schedule.php';
+            if (file_exists($new_template)) {
+                return $new_template;
+            }
+        }
+        return $template;
     }
 }
 
