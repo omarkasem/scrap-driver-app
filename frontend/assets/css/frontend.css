@@ -446,10 +446,6 @@ table.dataTable tbody td {
 }
 
 /* Holiday Requests Styles */
-.holiday-requests {
-    margin-top: 2rem;
-}
-
 .leave-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -568,4 +564,49 @@ table.dataTable tbody td {
     .form-row {
         grid-template-columns: 1fr;
     }
+}
+
+/* Updated layout styles */
+.schedule-container {
+    display: grid;
+    grid-template-columns: 40% 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.schedule-left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.schedule-right-column {
+    min-width: 0; /* Prevents content overflow */
+}
+
+/* Responsive adjustment */
+@media (max-width: 768px) {
+    .schedule-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Adjust existing styles */
+.sda-driver-schedule {
+    max-width: 1400px; /* Increased to accommodate the new layout */
+    margin: 2em auto;
+    padding: 0 20px;
+}
+
+.schedule-title {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+/* Ensure sections stack properly in columns */
+.schedule-left-column .sda-section,
+.schedule-right-column .sda-section {
+    height: fit-content;
+    margin-bottom: 0;
 }
