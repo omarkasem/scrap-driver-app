@@ -107,7 +107,7 @@ $shifts = new WP_Query($args);
     </div>
 
     <div class="sda-section">
-        <h2><?php _e('My Past Shifts', 'scrap-driver'); ?></h2>
+        <h2><?php _e('My Shifts', 'scrap-driver'); ?></h2>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
@@ -126,8 +126,8 @@ $shifts = new WP_Query($args);
                 ?>
                     <tr>
                         <td><?php echo date_i18n(get_option('date_format'), strtotime($shift_start)); ?></td>
-                        <td><?php echo date_i18n(get_option('time_format'), strtotime($shift_start)); ?></td>
-                        <td><?php echo $shift_end ? date_i18n(get_option('time_format'), strtotime($shift_end)) : '-'; ?></td>
+                        <td><?php echo ($shift_start) ? date_i18n(get_option('time_format'), strtotime($shift_start)) : '-'; ?></td>
+                        <td><?php echo ($shift_end) ? date_i18n(get_option('time_format'), strtotime($shift_end)) : '-'; ?></td>
                         <td><?php echo $completed_collections_count; ?></td>
                         <td>
                             <a href="<?php echo get_permalink(); ?>" class="button button-small">

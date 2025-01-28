@@ -80,11 +80,10 @@ class Route {
             $end_time = get_post_meta($collection->ID, 'collection_end_time', true) ?: '09:00:00';
             
             // Debug log
-            error_log(sprintf(
-                'Processing collection %d: Date: %s',
-                $collection->ID,
-                $collection_date
-            ));
+            error_log(json_encode(array(
+                'Processing collection' => $collection->ID,
+                'Date' => $collection_date
+            ), JSON_PRETTY_PRINT));
             
             return array(
                 'id' => $collection->ID,
@@ -98,7 +97,9 @@ class Route {
         }, $collections);
 
         // Debug log
-        error_log('Formatted collections: ' . print_r($formatted_collections, true));
+        error_log(json_encode(array(
+            'Formatted collections' => $formatted_collections
+        ), JSON_PRETTY_PRINT));
 
         return $formatted_collections;
     }
@@ -117,14 +118,16 @@ class Route {
         $route_order = intval($_POST['route_order']);
 
         // Debug logs
-        error_log('Update collection request: ' . print_r([
-            'collection_id' => $collection_id,
-            'new_date' => $new_date,
-            'start_time' => $start_time,
-            'end_time' => $end_time,
-            'driver_id' => $driver_id,
-            'route_order' => $route_order
-        ], true));
+        error_log(json_encode(array(
+            'Update collection request' => array(
+                'collection_id' => $collection_id,
+                'new_date' => $new_date,
+                'start_time' => $start_time,
+                'end_time' => $end_time,
+                'driver_id' => $driver_id,
+                'route_order' => $route_order
+            )
+        ), JSON_PRETTY_PRINT));
 
         // Validate inputs
         if (!$collection_id || !$new_date || !$start_time || !$end_time) {
@@ -168,7 +171,7 @@ class Route {
             update_post_meta($collection_id, 'route_order', $route_order);
 
             // Log the update results
-            error_log('Update results: ' . print_r([
+            $update_results = [
                 'date_updated' => $date_updated,
                 'start_updated' => $start_updated,
                 'end_updated' => $end_updated,
@@ -178,7 +181,10 @@ class Route {
                 'new_start' => $start_time,
                 'current_end' => $current_end,
                 'new_end' => $end_time
-            ], true));
+            ];
+            error_log(json_encode(array(
+                'Update results' => $update_results
+            ), JSON_PRETTY_PRINT));
 
             wp_send_json_success([
                 'message' => 'Collection updated successfully',

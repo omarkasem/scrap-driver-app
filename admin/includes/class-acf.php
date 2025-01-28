@@ -28,7 +28,7 @@ class Acf {
         add_filter('acf/settings/show_admin', array($this,'show_admin'));
 
         // Hide the ACF Updates menu
-        add_filter( 'acf/settings/show_updates', '__return_false', 100 );
+        // add_filter( 'acf/settings/show_updates', '__return_false', 100 );
 
         // Add Google Maps API key
         add_filter('acf/settings/google_api_key', function() {

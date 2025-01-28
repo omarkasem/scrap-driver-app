@@ -99,12 +99,21 @@ class Distance {
 
         $response = wp_remote_get($url);
 
+        error_log(json_encode(array(
+            'Response' => $response
+        ), JSON_PRETTY_PRINT));
+
         if (is_wp_error($response)) {
             return $response;
         }
 
         $body = wp_remote_retrieve_body($response);
+
         $data = json_decode($body, true);
+        
+        if($data === false) {
+            return new \WP_Error('json_decode_error', 'Failed to decode response from Google Geocoding API');
+        }
 
         if ($data['status'] !== 'OK') {
             return new \WP_Error('geocoding_error', $data['status']);
@@ -247,6 +256,9 @@ class Distance {
             $address = get_field('customer_info_address', $collection_id);
             $postcode = get_field('customer_info_postcode', $collection_id);
             $lat_lng = $this->get_lat_lng_by_address($address, $postcode, $collection_id);
+            if(is_wp_error($lat_lng)) {
+                continue;
+            }
             if ($lat_lng && isset($lat_lng['lat'], $lat_lng['lng'])) {
                 $locations[] = array(
                     'lat' => floatval($lat_lng['lat']),
