@@ -1,11 +1,6 @@
 <?php
-/**
- * Distance calculation functionality
- *
- * @package ScrapDriverApp
- */
 
-namespace ScrapDriverApp\Admin;
+namespace ScrapDriver\Admin;
 
 if (!defined('ABSPATH')) {
     exit;

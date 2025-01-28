@@ -94,6 +94,8 @@ class Collection {
      */
     public static function start_collection($collection_id) {
         update_field('status', 'Collection in Progress', $collection_id);
+        update_user_meta(get_current_user_id(), 'collection_started', $collection_id);
+        
         do_action('acf/save_post', $collection_id);
         return true;
     }

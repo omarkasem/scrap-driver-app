@@ -1,13 +1,11 @@
 <?php
-namespace ScrapDriver;
+namespace ScrapDriver\Admin;
 
 class Shift {
     public function __construct() {
         // Handle shift actions
         add_action('init', array($this, 'handle_shift_actions'));
         
-        // Add collection completion tracking
-        add_action('sda_collection_completed', array($this, 'track_collection_completion'), 10, 2);
         
         // Add template loading filters
         add_filter('theme_page_templates', array($this, 'add_shifts_template'));
@@ -29,6 +27,13 @@ class Shift {
         // Add hook for automatic shift title with later priority (20)
         add_filter('default_title', array($this, 'set_default_shift_title'), 10, 2);
         add_action('acf/save_post', array($this, 'update_shift_title'), 20, 1);
+
+        // Add validation for duplicate shifts
+        add_action('save_post_sda-shift', array($this, 'validate_duplicate_shifts'), 10, 3);
+    }
+
+    public static function get_current_shift_id() {
+        return get_user_meta(get_current_user_id(), 'current_shift_id', true);
     }
 
     public function set_default_shift_title($post_title, $post) {
@@ -134,14 +139,7 @@ class Shift {
         }
     }
 
-    /**
-     * Track collection completion during shift
-     */
-    public function track_collection_completion($collection_id, $driver_id) {
 
-        update_field('status', 'Completed', $collection_id);
-
-    }
 
     /**
      * Add shifts template to page templates
@@ -405,6 +403,54 @@ class Shift {
                     'post_name' => sanitize_title($new_title)
                 ));
             }
+        }
+    }
+
+    /**
+     * Validate and prevent duplicate shifts
+     */
+    public function validate_duplicate_shifts($post_id, $post, $update) {
+        // Skip autosaves and revisions
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+        if (wp_is_post_revision($post_id)) return;
+        
+        // Only check published posts
+        if ($post->post_status !== 'publish') return;
+
+        // Get driver and shift date FROM $_post ACF fields
+        $driver_id = $_POST['acf']['field_67938b4d7f418'];
+        $shift_date = $_POST['acf']['field_67938e50736a3'];
+
+        if (!$driver_id || !$shift_date) return;
+
+        // Check for existing shifts with same driver and date
+        $existing_shifts = get_posts(array(
+            'post_type' => 'sda-shift',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'post__not_in' => array($post_id), // Exclude current shift
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'assigned_driver',
+                    'value' => $driver_id
+                ),
+                array(
+                    'key' => 'shift_date',
+                    'value' => date('Ymd', strtotime($shift_date))
+                )
+            )
+        ));
+
+        if (!empty($existing_shifts)) {
+            // Set post status to draft
+            wp_update_post(array(
+                'ID' => $post_id,
+                'post_status' => 'draft'
+            ));
+
+            wp_die(__('A shift already exists for this driver on this date. The shift has been saved as draft.<br> <br><button class="button button-primary" onclick="window.history.back()">Go back to Edit shift</button>', 'scrap-driver'));
+            
         }
     }
 }

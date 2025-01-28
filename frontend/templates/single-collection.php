@@ -9,8 +9,6 @@ use ScrapDriver\Frontend\Collection;
 if (isset($_POST['start_collection']) && isset($_POST['start_collection_nonce']) && 
     wp_verify_nonce($_POST['start_collection_nonce'], 'start_collection')) {
     Collection::start_collection(get_the_ID());
-    wp_safe_redirect(add_query_arg('started', 'true', get_permalink()));
-    exit;
 }
 
 acf_form_head();
@@ -101,7 +99,7 @@ while (have_posts()) :
             </script>
         <?php endif; ?>
 
-        <?php if (isset($_GET['started']) && $_GET['started'] == 'true') : ?>
+        <?php if (isset($_POST['start_collection']) && wp_verify_nonce($_POST['start_collection_nonce'], 'start_collection')) : ?>
             <div class="sda-notice sda-notice-success">
                 <?php _e('Collection started successfully.', 'scrap-driver'); ?>
             </div>
@@ -125,7 +123,7 @@ while (have_posts()) :
         $collection_status = get_field('status', $collection_id);
         
         // Show start collection button if not started
-        if (!in_array($collection_status, array('Completed', 'Collection in Progress'))) {
+        if ((int)get_user_meta($current_user_id, 'collection_started', true) !== $collection_id) {
             $can_start = Collection::can_start_collection($collection_id, $current_user_id);
             
             if ($can_start === true) {
@@ -196,7 +194,7 @@ while (have_posts()) :
                 </div>
             </div>
 
-            <div class="edit-section" <?php echo (!in_array($collection_status, array('Completed', 'Collection in Progress'))) ? ' style="display: none;"' : ''; ?>>
+            <div class="edit-section" <?php echo (in_array($collection_status, array('Completed'))) ? ' style="display: none;"' : ''; ?>>
                 <?php if ($can_edit) :
                     // Handle form submission
                     if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {

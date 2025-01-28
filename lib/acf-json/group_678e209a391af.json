@@ -95,8 +95,8 @@
                 "class": "",
                 "id": ""
             },
-            "center_lat": 53.441483525331883,
-            "center_lng": -1.3048632398350635,
+            "center_lat": 53.444669634120594,
+            "center_lng": -1.3026982531811115,
             "zoom": "",
             "height": "",
             "allow_in_bindings": 0
@@ -115,8 +115,8 @@
                 "class": "",
                 "id": ""
             },
-            "center_lat": 53.441483525331883,
-            "center_lng": -1.3048632398350635,
+            "center_lat": 53.444669634120594,
+            "center_lng": -1.3026982531811115,
             "zoom": "",
             "height": "",
             "allow_in_bindings": 0
@@ -232,7 +232,7 @@
             ],
             "post_status": "",
             "taxonomy": "",
-            "return_format": "object",
+            "return_format": "id",
             "multiple": 1,
             "allow_null": 0,
             "allow_in_bindings": 0,
@@ -259,5 +259,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737910411
+    "modified": 1738056988
 }

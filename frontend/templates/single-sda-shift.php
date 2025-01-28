@@ -30,7 +30,6 @@ while (have_posts()) : the_post();
     $shift_start = get_field('start_time');
     $shift_end = get_field('end_time');
     $collections = get_field('shift_collections');
-    $completion_times = get_post_meta(get_the_ID(), 'collections_completed', true);
     ?>
 
     <div class="wrap sda-shift-single">
@@ -74,17 +73,15 @@ while (have_posts()) : the_post();
                             <tr>
                                 <th><?php _e('Collection ID', 'scrap-driver'); ?></th>
                                 <th><?php _e('Vehicle', 'scrap-driver'); ?></th>
-                                <th><?php _e('Time Completed', 'scrap-driver'); ?></th>
+                                <th><?php _e('View Collection', 'scrap-driver'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($collections as $collection): 
-                                if ($collection):
-                                    $collection_id = $collection->ID;
+                            <?php foreach ($collections as $collection_id): 
+                                if ($collection_id):
                                     $vehicle_make = get_field('vehicle_info_make', $collection_id);
                                     $vehicle_model = get_field('vehicle_info_model', $collection_id);
                                     $vehicle_plate = get_field('vehicle_info_plate', $collection_id);
-                                    $completion_time = isset($completion_times[$collection_id]) ? $completion_times[$collection_id] : '';
                             ?>
                                 <tr>
                                     <td><?php echo esc_html($collection_id); ?></td>
@@ -98,7 +95,11 @@ while (have_posts()) : the_post();
                                         )); 
                                         ?>
                                     </td>
-                                    <td><?php echo $completion_time ? date_i18n(get_option('time_format'), strtotime($completion_time)) : '-'; ?></td>
+                                    <td>
+                                        <a href="<?php echo get_the_permalink($collection_id); ?>" class="button">
+                                            <?php _e('View Collection', 'scrap-driver'); ?>
+                                        </a>
+                                    </td>
                                 </tr>
                             <?php 
                                 endif;

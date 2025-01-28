@@ -1,10 +1,6 @@
 <?php
-namespace ScrapDriver;
-/**
- * Class for handling custom roles and capabilities
- *
- * @package ScrapDriverApp
- */
+namespace ScrapDriver\Admin;
+
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly

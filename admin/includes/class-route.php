@@ -1,5 +1,5 @@
 <?php
-namespace ScrapDriver;
+namespace ScrapDriver\Admin;
 /**
  * Route Planning Class
  */
