@@ -102,15 +102,19 @@ class Collection {
                 'relation' => 'AND',
                 array(
                     'key' => 'assigned_driver',
-                    'value' => $driver
+                    'value' => $driver,
+                    'compare' => '='
                 ),
                 array(
                     'key' => 'status', 
-                    'value' => 'Completed'
+                    'value' => 'Completed',
+                    'compare' => '='
                 ),
                 array(
                     'key' => 'collection_date',
-                    'value' => $shift_collection_date
+                    'value' => $shift_collection_date,
+                    'compare' => '=',
+                    'type' => 'DATE'
                 )
             ),
         );

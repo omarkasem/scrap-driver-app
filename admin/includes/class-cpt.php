@@ -233,6 +233,8 @@ class CPT {
             $meta_query[] = array(
                 'key' => 'collection_date',
                 'value' => sanitize_text_field($_GET['collection_date_filter']),
+                'compare' => '=',
+                'type' => 'DATE'
             );
         }
 

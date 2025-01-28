@@ -122,3 +122,5 @@ class Collection {
         return true;
     }
 } 
+
+new Collection();

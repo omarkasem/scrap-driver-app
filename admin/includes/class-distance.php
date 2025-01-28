@@ -220,7 +220,8 @@ class Distance {
                 array(
                     'key' => 'collection_date',
                     'value' => $shift_date,
-                    'compare' => '='
+                    'compare' => '=',
+                    'type' => 'DATE'
                 ),
                 array(
                     'key' => 'assigned_driver',
