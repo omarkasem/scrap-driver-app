@@ -3,7 +3,7 @@
  * Plugin Name: Scrap Driver App
  * Plugin URI: #
  * Description: A WordPress plugin for scrap driver management
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Omar Kasem
  * Author URI: #
  * Text Domain: scrap-driver-app
@@ -15,7 +15,7 @@ if (!defined('WPINC')) {
 }
 
 // Define plugin constants
-define('SCRAP_DRIVER_VERSION', '1.0.0');
+define('SCRAP_DRIVER_VERSION', '1.0.2');
 define('SCRAP_DRIVER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SCRAP_DRIVER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -23,8 +23,12 @@ define('SCRAP_DRIVER_PLUGIN_URL', plugin_dir_url(__FILE__));
 define( 'SCRAP_DRIVER_ACF_PATH', __DIR__ . '/lib/acf/' );
 define( 'SCRAP_DRIVER_ACF_URL', plugin_dir_url( __FILE__ ) . '/lib/acf/' );
 define( 'SCRAP_DRIVER_ACF_SHOW', true );
-define( 'SCRAP_DRIVER_API_URL', 'https://vrm-dev.local/' );
-
+// check if current site has 'wplinkup.com' in it 
+if (strpos($_SERVER['HTTP_HOST'], 'wplinkup.com') !== false) {
+    define( 'SCRAP_DRIVER_API_URL', 'https://scrapmycaronline.co.uk/dev/' );
+} else {
+    define( 'SCRAP_DRIVER_API_URL', 'https://vrm-dev.local/' );
+}
 
 // Initialize the plugin
 function run_scrap_driver() {
