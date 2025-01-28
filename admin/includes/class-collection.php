@@ -11,6 +11,44 @@ class Collection {
 
     }
 
+    public static function can_view_collection($collection_id) {
+        $current_user_id = get_current_user_id();
+        $assigned_driver_id = get_field('assigned_driver', $collection_id);
+
+        // Admin can always view
+        if(current_user_can('manage_options')) {
+            return true;
+        }
+
+        // Driver can view if assigned
+        if($assigned_driver_id && $assigned_driver_id === $current_user_id) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function can_edit_collection($collection_id) {
+        $current_user_id = get_current_user_id();
+        $assigned_driver_id = get_field('assigned_driver', $collection_id);
+        $collection_date = get_field('collection_date', $collection_id);
+        $today = date('Y-m-d');
+
+        // Admin can always edit
+        if(current_user_can('manage_options')) {
+            return true;
+        }
+
+        // Driver can edit if:
+        // 1. They are assigned to the collection
+        // 2. It's the collection date
+        if($assigned_driver_id && $assigned_driver_id === $current_user_id && $collection_date === $today) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function save_collection($post_id) {
         if (get_post_type($post_id) !== 'sda-collection') {
             return;

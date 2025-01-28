@@ -4,6 +4,7 @@
  */
 
 use ScrapDriver\Frontend\Collection;
+use ScrapDriver\Admin\Collection as AdminCollection;
 
 // Process start collection - Move this to the top before any output
 if (isset($_POST['start_collection']) && isset($_POST['start_collection_nonce']) && 
@@ -22,9 +23,10 @@ while (have_posts()) :
     $current_user_id = get_current_user_id();
     
     // Check if user has permission to view/edit
-    $can_edit = current_user_can('manage_options') || 
-                ($assigned_driver_id && $assigned_driver_id == $current_user_id);
-    
+    $can_edit = AdminCollection::can_edit_collection($collection_id);
+    $can_view = AdminCollection::can_view_collection($collection_id);
+
+
     // Add check for active shift for drivers
     if ($assigned_driver_id && $assigned_driver_id == $current_user_id && !current_user_can('manage_options')) {
         $has_active_shift = get_user_meta($current_user_id, 'current_shift_id', true);
@@ -56,7 +58,7 @@ while (have_posts()) :
         }
     }
     
-    if (!$can_edit) {
+    if (!$can_view) {
         ?>
         <div class="wrap sda-collection-single">
             <div class="sda-section sda-error-message">
@@ -194,8 +196,8 @@ while (have_posts()) :
                 </div>
             </div>
 
-            <div class="edit-section" <?php echo (in_array($collection_status, array('Completed'))) ? ' style="display: none;"' : ''; ?>>
-                <?php if ($can_edit) :
+            <div class="edit-section">
+                <?php if ($can_edit && $collection_status !== 'Completed') :
                     // Handle form submission
                     if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
                         // Trigger collection completion action

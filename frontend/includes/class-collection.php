@@ -83,6 +83,15 @@ class Collection {
             }
         }
 
+        // Check if today is the collection date
+        $collection_date = get_field('collection_date', $collection_id);
+        $today = date('Y-m-d');
+        if($collection_date !== $today) {
+            //format January 28, 2025
+            $formatted_collection_date = date('F d, Y', strtotime($collection_date));
+            return '<h4>You must start this collection on the collection date. <br>Today is ' . date('F d, Y', strtotime($today)) . ' and the collection date is ' . $formatted_collection_date . '</h4>';
+        }
+
         return true;
     }
 
