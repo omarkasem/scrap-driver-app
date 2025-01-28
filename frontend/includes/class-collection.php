@@ -2,6 +2,19 @@
 namespace ScrapDriver\Frontend;
 
 class Collection {
+
+    public function __construct() {
+        add_action('init', array($this, 'complete_collection'), 10, 2);
+    }
+
+    public function complete_collection() {
+        if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
+            $collection_id = $_POST['collection_id'];
+            $driver_id = get_current_user_id();
+            do_action('sda_collection_completed', $collection_id, $driver_id);
+        }
+    }
+
     /**
      * Get the order number for collections based on date and time
      *

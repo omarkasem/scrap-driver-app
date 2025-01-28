@@ -17,10 +17,13 @@ get_header();
 while (have_posts()) :
     the_post();
     $collection_id = get_the_ID();
-    
+
+
     // Get the assigned driver ID from user meta
     $assigned_driver_id = get_field('assigned_driver');
     $current_user_id = get_current_user_id();
+    $collection_status = get_field('status', $collection_id);
+
     
     // Check if user has permission to view/edit
     $can_edit = AdminCollection::can_edit_collection($collection_id);
@@ -122,7 +125,6 @@ while (have_posts()) :
 
 
         <?php
-        $collection_status = get_field('status', $collection_id);
         
         // Show start collection button if not started
         if ((int)get_user_meta($current_user_id, 'collection_started', true) !== $collection_id) {
@@ -197,13 +199,8 @@ while (have_posts()) :
             </div>
 
             <div class="edit-section">
-                <?php if ($can_edit && $collection_status !== 'Completed') :
-                    // Handle form submission
-                    if (isset($_POST['complete_collection']) && wp_verify_nonce($_POST['complete_collection_nonce'], 'complete_collection')) {
-                        // Trigger collection completion action
-                        do_action('sda_collection_completed', $collection_id, $current_user_id);
+                <?php if ($can_edit && $collection_status !== 'Completed' && (int)get_user_meta($current_user_id, 'collection_started', true) === $collection_id) :
 
-                    }
                     
                     echo '<div class="sda-section">';
                     // Show ACF form
@@ -222,6 +219,7 @@ while (have_posts()) :
                         <!-- Complete Collection -->
                         <div class="sda-section">
                             <form method="POST" onsubmit="return confirm('<?php echo esc_js(__('Are you sure you want to complete this collection?', 'scrap-driver')); ?>');">
+                                <input type="hidden" name="collection_id" value="<?php echo $collection_id; ?>">
                                 <?php wp_nonce_field('complete_collection', 'complete_collection_nonce'); ?>
                                 <button type="submit" name="complete_collection" class="button button-primary button-large">
                                     <?php _e('Complete Collection', 'scrap-driver'); ?>
