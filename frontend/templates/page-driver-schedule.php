@@ -13,7 +13,7 @@ if (!is_user_logged_in()) {
 
 // Get current user
 $current_user_id = get_current_user_id();
-$schedule_class = new Schedule();
+$schedule_class = new Admin\Schedule();
 
 // Check if user is a driver
 if (!in_array('driver', wp_get_current_user()->roles)) {
