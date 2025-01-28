@@ -3,89 +3,6 @@
     "title": "Shifts - CPT",
     "fields": [
         {
-            "key": "field_67938e5c736a4",
-            "label": "Driver Fields",
-            "name": "",
-            "aria-label": "",
-            "type": "tab",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "placement": "top",
-            "endpoint": 0,
-            "selected": 0
-        },
-        {
-            "key": "field_678e209afc9af",
-            "label": "Start Time",
-            "name": "start_time",
-            "aria-label": "",
-            "type": "date_time_picker",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "display_format": "F j, Y g:i a",
-            "return_format": "F j, Y g:i a",
-            "first_day": 1,
-            "allow_in_bindings": 0
-        },
-        {
-            "key": "field_678e20b5fc9b0",
-            "label": "End Time",
-            "name": "end_time",
-            "aria-label": "",
-            "type": "date_time_picker",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "display_format": "F j, Y g:i a",
-            "return_format": "F j, Y g:i a",
-            "first_day": 1,
-            "allow_in_bindings": 0
-        },
-        {
-            "key": "field_678e20befc9b1",
-            "label": "Completed Collections",
-            "name": "shift_collections",
-            "aria-label": "",
-            "type": "post_object",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "post_type": [
-                "sda-collection"
-            ],
-            "post_status": "",
-            "taxonomy": "",
-            "return_format": "object",
-            "multiple": 1,
-            "allow_null": 0,
-            "allow_in_bindings": 0,
-            "bidirectional": 0,
-            "ui": 1,
-            "bidirectional_target": []
-        },
-        {
             "key": "field_67938eb8736a6",
             "label": "Admin Fields",
             "name": "",
@@ -178,8 +95,8 @@
                 "class": "",
                 "id": ""
             },
-            "center_lat": 30.284122400000001,
-            "center_lng": -81.396133800000001,
+            "center_lat": 53.441483525331883,
+            "center_lng": -1.3048632398350635,
             "zoom": "",
             "height": "",
             "allow_in_bindings": 0
@@ -198,8 +115,8 @@
                 "class": "",
                 "id": ""
             },
-            "center_lat": 30.284122400000001,
-            "center_lng": -81.396133800000001,
+            "center_lat": 53.441483525331883,
+            "center_lng": -1.3048632398350635,
             "zoom": "",
             "height": "",
             "allow_in_bindings": 0
@@ -239,6 +156,89 @@
             "message": "<div class=\"sda-route-container\"><div id=\"calendar\"><\/div><\/div>",
             "new_lines": "wpautop",
             "esc_html": 0
+        },
+        {
+            "key": "field_67938e5c736a4",
+            "label": "Driver Fields",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_678e209afc9af",
+            "label": "Start Time",
+            "name": "start_time",
+            "aria-label": "",
+            "type": "date_time_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y g:i a",
+            "return_format": "F j, Y g:i a",
+            "first_day": 1,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_678e20b5fc9b0",
+            "label": "End Time",
+            "name": "end_time",
+            "aria-label": "",
+            "type": "date_time_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y g:i a",
+            "return_format": "F j, Y g:i a",
+            "first_day": 1,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_678e20befc9b1",
+            "label": "Completed Collections",
+            "name": "shift_collections",
+            "aria-label": "",
+            "type": "post_object",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "sda-collection"
+            ],
+            "post_status": "",
+            "taxonomy": "",
+            "return_format": "object",
+            "multiple": 1,
+            "allow_null": 0,
+            "allow_in_bindings": 0,
+            "bidirectional": 0,
+            "ui": 1,
+            "bidirectional_target": []
         }
     ],
     "location": [
@@ -259,5 +259,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737726340
+    "modified": 1737910411
 }
