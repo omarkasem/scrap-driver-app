@@ -53,6 +53,36 @@ jQuery(document).ready(function($) {
         });
     }
 
+    // Initialize DataTables for driver dashboard
+    if ($('#today-collections-table').length) {
+        $('#today-collections-table').DataTable({
+            language: sdaDataTableTranslations,
+            responsive: true,
+            order: [[0, 'asc']]
+        });
+    }
+    
+    if ($('#shifts-table').length) {
+        $('#shifts-table').DataTable({
+            language: sdaDataTableTranslations,
+            responsive: true,
+            order: [[0, 'desc']]
+        });
+    }
+    
+    if ($('#all-collections-table').length) {
+        $('#all-collections-table').DataTable({
+            language: sdaDataTableTranslations,
+            responsive: true,
+            order: [[3, 'desc'], [0, 'asc']]
+        });
+    }
+    
+    // Accordion functionality
+    $('.sda-accordion-header').on('click', function() {
+        $(this).parent().toggleClass('open');
+    });
+
     // Status form submission
     $('#sda-status-form').on('submit', function(e) {
         e.preventDefault();

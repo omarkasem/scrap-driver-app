@@ -94,6 +94,13 @@ class Shift {
         }
 
         $shift_id = $today_shift[0]->ID;
+        
+        // Check if shift has already been started
+        $existing_start_time = get_field('start_time', $shift_id);
+        if ( !empty( $existing_start_time ) ) {
+            wp_die( __( 'This shift has already been started.', 'scrap-driver' ) );
+        }
+        
         $shift_start = current_time('mysql');
         
         // Update shift start time
@@ -129,14 +136,21 @@ class Shift {
      */
     private function end_shift($current_user_id) {
         $shift_end = current_time('mysql');
-        delete_user_meta($current_user_id, 'shift_start_time');
         
         // Update shift post
         $current_shift_id = get_user_meta($current_user_id, 'current_shift_id', true);
-        if ($current_shift_id) {
+        if ( $current_shift_id ) {
+            // Check if shift has already been ended
+            $existing_end_time = get_field('end_time', $current_shift_id);
+            if ( !empty( $existing_end_time ) ) {
+                wp_die( __( 'This shift has already been ended.', 'scrap-driver' ) );
+            }
+            
             update_field('end_time', $shift_end, $current_shift_id);
             delete_user_meta($current_user_id, 'current_shift_id');
         }
+        
+        delete_user_meta($current_user_id, 'shift_start_time');
     }
 
 
