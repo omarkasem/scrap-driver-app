@@ -9,6 +9,8 @@ class Collection {
 
         add_action('acf/save_post', array($this, 'save_collection'), 20, 1);
 
+        // Add shift management
+        add_action( 'acf/save_post', array( $this, 'handle_shift_management' ), 20, 1 );
     }
 
     public static function can_view_collection($collection_id) {
@@ -71,6 +73,9 @@ class Collection {
         }
 
         update_field('shift_collections', $shift_collections, $current_shift_id);
+
+        // Manage shift for collection
+        $this->manage_shift($post_id);
     }
 
     /**
@@ -120,6 +125,144 @@ class Collection {
         );
         $collections = get_posts($args);
         return count($collections);
+    }
+
+    /**
+     * Manage shift for collection
+     */
+    public function manage_shift( $collection_id ) {
+        // Get collection details
+        $driver_id = get_field( 'assigned_driver', $collection_id );
+        $collection_date = get_field( 'collection_date', $collection_id );
+        
+        if ( !$driver_id || !$collection_date ) {
+            return;
+        }
+
+        // Format date to match shift date format (Ymd)
+        $shift_date = date( 'Ymd', strtotime( $collection_date ) );
+
+        // Check for existing shift
+        $existing_shift = get_posts( array(
+            'post_type' => 'sda-shift',
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'assigned_driver',
+                    'value' => $driver_id
+                ),
+                array(
+                    'key' => 'shift_date',
+                    'value' => $shift_date
+                )
+            ),
+            'posts_per_page' => 1
+        ) );
+
+        if ( empty( $existing_shift ) ) {
+            // Create new shift
+            $driver = get_userdata( $driver_id );
+            $shift_title = sprintf( 'Shift By %s on %s',
+                $driver->display_name,
+                date( 'Y-m-d', strtotime( $collection_date ) )
+            );
+
+            $shift_id = wp_insert_post( array(
+                'post_type' => 'sda-shift',
+                'post_title' => $shift_title,
+                'post_status' => 'publish'
+            ) );
+
+            if ( !is_wp_error( $shift_id ) ) {
+                // Set shift metadata
+                update_field( 'assigned_driver', $driver_id, $shift_id );
+                update_field( 'shift_date', $shift_date, $shift_id );
+            }
+        }
+    }
+
+    /**
+     * Clean up shifts without collections
+     */
+    public function cleanup_empty_shifts( $driver_id, $collection_date ) {
+        // Format date
+        $shift_date = date( 'Ymd', strtotime( $collection_date ) );
+        
+        // Get shift for this date/driver
+        $shift = get_posts( array(
+            'post_type' => 'sda-shift',
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'assigned_driver',
+                    'value' => $driver_id
+                ),
+                array(
+                    'key' => 'shift_date',
+                    'value' => $shift_date
+                )
+            ),
+            'posts_per_page' => 1
+        ) );
+
+        if ( !empty( $shift ) ) {
+            // Check for any collections on this date for this driver
+            $collections = get_posts( array(
+                'post_type' => 'sda-collection',
+                'meta_query' => array(
+                    'relation' => 'AND',
+                    array(
+                        'key' => 'assigned_driver',
+                        'value' => $driver_id
+                    ),
+                    array(
+                        'key' => 'collection_date',
+                        'value' => date( 'Y-m-d', strtotime( $collection_date ) ),
+                        'compare' => '=',
+                        'type' => 'DATE'
+                    )
+                ),
+                'posts_per_page' => 1
+            ) );
+
+            // If no collections exist, delete the shift
+            if ( empty( $collections ) ) {
+                wp_delete_post( $shift[0]->ID, true );
+            }
+        }
+    }
+
+    /**
+     * Handle shift management when collection is saved
+     */
+    public function handle_shift_management( $post_id ) {
+        // Only process collections
+        if ( get_post_type( $post_id ) !== 'sda-collection' ) {
+            return;
+        }
+
+        // Get old and new values
+        $old_driver_id = get_post_meta( $post_id, 'assigned_driver', true );
+        $old_date = get_post_meta( $post_id, 'collection_date', true );
+        
+        $new_driver_id = isset( $_POST['acf']['field_assigned_driver'] ) ? 
+            $_POST['acf']['field_assigned_driver'] : 
+            get_field( 'assigned_driver', $post_id );
+        
+        $new_date = isset( $_POST['acf']['field_collection_date'] ) ? 
+            $_POST['acf']['field_collection_date'] : 
+            get_field( 'collection_date', $post_id );
+
+        // Create/update shift for new assignment
+        if ( $new_driver_id && $new_date ) {
+            $this->manage_shift( $post_id );
+        }
+
+        // Clean up old shift if driver or date changed
+        if ( $old_driver_id && $old_date && 
+             ( $old_driver_id !== $new_driver_id || $old_date !== $new_date ) ) {
+            $this->cleanup_empty_shifts( $old_driver_id, $old_date );
+        }
     }
 }
 

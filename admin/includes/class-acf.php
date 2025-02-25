@@ -113,19 +113,27 @@ class Acf {
     }
 
     public function set_default_map_center($field) {
-        // Check if field is one of our target map fields
-        if (in_array($field['key'], ['field_67938b627f419', 'field_67938b777f41b'])) {
+                
+        // Set default value for specific field if empty
+        if ($field['key'] === 'field_67938b627f419') {
             $default_location = get_field('default_shifts_location', 'option');
             if ($default_location) {
                 $field['center_lat'] = $default_location['lat'];
                 $field['center_lng'] = $default_location['lng'];
-                
-                // Set default value for specific field if empty
-                if ($field['key'] === 'field_67938b627f419') {
-                    $field['value'] = empty($field['value']) ? $default_location : $field['value'];
-                }
+                $field['value'] = empty($field['value']) ? $default_location : $field['value'];
             }
         }
+
+
+        if ($field['key'] === 'field_67938b777f41b') {
+            $default_location = get_field('default_end_location', 'option');
+            if ($default_location) {
+                $field['center_lat'] = $default_location['lat'];
+                $field['center_lng'] = $default_location['lng'];
+                $field['value'] = empty($field['value']) ? $default_location : $field['value'];
+            }
+        }
+
         return $field;
     }
 

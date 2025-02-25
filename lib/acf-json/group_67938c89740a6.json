@@ -49,6 +49,33 @@
             "zoom": "",
             "height": "",
             "allow_in_bindings": 0
+        },
+        {
+            "key": "field_67bdbf1f390a1",
+            "label": "Default End Location",
+            "name": "default_end_location",
+            "aria-label": "",
+            "type": "google_map",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_67938cc1a3190",
+                        "operator": "!=empty"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "center_lat": "",
+            "center_lng": "",
+            "zoom": "",
+            "height": "",
+            "allow_in_bindings": 0
         }
     ],
     "location": [
@@ -69,5 +96,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737723100
+    "modified": 1740488495
 }
