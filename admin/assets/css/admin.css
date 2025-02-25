@@ -310,3 +310,64 @@
     background: #ffeeba;
     color: #856404;
 }
+
+/* Tooltip styles */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:hover:after {
+    max-width: 250px;
+    white-space: normal;
+    word-wrap: break-word;
+    pointer-events: none;
+    margin-bottom: 5px;
+}
+
+/* For right-aligned elements to prevent overflow */
+.route-actions [data-tooltip]:hover:after {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+.route-actions {
+    margin-bottom: 10px;
+}
+#ai-reorder-route {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+#ai-reorder-route .dashicons {
+    margin-right: 5px;
+}
+[data-tooltip]:hover:after {
+    content: attr( data-tooltip );
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX( -50% );
+    background: #333;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    width: 220px;
+    z-index: 10;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba( 0, 0, 0, 0.2 );
+}
+
+
+/* For elements near the right edge of the screen */
+@media screen and (max-width: 782px) {
+    [data-tooltip]:hover:after {
+        left: auto;
+        right: 0;
+        transform: none;
+    }
+}

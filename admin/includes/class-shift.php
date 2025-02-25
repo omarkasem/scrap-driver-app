@@ -184,8 +184,8 @@ class Shift {
     public function add_adjustment_requests_metabox() {
         add_meta_box(
             'shift_adjustment_requests',
-            __('Shift Adjustment Requests', 'scrap-driver'),
-            array($this, 'render_adjustment_requests_metabox'),
+            __( 'Shift Adjustment Requests', 'scrap-driver' ),
+            array( $this, 'render_adjustment_requests_metabox' ),
             'sda-shift',
             'normal',
             'default'

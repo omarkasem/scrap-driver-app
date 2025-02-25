@@ -64,7 +64,10 @@ class Admin {
             'nonce' => wp_create_nonce('sda_route_nonce'),
             'schedule_nonce' => wp_create_nonce('schedule_dates_nonce'),
             'postId' => $post_id,
-            'loader' => $ajax_loader_img
+            'loader' => $ajax_loader_img,
+            'optimizing' => __('Optimizing route...', 'scrap-driver-app'),
+            'success' => __('Route optimized successfully!', 'scrap-driver-app'),
+            'error' => __('Error optimizing route', 'scrap-driver-app')
         ));
 
 

@@ -181,9 +181,6 @@ class Collection {
                 update_field( 'assigned_driver', $driver_id, $shift_id );
                 update_field( 'shift_date', $shift_date, $shift_id );
                 
-                // Set default start and end times for the shift
-                update_field( 'start_time', '08:00:00', $shift_id );
-                update_field( 'end_time', '17:00:00', $shift_id );
             }
         }
     }

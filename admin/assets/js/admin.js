@@ -6,6 +6,7 @@ class RoutePlanning {
         this.today.setHours(0, 0, 0, 0);
         this.$driverField = jQuery('select[name="acf[field_67938b4d7f418]"]');
         this.driverId = this.$driverField.val();
+        this.$shiftDate = jQuery('input[name="acf[field_67938e50736a3]"]');
         // Only check for calendar existence
         if (!this.$calendar.length) {
             return;
@@ -37,12 +38,20 @@ class RoutePlanning {
 
     initCalendar() {
         const self = this;
+        
+        // Get the shift date value to use as initial date
+        let initialDate = null;
+        if (this.$shiftDate.length && this.$shiftDate.val()) {
+            initialDate = this.$shiftDate.val();
+        }
+        
         this.calendar = new FullCalendar.Calendar(this.$calendar[0], {
             initialView: 'timeGridDay',
+            initialDate: initialDate, // Set the initial date from shift date
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'multiMonthYear,dayGridMonth,timeGridDay'
+                right: 'dayGridMonth,timeGridDay'
             },
             editable: true,
             selectMirror: true,
@@ -312,6 +321,11 @@ class Distance {
                 }, 500);
             });
         }
+        
+        // AI Route Optimization button
+        jQuery('#ai-reorder-route').on('click', function() {
+            self.optimizeRoute(jQuery(this));
+        });
     }
 
     calculateDistance() {
@@ -320,13 +334,13 @@ class Distance {
         const startingPoint = this.$startingPoint.val();
         const endingPoint = this.$endingPoint.val();
 
-        if (!shiftDate || !driverId || !startingPoint || !endingPoint) {
-            console.warn('Missing required fields for distance calculation');
+        if ( !shiftDate || !driverId || !startingPoint || !endingPoint ) {
+            console.warn( 'Missing required fields for distance calculation' );
             return;
         }
 
-        jQuery('.distance-total').html(`<img src="${sdaRoute.loader}" alt="Loading..." />`);
-        jQuery.ajax({
+        jQuery( '.distance-total' ).html( `<img src="${sdaRoute.loader}" alt="Loading..." />` );
+        jQuery.ajax( {
             url: sdaRoute.ajaxurl,
             type: 'POST',
             data: {
@@ -338,21 +352,102 @@ class Distance {
                 ending_point: endingPoint,
                 post_id: sdaRoute.postId
             },
-            success: function(response) {
-                if (response.success) {
-                    const distanceElement = document.querySelector('.distance-total');
-                    if (distanceElement) {
-                        distanceElement.innerHTML = `Total Distance: ${response.data.distance} miles`;
+            success: function( response ) {
+                if ( response.success ) {
+                    const distanceElement = document.querySelector( '.distance-total' );
+                    if ( distanceElement ) {
+                        let html = `<div>Total Distance: ${response.data.distance} miles</div>`;
+                        // Always use the formatted time string if available
+                        if ( response.data.time_formatted ) {
+                            html += `<div>Total Time: ${response.data.time_formatted}</div>`;
+                        } else if ( response.data.time ) {
+                            // Fallback to formatting the time here if needed
+                            const hours = Math.floor( response.data.time / 3600 );
+                            const minutes = Math.round( ( response.data.time % 3600 ) / 60 );
+                            html += `<div>Total Time: ${hours} hour${hours !== 1 ? 's' : ''} ${minutes} minute${minutes !== 1 ? 's' : ''}</div>`;
+                        }
+                        distanceElement.innerHTML = html;
                     }
                 } else {
-                    console.error('Error calculating distance:', response.data);
-                    distanceElement.innerHTML = `Total Distance: 0 miles`;
+                    console.error( 'Error calculating distance:', response.data );
+                    const distanceElement = document.querySelector( '.distance-total' );
+                    if ( distanceElement ) {
+                        distanceElement.innerHTML = `Total Distance: 0 miles`;
+                    }
                 }
             },
-            error: function(xhr, status, error) {
-                console.error('Ajax error:', {xhr, status, error});
+            error: function( xhr, status, error ) {
+                console.error( 'Ajax error:', { xhr, status, error } );
             }
-        });
+        } );
+    }
+    
+    optimizeRoute( button ) {
+        const self = this;
+        const originalText = button.html();
+        
+        // Get shift data
+        const postId = sdaRoute.postId;
+        const shiftDate = this.$shiftDate.val();
+        const driverId = this.$driverField.val();
+        
+        // Get starting and ending points
+        const startingPoint = this.$startingPoint.val();
+        const endingPoint = this.$endingPoint.val();
+        
+        if ( !shiftDate || !driverId || !startingPoint || !endingPoint ) {
+            alert( 'Missing required fields for route optimization' );
+            return;
+        }
+        
+        // Disable button and show loading state
+        button.prop( 'disabled', true ).html( '<span class="spinner is-active" style="float:none;margin-right:5px"></span> Optimizing route...' );
+        
+        // Make AJAX request to optimize route
+        jQuery.ajax( {
+            url: sdaRoute.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'optimize_route',
+                nonce: sdaRoute.nonce,
+                post_id: postId,
+                shift_date: shiftDate,
+                driver_id: driverId,
+                starting_point: startingPoint,
+                ending_point: endingPoint
+            },
+            success: function( response ) {
+                if ( response.success ) {
+                    // Update the distance/time display
+                    const distanceTotal = jQuery( '.distance-total' );
+                    let html = `<div>Total Distance: ${response.data.distance} miles</div>`;
+                    if ( response.data.time_formatted ) {
+                        html += `<div>Total Time: ${response.data.time_formatted}</div>`;
+                    } else if ( response.data.time ) {
+                        // Fallback to formatting the time here if needed
+                        const hours = Math.floor( response.data.time / 3600 );
+                        const minutes = Math.round( ( response.data.time % 3600 ) / 60 );
+                        html += `<div>Total Time: ${hours} hour${hours !== 1 ? 's' : ''} ${minutes} minute${minutes !== 1 ? 's' : ''}</div>`;
+                    }
+                    distanceTotal.html( html );
+                    
+                    // Show success message
+                    alert( 'Route optimized successfully!' );
+                    
+                    // Reload the page to show the new order
+                    window.location.reload();
+                } else {
+                    alert( 'Error optimizing route: ' + ( response.data || 'Unknown error' ) );
+                }
+            },
+            error: function() {
+                alert( 'Error optimizing route' );
+            },
+            complete: function() {
+                // Re-enable button and restore original text
+                button.prop( 'disabled', false ).html( originalText );
+            }
+        } );
     }
 }
 
