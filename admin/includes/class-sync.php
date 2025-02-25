@@ -137,6 +137,10 @@ class Sync {
             if (!empty($collection['end_time'])) {
                 update_post_meta($post_id, 'collection_end_time', $collection['end_time']);
             }
+
+            // Handle shift management for synced collection
+            $collection_obj = new \ScrapDriver\Admin\Collection();
+            $collection_obj->handle_shift_management($post_id);
         }
 
         return $post_id;

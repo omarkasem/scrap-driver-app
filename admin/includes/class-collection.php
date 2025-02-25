@@ -11,6 +11,9 @@ class Collection {
 
         // Add shift management
         add_action( 'acf/save_post', array( $this, 'handle_shift_management' ), 20, 1 );
+        
+        // Add action for collection deletion to clean up shifts
+        add_action( 'before_delete_post', array( $this, 'handle_collection_deletion' ), 10, 1 );
     }
 
     public static function can_view_collection($collection_id) {
@@ -177,6 +180,10 @@ class Collection {
                 // Set shift metadata
                 update_field( 'assigned_driver', $driver_id, $shift_id );
                 update_field( 'shift_date', $shift_date, $shift_id );
+                
+                // Set default start and end times for the shift
+                update_field( 'start_time', '08:00:00', $shift_id );
+                update_field( 'end_time', '17:00:00', $shift_id );
             }
         }
     }
@@ -184,7 +191,61 @@ class Collection {
     /**
      * Clean up shifts without collections
      */
-    public function cleanup_empty_shifts( $driver_id, $collection_date ) {
+    public function cleanup_empty_shifts( $driver_id = null, $collection_date = null ) {
+        // If specific driver and date are provided, only check that shift
+        if ( $driver_id && $collection_date ) {
+            $this->cleanup_specific_shift( $driver_id, $collection_date );
+            return;
+        }
+        
+        // Otherwise, check all shifts for empty ones
+        $args = array(
+            'post_type' => 'sda-shift',
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        );
+        
+        $shifts = get_posts( $args );
+        
+        foreach ( $shifts as $shift_id ) {
+            $shift_driver = get_field( 'assigned_driver', $shift_id );
+            $shift_date = get_field( 'shift_date', $shift_id );
+            
+            if ( $shift_driver && $shift_date ) {
+                // Format date for query
+                $formatted_date = date( 'Y-m-d', strtotime( $shift_date ) );
+                
+                // Check for any collections on this date for this driver
+                $collections = get_posts( array(
+                    'post_type' => 'sda-collection',
+                    'meta_query' => array(
+                        'relation' => 'AND',
+                        array(
+                            'key' => 'assigned_driver',
+                            'value' => $shift_driver
+                        ),
+                        array(
+                            'key' => 'collection_date',
+                            'value' => $formatted_date,
+                            'compare' => '=',
+                            'type' => 'DATE'
+                        )
+                    ),
+                    'posts_per_page' => 1
+                ) );
+
+                // If no collections exist, delete the shift
+                if ( empty( $collections ) ) {
+                    wp_delete_post( $shift_id, true );
+                }
+            }
+        }
+    }
+
+    /**
+     * Clean up a specific shift if empty
+     */
+    private function cleanup_specific_shift( $driver_id, $collection_date ) {
         // Format date
         $shift_date = date( 'Ymd', strtotime( $collection_date ) );
         
@@ -261,7 +322,34 @@ class Collection {
         // Clean up old shift if driver or date changed
         if ( $old_driver_id && $old_date && 
              ( $old_driver_id !== $new_driver_id || $old_date !== $new_date ) ) {
-            $this->cleanup_empty_shifts( $old_driver_id, $old_date );
+            $this->cleanup_specific_shift( $old_driver_id, $old_date );
+        }
+        
+        // Clean up all empty shifts
+        $this->cleanup_empty_shifts();
+        
+        // Store the current values as post meta for future reference
+        update_post_meta( $post_id, 'assigned_driver', $new_driver_id );
+        update_post_meta( $post_id, 'collection_date', $new_date );
+    }
+    
+    /**
+     * Handle collection deletion
+     * Clean up shifts if needed when a collection is deleted
+     */
+    public function handle_collection_deletion( $post_id ) {
+        // Only process collections
+        if ( get_post_type( $post_id ) !== 'sda-collection' ) {
+            return;
+        }
+        
+        // Get collection details before it's deleted
+        $driver_id = get_field( 'assigned_driver', $post_id );
+        $collection_date = get_field( 'collection_date', $post_id );
+        
+        if ( $driver_id && $collection_date ) {
+            // Check if this is the last collection for this driver/date
+            $this->cleanup_empty_shifts( $driver_id, $collection_date );
         }
     }
 }
