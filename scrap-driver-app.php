@@ -3,7 +3,7 @@
  * Plugin Name: Scrap Driver App
  * Plugin URI: #
  * Description: A WordPress plugin for scrap driver management
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Omar Kasem
  * Author URI: #
  * Text Domain: scrap-driver-app
@@ -15,7 +15,7 @@ if (!defined('WPINC')) {
 }
 
 // Define plugin constants
-define('SCRAP_DRIVER_VERSION', '1.0.2');
+define('SCRAP_DRIVER_VERSION', '1.0.3');
 define('SCRAP_DRIVER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SCRAP_DRIVER_PLUGIN_URL', plugin_dir_url(__FILE__));
 

@@ -167,7 +167,7 @@ class Collection {
             $driver = get_userdata( $driver_id );
             $shift_title = sprintf( 'Shift By %s on %s',
                 $driver->display_name,
-                date( 'Y-m-d', strtotime( $collection_date ) )
+                date( 'F j, Y', strtotime( $collection_date ) )
             );
 
             $shift_id = wp_insert_post( array(

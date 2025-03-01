@@ -54,12 +54,12 @@ class Route {
             'post_status' => 'publish',
             'meta_query' => array(
                 'relation' => 'AND',
-                array(
-                    'key' => 'collection_date',
-                    'value' => date('Y-m-d'),
-                    'compare' => '>=',
-                    'type' => 'DATE'
-                ),
+                // array(
+                //     'key' => 'collection_date',
+                //     'value' => date('Y-m-d'),
+                //     'compare' => '>=',
+                //     'type' => 'DATE'
+                // ),
                 array(
                     'key' => 'assigned_driver',
                     'value' => $driver_id

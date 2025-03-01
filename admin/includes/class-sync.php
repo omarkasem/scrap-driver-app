@@ -186,7 +186,9 @@ class Sync {
         if (get_post_type($post_id) !== 'sda-collection' || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)) {
             return;
         }
-
+        if(empty(sda_get_statuses_ids())){
+            return;
+        }
         $statuses = array_flip(sda_get_statuses_ids());
         $status_id = $statuses[get_field('status', $post_id)];
 

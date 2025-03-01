@@ -3,22 +3,83 @@
     "title": "Collection - CPT",
     "fields": [
         {
-            "key": "field_6782696cc2f62",
-            "label": "Car",
-            "name": "",
+            "key": "field_677a4dbb75eba",
+            "label": "Collection Date",
+            "name": "collection_date",
             "aria-label": "",
-            "type": "tab",
+            "type": "date_picker",
             "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
+            "required": 1,
+            "conditional_logic": false,
             "wrapper": {
                 "width": "",
                 "class": "",
                 "id": ""
             },
-            "placement": "top",
-            "endpoint": 0,
-            "selected": 0
+            "display_format": "F j, Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_677a4dbb75eb2",
+            "label": "Status",
+            "name": "status",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 1,
+            "conditional_logic": false,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "COD Issued": "COD Issued",
+                "Offer accepted": "Offer accepted",
+                "Pending info": "Pending info",
+                "Pending payment": "Pending payment",
+                "Pending Collection": "Pending Collection",
+                "Completed": "Completed",
+                "Quote Enquiry": "Quote Enquiry",
+                "Out of Range": "Out of Range",
+                "Out of Range - Contact": "Out of Range - Contact",
+                "Payment Complete": "Payment Complete",
+                "Cancelled": "Cancelled",
+                "Booked Pending Uplift\t": "Booked Pending Uplift\t",
+                "No Contact\t": "No Contact\t",
+                "Needs Rebooking\t": "Needs Rebooking\t",
+                "Collection in Progress": "Collection in Progress"
+            },
+            "default_value": "pending",
+            "allow_null": 0,
+            "multiple": 0,
+            "ui": 1,
+            "return_format": "value",
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_677a4dbb75ebb",
+            "label": "Assigned Driver",
+            "name": "assigned_driver",
+            "aria-label": "",
+            "type": "user",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": false,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "role": [
+                "driver"
+            ],
+            "allow_null": 1,
+            "multiple": 0,
+            "return_format": "id",
+            "bidirectional_target": []
         },
         {
             "key": "field_6787f37c439ee",
@@ -222,24 +283,6 @@
             ]
         },
         {
-            "key": "field_678679e62e6b6",
-            "label": "Admin",
-            "name": "",
-            "aria-label": "",
-            "type": "tab",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "placement": "top",
-            "endpoint": 0,
-            "selected": 0
-        },
-        {
             "key": "field_677a4dbb75ebd",
             "label": "Admin Notes",
             "name": "admin_notes",
@@ -259,103 +302,6 @@
             "rows": "",
             "placeholder": "",
             "new_lines": ""
-        },
-        {
-            "key": "field_678269a1c2f63",
-            "label": "Driver",
-            "name": "",
-            "aria-label": "",
-            "type": "tab",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "placement": "top",
-            "endpoint": 0,
-            "selected": 0
-        },
-        {
-            "key": "field_677a4dbb75eba",
-            "label": "Collection Date",
-            "name": "collection_date",
-            "aria-label": "",
-            "type": "date_picker",
-            "instructions": "",
-            "required": 1,
-            "conditional_logic": false,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "display_format": "F j, Y",
-            "return_format": "Y-m-d",
-            "first_day": 1
-        },
-        {
-            "key": "field_677a4dbb75ebb",
-            "label": "Assigned Driver",
-            "name": "assigned_driver",
-            "aria-label": "",
-            "type": "user",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": false,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "role": [
-                "driver"
-            ],
-            "allow_null": 1,
-            "multiple": 0,
-            "return_format": "id",
-            "bidirectional_target": []
-        },
-        {
-            "key": "field_677a4dbb75eb2",
-            "label": "Status",
-            "name": "status",
-            "aria-label": "",
-            "type": "select",
-            "instructions": "",
-            "required": 1,
-            "conditional_logic": false,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "choices": {
-                "COD Issued": "COD Issued",
-                "Offer accepted": "Offer accepted",
-                "Pending info": "Pending info",
-                "Pending payment": "Pending payment",
-                "Pending Collection": "Pending Collection",
-                "Completed": "Completed",
-                "Quote Enquiry": "Quote Enquiry",
-                "Out of Range": "Out of Range",
-                "Out of Range - Contact": "Out of Range - Contact",
-                "Payment Complete": "Payment Complete",
-                "Cancelled": "Cancelled",
-                "Booked Pending Uplift\t": "Booked Pending Uplift\t",
-                "No Contact\t": "No Contact\t",
-                "Needs Rebooking\t": "Needs Rebooking\t",
-                "Collection in Progress": "Collection in Progress"
-            },
-            "default_value": "pending",
-            "allow_null": 0,
-            "multiple": 0,
-            "ui": 1,
-            "return_format": "value",
-            "ajax": 0,
-            "placeholder": ""
         },
         {
             "key": "field_677a4dbb75ebe",
@@ -448,5 +394,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1737733988
+    "modified": 1740832502
 }

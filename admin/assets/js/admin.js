@@ -87,9 +87,6 @@ class RoutePlanning {
             eventDragStop: function(info) {
                 self.$calendar.removeClass('fc-dragging');
             },
-            validRange: {
-                start: self.today
-            },
             eventDrop: function(info) {
                 self.handleEventDrop(info);
             },
@@ -100,7 +97,7 @@ class RoutePlanning {
             eventClick: function(info) {
                 self.handleEventClick(info);
             },
-            // Prevent dragging to past dates
+            // Prevent dragging to past dates but still allow viewing past dates
             eventConstraint: {
                 start: self.today
             },
@@ -379,8 +376,7 @@ class Distance {
 
                     // If this was an optimization, show success message and reload
                     if (optimize) {
-                        alert('Route optimized successfully!');
-                        window.location.reload();
+                        window.location.href = window.location.pathname + ( window.location.search ? window.location.search + '&' : '?' ) + 'optimize=1';
                     }
                 } else {
                     console.error('Error processing route:', response.data);

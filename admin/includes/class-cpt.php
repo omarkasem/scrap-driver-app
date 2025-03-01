@@ -105,6 +105,16 @@ class CPT {
             </div>
             <?php
         }
+
+        // Show optimization success message on shift edit page
+        if ( $screen->post_type === 'sda-shift' && isset( $_GET['optimize'] ) && $_GET['optimize'] === '1' ) {
+            ?>
+            <div class="notice notice-success is-dismissible">
+                <p><?php esc_html_e( 'Route optimized successfully!', 'scrap-driver' ); ?></p>
+            </div>
+            <?php
+        }
+        
     }
 
     public function set_collection_columns($columns) {
@@ -338,6 +348,9 @@ class CPT {
             // Get the Generator instance and sync
             $API = new \ScrapDriver\Admin\Sync();
             $API->sync_to_vrm($post_id);
+
+            // Trigger the sync
+            do_action('acf/save_post', $post_id);
         }
     }
 
