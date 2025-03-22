@@ -142,9 +142,18 @@ $approved_dates_json = json_encode($approved_dates);
                             $requests = array($requests);
                         }
                         
-                        echo '<div class="holiday-previous-requests">';
-                        echo '<h4>' . __('Previous Requests', 'scrap-driver') . '</h4>';
+                        // Sort requests by start date (newest first)
+                        usort($requests, function($a, $b) {
+                            return strtotime($b['start_date']) - strtotime($a['start_date']);
+                        });
                         
+                        echo '<div class="sda-accordion-section">';
+                        echo '<div class="sda-accordion-header">';
+                        echo '<h2>' . __('Previous Requests', 'scrap-driver') . '</h2>';
+                        echo '<div class="sda-accordion-icon"></div>';
+                        echo '</div>';
+                        
+                        echo '<div class="sda-accordion-content">';
                         foreach ($requests as $request) {
                             $status_class = 'status-' . $request['status'];
                             $status_label = ucfirst($request['status']);
@@ -170,9 +179,11 @@ $approved_dates_json = json_encode($approved_dates);
                                     <?php endif; ?>
                                 </div>
                             </div>
+                            <hr class="holiday-request-divider">
                             <?php
                         }
-                        echo '</div>';
+                        echo '</div>'; // Close accordion content
+                        echo '</div>'; // Close accordion section
                     }
                     ?>
 
@@ -216,7 +227,7 @@ $approved_dates_json = json_encode($approved_dates);
 <?php get_footer(); ?> 
 
 
-<!-- Replace the existing JavaScript section with this simpler version -->
+<!-- Replace the entire script section at the bottom of the file -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const approvedDates = <?php echo $approved_dates_json; ?>;

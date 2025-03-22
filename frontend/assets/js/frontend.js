@@ -36,6 +36,7 @@ jQuery(document).ready(function($) {
         $('#collections-table').DataTable({
             order: [[0, 'asc']], // Sort by Order column by default
             pageLength: 25,
+            responsive: true,
             language: {
                 search: sdaDataTableTranslations.search,
                 lengthMenu: sdaDataTableTranslations.lengthMenu,
