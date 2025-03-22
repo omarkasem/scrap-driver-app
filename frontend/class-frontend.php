@@ -8,27 +8,33 @@ class Frontend {
         add_filter('single_template', array($this, 'load_collection_template'));
         
         // Change to theme_page_templates filter
-        add_filter('theme_page_templates', array($this, 'add_collections_template'));
-        add_filter('template_include', array($this, 'load_collections_list_template'));
+        add_filter('theme_page_templates', array($this, 'add_templates'));
+        add_filter('template_include', array($this, 'load_page_templates'));
 
         $this->includes();
+        
+        // Register shortcode for driver statistics
+        add_shortcode('driver_statistics', array($this, 'render_statistics_shortcode'));
     }
 
     public function includes() {
         require_once plugin_dir_path(__FILE__) . 'includes/class-collection.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-driver-statistics.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-frontend-statistics-controller.php';
     }
 
     /**
-     * Add the collections template to the page template dropdown
+     * Add the page templates to the dropdown
      */
-    public function add_collections_template($templates) {
+    public function add_templates($templates) {
         $templates['view-collections.php'] = __('Collections List', 'scrap-driver');
         $templates['view-todays-collections.php'] = __('Today\'s Collections', 'scrap-driver');
         $templates['view-driver-dashboard.php'] = __('Driver Dashboard', 'scrap-driver');
+        $templates['driver-statistics.php'] = __('Driver Statistics', 'scrap-driver');
         return $templates;
     }
 
-    public function load_collections_list_template($template) {
+    public function load_page_templates($template) {
         // Get the template selected for the page
         if (is_page()) {
             $page_template = get_page_template_slug();
@@ -53,6 +59,13 @@ class Frontend {
                     return $custom_template;
                 }
             }
+            
+            if ('driver-statistics.php' === $page_template) {
+                $custom_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/driver-statistics.php';
+                if (file_exists($custom_template)) {
+                    return $custom_template;
+                }
+            }
         }
         
         return $template;
@@ -71,7 +84,6 @@ class Frontend {
         return $template;
     }
 
-
     public function enqueue_assets() {
         if (is_page()) {
             $page_template = get_page_template_slug();
@@ -81,6 +93,13 @@ class Frontend {
                 'view-driver-dashboard.php' === $page_template) {
                 wp_enqueue_style('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
                 wp_enqueue_script('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
+            }
+            
+            // Add DataTables and Chart.js for driver statistics page
+            if ('driver-statistics.php' === $page_template) {
+                wp_enqueue_style('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
+                wp_enqueue_script('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
+                wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '3.7.0', true);
             }
         }
 
@@ -105,5 +124,25 @@ class Frontend {
         );
 
         wp_localize_script('scrap-driver-frontend', 'sdaAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
+        
+        // Add driver statistics data if needed
+        if (is_page() && get_page_template_slug() === 'driver-statistics.php') {
+            wp_localize_script('scrap-driver-frontend', 'driverStatistics', array(
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('driver_statistics_nonce'),
+                'currentUserId' => get_current_user_id(),
+                'isAdmin' => current_user_can('administrator') ? 'true' : 'false'
+            ));
+        }
+    }
+    
+    /**
+     * Render statistics shortcode
+     * 
+     * @return string HTML content
+     */
+    public function render_statistics_shortcode() {
+        $controller = new \FrontendStatisticsController();
+        return $controller->render_statistics_page();
     }
 } 
