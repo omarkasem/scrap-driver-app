@@ -726,11 +726,11 @@ var DriverStatistics = {
         
         // Prepare table data
         var tableData = [];
-        
+        console.log(stats);
         jQuery.each(stats, function(driverId, driverStats) {
             var driverName = jQuery('#driver-selector option[value="' + driverId + '"]').text();
             if (!driverName) {
-                driverName = 'Driver';
+                driverName = sdaAjax.currentUserName;
             }
             
             // Add row for each interval

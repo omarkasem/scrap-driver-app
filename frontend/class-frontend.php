@@ -134,6 +134,7 @@ class Frontend {
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('driver_statistics_nonce'),
             'currentUserId' => get_current_user_id(),
+            'currentUserName' => wp_get_current_user()->display_name,
             'isAdmin' => current_user_can('administrator') ? 'true' : 'false'
         ));
 
