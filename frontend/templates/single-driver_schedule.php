@@ -60,6 +60,31 @@ $approved_dates_json = json_encode($approved_dates);
     <div class="schedule-container">
         <!-- Left Column -->
         <div class="schedule-left-column">
+
+            <!-- Weekly Schedule Section -->
+            <div class="sda-section weekly-schedule">
+                <h3>Weekly Working Schedule</h3>
+                <div class="schedule-grid">
+                    <?php
+                    $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                    
+                    foreach ($days as $day) {
+                        $status = isset($schedule[$day]) ? $schedule[$day] : 'Not Working';
+                        $status_class = strtolower(str_replace(' ', '-', $status));
+                        ?>
+                        <div class="schedule-day">
+                            <h4><?php echo ucfirst($day); ?></h4>
+                            <div class="status-badge <?php echo $status_class; ?>">
+                                <?php echo esc_html($status); ?>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                </div>
+            </div>
+
+
             <!-- Leave Allowance Section -->
             <div class="sda-section leave-allowance-box">
                 <div class="leave-info">
@@ -96,28 +121,7 @@ $approved_dates_json = json_encode($approved_dates);
                 </div>
             </div>
 
-            <!-- Weekly Schedule Section -->
-            <div class="sda-section weekly-schedule">
-                <h3>Weekly Working Schedule</h3>
-                <div class="schedule-grid">
-                    <?php
-                    $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-                    
-                    foreach ($days as $day) {
-                        $status = isset($schedule[$day]) ? $schedule[$day] : 'Not Working';
-                        $status_class = strtolower(str_replace(' ', '-', $status));
-                        ?>
-                        <div class="schedule-day">
-                            <h4><?php echo ucfirst($day); ?></h4>
-                            <div class="status-badge <?php echo $status_class; ?>">
-                                <?php echo esc_html($status); ?>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                    ?>
-                </div>
-            </div>
+
         </div>
 
         <!-- Right Column -->
@@ -187,36 +191,43 @@ $approved_dates_json = json_encode($approved_dates);
                     }
                     ?>
 
-                    <h4><?php _e('Request Annual Leave', 'scrap-driver'); ?></h4>
-                    <form method="post" class="holiday-request-form">
-                        <?php 
-                        $today = date('Y-m-d');
-                        wp_nonce_field('holiday_request', 'holiday_request_nonce'); 
-                        ?>
-                        <input type="hidden" name="action" value="request_holiday">
-                        <input type="hidden" name="schedule_id" value="<?php echo get_the_ID(); ?>">
-                        
-                        <div class="form-row">
-                            <div class="form-field">
-                                <label for="start_date"><?php _e('Start Date:', 'scrap-driver'); ?></label>
-                                <input type="text" id="start_date" name="start_date" min="<?php echo $today; ?>" required>
-                            </div>
-                            
-                            <div class="form-field">
-                                <label for="end_date"><?php _e('End Date:', 'scrap-driver'); ?></label>
-                                <input type="text" id="end_date" name="end_date" min="<?php echo $today; ?>" required>
-                            </div>
+                    <div class="sda-accordion-section">
+                        <div class="sda-accordion-header">
+                            <h2><?php _e('Request Annual Leave', 'scrap-driver'); ?></h2>
+                            <div class="sda-accordion-icon"></div>
                         </div>
-                        
-                        <div class="form-field">
-                            <label for="comments"><?php _e('Comments:', 'scrap-driver'); ?></label>
-                            <textarea id="comments" name="comments" rows="4" required></textarea>
+                        <div class="sda-accordion-content">
+                            <form method="post" class="holiday-request-form">
+                                <?php 
+                                $today = date('Y-m-d');
+                                wp_nonce_field('holiday_request', 'holiday_request_nonce'); 
+                                ?>
+                                <input type="hidden" name="action" value="request_holiday">
+                                <input type="hidden" name="schedule_id" value="<?php echo get_the_ID(); ?>">
+                                
+                                <div class="form-row">
+                                    <div class="form-field">
+                                        <label for="start_date"><?php _e('Start Date:', 'scrap-driver'); ?></label>
+                                        <input type="text" id="start_date" name="start_date" min="<?php echo $today; ?>" required>
+                                    </div>
+                                    
+                                    <div class="form-field">
+                                        <label for="end_date"><?php _e('End Date:', 'scrap-driver'); ?></label>
+                                        <input type="text" id="end_date" name="end_date" min="<?php echo $today; ?>" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="comments"><?php _e('Comments:', 'scrap-driver'); ?></label>
+                                    <textarea id="comments" name="comments" rows="4" required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="button button-primary">
+                                    <?php _e('Submit Request', 'scrap-driver'); ?>
+                                </button>
+                            </form>
                         </div>
-                        
-                        <button type="submit" class="button button-primary">
-                            <?php _e('Submit Request', 'scrap-driver'); ?>
-                        </button>
-                    </form>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

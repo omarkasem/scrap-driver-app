@@ -24,7 +24,7 @@
         
         <div class="chart-row">
             <div class="chart-container">
-                <h3><?php _e( 'Time per Mile', 'scrap-driver' ); ?></h3>
+                <h3><?php _e( 'Time per Mile (hrs)', 'scrap-driver' ); ?></h3>
                 <canvas id="time-per-mile-chart"></canvas>
             </div>
             
