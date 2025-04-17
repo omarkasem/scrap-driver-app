@@ -9,7 +9,7 @@ $is_admin = current_user_can( 'administrator' );
 
 // Default date range (last 30 days)
 $end_date = date( 'Y-m-d' );
-$start_date = date( 'Y-m-d', strtotime( '-30 days' ) );
+$start_date = date( 'Y-m-d' );
 ?>
 
 <div class="statistics-filters">
@@ -26,7 +26,7 @@ $start_date = date( 'Y-m-d', strtotime( '-30 days' ) );
             
             <div class="filter-group">
                 <label for="start-date"><?php _e( 'Start Date', 'scrap-driver' ); ?></label>
-                <input type="date" id="start-date" name="start_date" value="<?php echo esc_attr( $start_date ); ?>" max="<?php echo esc_attr( $end_date ); ?>">
+                <input type="date" id="start-date" name="start_date" value="<?php echo esc_attr( $start_date ); ?>" max="<?php echo esc_attr( date( 'Y-m-d' ) ); ?>">
             </div>
             
             <div class="filter-group">
@@ -43,7 +43,7 @@ $start_date = date( 'Y-m-d', strtotime( '-30 days' ) );
                 </select>
             </div>
             
-            <div class="filter-group filter-actions">
+            <div class="filter-group filter-actions" style="flex-direction: row;">
                 <button type="submit" id="apply-filters" class="button button-primary"><?php _e( 'Apply Filters', 'scrap-driver' ); ?></button>
                 <button type="button" id="reset-filters" class="button"><?php _e( 'Reset', 'scrap-driver' ); ?></button>
             </div>

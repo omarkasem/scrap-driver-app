@@ -91,49 +91,52 @@ class Frontend {
             if ('view-collections.php' === $page_template || 
                 'view-todays-collections.php' === $page_template || 
                 'view-driver-dashboard.php' === $page_template) {
-                wp_enqueue_style('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
-                wp_enqueue_script('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
+                wp_enqueue_style(SCRAP_DRIVER_SLUG . '-datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
+                wp_enqueue_script(SCRAP_DRIVER_SLUG . '-datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
             }
             
             // Add DataTables and Chart.js for driver statistics page
             if ('driver-statistics.php' === $page_template) {
-                wp_enqueue_style('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
-                wp_enqueue_script('datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
-                wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '3.7.0', true);
+                wp_enqueue_style(SCRAP_DRIVER_SLUG . '-datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
+                wp_enqueue_script(SCRAP_DRIVER_SLUG . '-datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
+                wp_enqueue_script(SCRAP_DRIVER_SLUG . '-chartjs', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/chart.js', array(), '3.7.0', true);
+
+                // enqueue select 2
+                wp_enqueue_style(SCRAP_DRIVER_SLUG . '-select2', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/select2.min.css');
+                wp_enqueue_script(SCRAP_DRIVER_SLUG . '-select2', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/select2.min.js', array('jquery'), null, true);
             }
+
         }
 
         // Enqueue frontend CSS
         wp_enqueue_style(
-            'scrap-driver-frontend',
+            SCRAP_DRIVER_SLUG . '-  frontend',
             SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/frontend.css',
             array(),
             SCRAP_DRIVER_VERSION
         );
 
         // enqueue jquery ui styles
-        wp_enqueue_style('jquery-ui', 'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
+        wp_enqueue_style(SCRAP_DRIVER_SLUG . '-jquery-ui', 'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
 
         // Enqueue frontend JavaScript
         wp_enqueue_script(
-            'scrap-driver-frontend',
+            SCRAP_DRIVER_SLUG . '-frontend',
             SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/frontend.js',
             array('jquery','jquery-ui-datepicker'),
             SCRAP_DRIVER_VERSION,
             true
         );
 
-        wp_localize_script('scrap-driver-frontend', 'sdaAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
+
         
-        // Add driver statistics data if needed
-        if (is_page() && get_page_template_slug() === 'driver-statistics.php') {
-            wp_localize_script('scrap-driver-frontend', 'driverStatistics', array(
-                'ajaxUrl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('driver_statistics_nonce'),
-                'currentUserId' => get_current_user_id(),
-                'isAdmin' => current_user_can('administrator') ? 'true' : 'false'
-            ));
-        }
+        wp_localize_script(SCRAP_DRIVER_SLUG . '-frontend', 'sdaAjax', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('driver_statistics_nonce'),
+            'currentUserId' => get_current_user_id(),
+            'isAdmin' => current_user_can('administrator') ? 'true' : 'false'
+        ));
+
     }
     
     /**

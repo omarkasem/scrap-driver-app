@@ -11,6 +11,7 @@ class Sync {
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_routes'));
         add_action('acf/save_post', array($this, 'sync_to_vrm'), 20);
+        add_action('sda_collection_completed', array($this, 'sync_to_vrm'), 20);
         add_action('init', array($this, 'schedule_sync'));
         add_action('sda_hourly_sync', array($this, 'sync_from_vrm'));
         add_action('admin_init', array($this, 'handle_manual_sync'));
@@ -183,6 +184,7 @@ class Sync {
     }
 
     public function sync_to_vrm($post_id) {
+
         if (get_post_type($post_id) !== 'sda-collection' || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)) {
             return;
         }

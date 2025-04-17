@@ -57,16 +57,19 @@ class DriverStatistics {
                 $intervals[$interval_key]['hours'] += $metrics['hours'];
             }
             
-            // Calculate performance metrics
-            $collections_per_hour = $total_hours > 0 ? $total_collections / $total_hours : 0;
-            $time_per_mile = $total_miles > 0 ? $total_hours / $total_miles : 0;
+            // Calculate performance metrics with proper scaling
+            // For collections per hour: (collections / hours) * 1 hour
+            $collections_per_hour = $total_hours > 0 ? round( ($total_collections / $total_hours) * 1, 2 ) : 0;
+            
+            // For time per mile: (hours / miles) * 1 mile
+            $time_per_mile = $total_miles > 0 ? round( ($total_hours / $total_miles) * 1, 2 ) : 0;
             
             // Format the statistics
             $stats[$driver_id] = array(
                 'summary' => array(
-                    'total_collections' => $total_collections,
-                    'total_miles' => $total_miles,
-                    'total_hours' => $total_hours,
+                    'total_collections' => intval( $total_collections ),
+                    'total_miles' => round( $total_miles, 2 ),
+                    'total_hours' => round( $total_hours, 2 ),
                     'collections_per_hour' => $collections_per_hour,
                     'time_per_mile' => $time_per_mile
                 ),
@@ -138,11 +141,6 @@ class DriverStatistics {
         $shift_end = get_post_meta( $shift_id, 'shift_end', true );
         $driver_id = get_post_meta( $shift_id, 'assigned_driver', true );
         
-        // Calculate hours worked
-        $start_datetime = strtotime( $shift_date . ' ' . $shift_start );
-        $end_datetime = strtotime( $shift_date . ' ' . $shift_end );
-        $hours = ( $end_datetime - $start_datetime ) / 3600; // Convert seconds to hours
-        
         // Get collections completed during this shift
         $args = array(
             'post_type' => 'sda-collection',
@@ -170,15 +168,17 @@ class DriverStatistics {
         $query = new WP_Query( $args );
         $collections_count = $query->found_posts;
         
-        // Calculate distance traveled (from route data if available)
+        // Get and convert distance
         $miles = get_post_meta( $shift_id, 'total_distance', true );
-        if ( empty( $miles ) ) {
-            $miles = 0; // Default if no distance is recorded
-        }
+        $miles = !empty( $miles ) ? floatval( $miles ) : 0;
+        
+        // Get and convert time from seconds to hours
+        $total_time = get_post_meta( $shift_id, 'total_time', true );
+        $hours = !empty( $total_time ) ? floatval( $total_time ) / 3600 : 0; // Convert seconds to hours
         
         return array(
             'collections' => $collections_count,
-            'miles' => floatval( $miles ),
+            'miles' => $miles,
             'hours' => $hours
         );
     }
@@ -201,7 +201,8 @@ class DriverStatistics {
         );
         
         foreach ( $all_stats as $driver_id => $stats ) {
-            $driver_name = get_user_meta( $driver_id, 'first_name', true ) . ' ' . get_user_meta( $driver_id, 'last_name', true );
+            $user = get_user_by('id', $driver_id);
+            $driver_name = $user->display_name;
             
             $comparative_data['collections_per_hour'][$driver_name] = $stats['summary']['collections_per_hour'];
             $comparative_data['time_per_mile'][$driver_name] = $stats['summary']['time_per_mile'];

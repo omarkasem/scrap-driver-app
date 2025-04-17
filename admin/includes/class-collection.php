@@ -1,6 +1,7 @@
 <?php 
 namespace ScrapDriver\Admin;
 use ScrapDriver\Admin\Shift;
+use ScrapDriver\Admin\Distance;
 class Collection {
 
     public function __construct() {
@@ -181,6 +182,14 @@ class Collection {
                 update_field( 'assigned_driver', $driver_id, $shift_id );
                 update_field( 'shift_date', $shift_date, $shift_id );
                 
+                Distance::calculate_route_distance_static(
+                    $shift_date,
+                    $driver_id,
+                    false,
+                    false,
+                    $shift_id
+                );
+
             }
         }
     }

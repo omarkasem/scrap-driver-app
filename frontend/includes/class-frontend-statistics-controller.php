@@ -21,8 +21,6 @@ class FrontendStatisticsController {
         
         $this->register_routes();
         
-        // Enqueue scripts and styles
-        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
     }
     
     /**
@@ -88,13 +86,12 @@ class FrontendStatisticsController {
         
         // Get statistics
         $stats = $this->driver_statistics->get_driver_stats( $driver_ids, $start_date, $end_date, $interval );
-        
+
         // If comparing multiple drivers, get comparative stats
         $comparative_stats = null;
         if ( count( $driver_ids ) > 1 ) {
             $comparative_stats = $this->driver_statistics->get_comparative_statistics( $driver_ids, $start_date, $end_date );
         }
-        
         wp_send_json_success( array(
             'stats' => $stats,
             'comparative' => $comparative_stats
@@ -186,32 +183,7 @@ class FrontendStatisticsController {
         return $csv;
     }
     
-    /**
-     * Enqueue scripts and styles
-     */
-    public function enqueue_scripts() {
-        // Check if we're on the statistics page
-        global $post;
-        $page_template = get_page_template_slug($post->ID);
-        
-        if ($page_template === 'driver-statistics.php' || has_shortcode($post->post_content, 'driver_statistics')) {
-            // Load Chart.js
-            wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '3.7.0', true);
-            
-            // Load DataTables
-            wp_enqueue_script('datatables', 'https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js', array('jquery'), '1.11.3', true);
-            wp_enqueue_style('datatables-css', 'https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css');
-            
-            // Localize script with data
-            wp_localize_script('scrap-driver-frontend', 'driverStatistics', array(
-                'ajaxUrl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('driver_statistics_nonce'),
-                'currentUserId' => get_current_user_id(),
-                'isAdmin' => current_user_can('administrator') ? 'true' : 'false'
-            ));
-        }
-    }
-    
+
     /**
      * For use with shortcode rendering
      * 

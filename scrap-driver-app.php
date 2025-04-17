@@ -15,9 +15,11 @@ if (!defined('WPINC')) {
 }
 
 // Define plugin constants
+define('SCRAP_DRIVER_SLUG', 'scrap-driver-app');
 define('SCRAP_DRIVER_VERSION', '1.0.4');
 define('SCRAP_DRIVER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SCRAP_DRIVER_PLUGIN_URL', plugin_dir_url(__FILE__));
+
 
 // ACF
 define( 'SCRAP_DRIVER_ACF_PATH', __DIR__ . '/lib/acf/' );

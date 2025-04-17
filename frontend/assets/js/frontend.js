@@ -7,6 +7,13 @@
 jQuery(document).ready(function($) {
     // Initialize the Driver Statistics module
     DriverStatistics.initialize($);
+
+    if($('#driver-selector').length) {  
+        $('#driver-selector').select2({
+            placeholder: 'Select a driver',
+            allowClear: true
+        });
+    }
     
     // Copy to clipboard functionality
     $('.copy-btn').on('click', function() {
@@ -220,7 +227,7 @@ var DriverStatistics = {
         this.setupEventListeners( $ );
         
         // If admin, preselect the first driver
-        if (driverStatistics.isAdmin === 'true') {
+        if (sdaAjax.isAdmin === 'true') {
             var firstDriver = $( '#driver-selector option:first' );
             if (firstDriver.length) {
                 firstDriver.prop( 'selected', true );
@@ -228,7 +235,7 @@ var DriverStatistics = {
         }
         
         // Initialize date pickers
-        this.initializeDatePickers( $ );
+        // this.initializeDatePickers( $ );
         
         // Load statistics with default values
         this.loadStatisticsData( $ );
@@ -275,17 +282,15 @@ var DriverStatistics = {
     resetFilters: function( $ ) {
         // Reset date filters to last 30 days
         var today = new Date();
-        var thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
         
         $( '#end-date' ).val(this.formatDate(today));
-        $( '#start-date' ).val(this.formatDate(thirtyDaysAgo));
+        $( '#start-date' ).val(this.formatDate(today));
         
         // Reset interval to day
         $( '#interval' ).val('day');
         
         // If admin, reset to first driver
-        if (driverStatistics.isAdmin === 'true') {
+        if (sdaAjax.isAdmin === 'true') {
             $( '#driver-selector option' ).prop( 'selected', false );
             $( '#driver-selector option:first' ).prop( 'selected', true );
         }
@@ -313,10 +318,10 @@ var DriverStatistics = {
         // Get form data
         var driverIds = [];
         
-        if (driverStatistics.isAdmin === 'true') {
+        if (sdaAjax.isAdmin === 'true') {
             driverIds = $( '#driver-selector' ).val();
         } else {
-            driverIds = [driverStatistics.currentUserId];
+            driverIds = [sdaAjax.currentUserId];
         }
         
         var startDate = $( '#start-date' ).val();
@@ -325,11 +330,11 @@ var DriverStatistics = {
         
         // Make AJAX request
         jQuery.ajax({
-            url: driverStatistics.ajaxUrl,
+            url: sdaAjax.ajaxurl,
             type: 'POST',
             data: {
                 action: 'get_driver_stats',
-                nonce: driverStatistics.nonce,
+                nonce: sdaAjax.nonce,
                 driver_ids: driverIds,
                 start_date: startDate,
                 end_date: endDate,
@@ -361,8 +366,7 @@ var DriverStatistics = {
         // For each driver, add summary cards
         jQuery.each( stats, function( driverId, driverStats ) {
             var summary = driverStats.summary;
-            console.log(summary);   
-            
+
             // Get driver name
             var driverName = jQuery( '#driver-selector option[value="' + driverId + '"]' ).text();
             if (!driverName) {
@@ -425,6 +429,7 @@ var DriverStatistics = {
     
     // Initialize charts
     initializeCharts: function(stats, comparative, $ ) {
+        console.log(comparative);
         var self = this;
         
         // Destroy any existing charts
@@ -766,10 +771,10 @@ var DriverStatistics = {
         // Get form data
         var driverIds = [];
         
-        if (driverStatistics.isAdmin === 'true') {
+        if (sdaAjax.isAdmin === 'true') {
             driverIds = $( '#driver-selector' ).val();
         } else {
-            driverIds = [driverStatistics.currentUserId];
+            driverIds = [sdaAjax.currentUserId];
         }
         
         var startDate = $( '#start-date' ).val();
@@ -777,11 +782,11 @@ var DriverStatistics = {
         
         // Make AJAX request
         jQuery.ajax({
-            url: driverStatistics.ajaxUrl,
+            url: sdaAjax.ajaxurl,
             type: 'POST',
             data: {
                 action: 'export_statistics',
-                nonce: driverStatistics.nonce,
+                nonce: sdaAjax.nonce,
                 driver_ids: driverIds,
                 start_date: startDate,
                 end_date: endDate,

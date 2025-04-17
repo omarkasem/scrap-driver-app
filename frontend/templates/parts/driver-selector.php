@@ -14,4 +14,3 @@ $driver_users = get_users( array( 'role' => 'driver' ) );
         </option>
     <?php endforeach; ?>
 </select>
-<p class="description"><?php _e( 'Hold Ctrl/Cmd to select multiple drivers', 'scrap-driver' ); ?></p> 
