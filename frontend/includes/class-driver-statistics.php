@@ -168,13 +168,20 @@ class DriverStatistics {
         $query = new WP_Query( $args );
         $collections_count = $query->found_posts;
         
-        // Get and convert distance
-        $miles = get_post_meta( $shift_id, 'total_distance', true );
-        $miles = !empty( $miles ) ? floatval( $miles ) : 0;
+        // Make sure collections_count is specific to this driver by checking the assigned_driver
+        // If collections_count > 0, we should have miles and hours too
+        $miles = 0;
+        $hours = 0;
         
-        // Get and convert time from seconds to hours
-        $total_time = get_post_meta( $shift_id, 'total_time', true );
-        $hours = !empty( $total_time ) ? floatval( $total_time ) / 3600 : 0; // Convert seconds to hours
+        if ( $collections_count > 0 || get_post_meta( $shift_id, 'assigned_driver', true ) == $driver_id ) {
+            // Get and convert distance
+            $miles = get_post_meta( $shift_id, 'total_distance', true );
+            $miles = !empty( $miles ) ? floatval( $miles ) : 0;
+            
+            // Get and convert time from seconds to hours
+            $total_time = get_post_meta( $shift_id, 'total_time', true );
+            $hours = !empty( $total_time ) ? floatval( $total_time ) / 3600 : 0; // Convert seconds to hours
+        }
         
         return array(
             'collections' => $collections_count,
