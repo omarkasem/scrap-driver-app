@@ -139,8 +139,17 @@ class DriverStatistics {
         $shift_date = get_post_meta( $shift_id, 'shift_date', true );
         $shift_start = get_post_meta( $shift_id, 'shift_start', true );
         $shift_end = get_post_meta( $shift_id, 'shift_end', true );
+        $end_time = get_post_meta( $shift_id, 'end_time', true );
         $driver_id = get_post_meta( $shift_id, 'assigned_driver', true );
-        
+
+        // check if it has end date if not then return zero values
+        if ( empty( $end_time ) ) {
+            return array(
+                'collections' => 0,
+                'miles' => 0,
+                'hours' => 0
+            );
+        }
         // Get collections completed during this shift
         $args = array(
             'post_type' => 'sda-collection',
@@ -168,20 +177,13 @@ class DriverStatistics {
         $query = new WP_Query( $args );
         $collections_count = $query->found_posts;
         
-        // Make sure collections_count is specific to this driver by checking the assigned_driver
-        // If collections_count > 0, we should have miles and hours too
-        $miles = 0;
-        $hours = 0;
+        // Get and convert distance
+        $miles = get_post_meta( $shift_id, 'total_distance', true );
+        $miles = !empty( $miles ) ? floatval( $miles ) : 0;
         
-        if ( $collections_count > 0 || get_post_meta( $shift_id, 'assigned_driver', true ) == $driver_id ) {
-            // Get and convert distance
-            $miles = get_post_meta( $shift_id, 'total_distance', true );
-            $miles = !empty( $miles ) ? floatval( $miles ) : 0;
-            
-            // Get and convert time from seconds to hours
-            $total_time = get_post_meta( $shift_id, 'total_time', true );
-            $hours = !empty( $total_time ) ? floatval( $total_time ) / 3600 : 0; // Convert seconds to hours
-        }
+        // Get and convert time from seconds to hours
+        $total_time = get_post_meta( $shift_id, 'total_time', true );
+        $hours = !empty( $total_time ) ? floatval( $total_time ) / 3600 : 0; // Convert seconds to hours
         
         return array(
             'collections' => $collections_count,
