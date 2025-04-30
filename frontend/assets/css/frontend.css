@@ -420,10 +420,10 @@ table.dataTable tbody td {
 }
 
 /* Astra theme specific adjustments */
-.ast-container {
+/* .ast-container {
     max-width: none !important;
     padding: 0 !important;
-}
+} */
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
