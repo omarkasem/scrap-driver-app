@@ -16,33 +16,33 @@ get_header();
     // Access control check
     $controller = new FrontendStatisticsController();
     if ( !$controller->can_view_statistics() ) {
-        include( plugin_dir_path( __FILE__ ) . 'parts/access-denied.php' );
+        include( plugin_dir_path( __FILE__ ) . 'parts/statistics/access-denied.php' );
     } else {
         // Include filters
-        include( plugin_dir_path( __FILE__ ) . 'parts/driver-statistics-filters.php' );
+        include( plugin_dir_path( __FILE__ ) . 'parts/statistics/driver-statistics-filters.php' );
         
         // Include summary section
         echo '<div id="statistics-summary-container">';
-        include( plugin_dir_path( __FILE__ ) . 'parts/driver-statistics-summary.php' );
+        include( plugin_dir_path( __FILE__ ) . 'parts/statistics/driver-statistics-summary.php' );
         echo '</div>';
         
         // Include charts section
         echo '<div class="sda-accordion-section">';
         echo '<div class="sda-accordion-header"><h2>Performance Charts</h2><div class="sda-accordion-icon"></div></div>';
         echo '<div class="sda-accordion-content"><div class="accordion-content-inner">';
-        include( plugin_dir_path( __FILE__ ) . 'parts/driver-statistics-charts.php' );
+        include( plugin_dir_path( __FILE__ ) . 'parts/statistics/driver-statistics-charts.php' );
         echo '</div></div></div>';
         
         // Include table section
         echo '<div class="sda-accordion-section">';
         echo '<div class="sda-accordion-header"><h2>Detailed Statistics</h2><div class="sda-accordion-icon"></div></div>';
         echo '<div class="sda-accordion-content"><div class="accordion-content-inner">';
-        include( plugin_dir_path( __FILE__ ) . 'parts/driver-statistics-table.php' );
+        include( plugin_dir_path( __FILE__ ) . 'parts/statistics/driver-statistics-table.php' );
         echo '</div></div></div>';
         
         // Include export options
         echo '<div class="export-container">';
-        include( plugin_dir_path( __FILE__ ) . 'parts/export-options.php' );
+        include( plugin_dir_path( __FILE__ ) . 'parts/statistics/export-options.php' );
         echo '</div>';
     }
     ?>
