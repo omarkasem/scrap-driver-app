@@ -65,7 +65,7 @@ if ($is_driver) {
 $collections = new WP_Query($args);
 ?>
 
-<div class="wrap sda-collections-list">
+<div class="wrap sda-collections-list" <?php if($is_shortcode) { echo 'style="margin:0;padding:0;"'; } ?>>
     <?php if(!$is_shortcode) { ?>
         <h1><?php _e("Today's Collections", 'scrap-driver'); ?></h1>
     <?php } ?>

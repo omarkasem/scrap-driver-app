@@ -238,7 +238,9 @@ var DriverStatistics = {
         // this.initializeDatePickers( $ );
         
         // Load statistics with default values
-        this.loadStatisticsData( $ );
+        if($('.driver-statistics-dashboard').length) {
+            this.loadStatisticsData( $ );
+        }
     },
     
     // Initialize date pickers
