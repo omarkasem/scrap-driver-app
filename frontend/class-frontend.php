@@ -22,7 +22,12 @@ class Frontend {
     public function render_todays_collections_shortcode() {
         ob_start();
         $is_shortcode = true;
+
+        echo '<div class="sda-accordion-section">';
+        echo '<div class="sda-accordion-header"><h2>Today\'s Collections</h2><div class="sda-accordion-icon"></div></div>';
+        echo '<div class="sda-accordion-content"><div class="accordion-content-inner">';
         include SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-todays-collections.php';
+        echo '</div></div></div>';
         return ob_get_clean();
     }
 
@@ -104,15 +109,15 @@ class Frontend {
         if (is_page()) {
             $page_template = get_page_template_slug();
 
-            if ('view-collections.php' === $page_template || 
-                'view-todays-collections.php' === $page_template || 
-                'view-driver-dashboard.php' === $page_template) {
+            // if ('view-collections.php' === $page_template || 
+            //     'view-todays-collections.php' === $page_template || 
+            //     'view-driver-dashboard.php' === $page_template) {
                 wp_enqueue_style(SCRAP_DRIVER_SLUG . '-datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
                 wp_enqueue_script(SCRAP_DRIVER_SLUG . '-datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
-            }
+            // }
             
             // Add DataTables and Chart.js for driver statistics page
-            if ('driver-statistics.php' === $page_template) {
+            // if ('driver-statistics.php' === $page_template) {
                 wp_enqueue_style(SCRAP_DRIVER_SLUG . '-datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/datatables.min.css');
                 wp_enqueue_script(SCRAP_DRIVER_SLUG . '-datatables', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/datatables.min.js', array('jquery'), null, true);
                 wp_enqueue_script(SCRAP_DRIVER_SLUG . '-chartjs', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/chart.js', array(), '3.7.0', true);
@@ -120,7 +125,7 @@ class Frontend {
                 // enqueue select 2
                 wp_enqueue_style(SCRAP_DRIVER_SLUG . '-select2', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/css/select2.min.css');
                 wp_enqueue_script(SCRAP_DRIVER_SLUG . '-select2', SCRAP_DRIVER_PLUGIN_URL . 'frontend/assets/js/select2.min.js', array('jquery'), null, true);
-            }
+            // }
 
         }
 
