@@ -22,24 +22,42 @@ class Frontend {
     public function render_holiday_requests_shortcode($atts) {
         $atts = shortcode_atts(array(
             'title' => __('Holiday Requests', 'scrap-driver'),
+            'accordion' => false,
+            'open' => false,
         ), $atts);
         if (!$this->can_access()) {
             return $this->access_denied();
         }
         ob_start();
-        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/holiday.php';
+        if ( $atts['accordion'] ) {
+            ob_start();
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/holiday.php';
+            $content = ob_get_clean();
+            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
+        } else {
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/holiday.php';
+        }
         return ob_get_clean();
     }
 
     public function render_work_schedule_shortcode($atts) {
         $atts = shortcode_atts(array(
             'title' => __('Work Schedule', 'scrap-driver'),
+            'accordion' => false,
+            'open' => false,
         ), $atts);
         if (!$this->can_access()) {
             return $this->access_denied();
         }
         ob_start();
-        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/work.php';
+        if ( $atts['accordion'] ) {
+            ob_start();
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/work.php';
+            $content = ob_get_clean();
+            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
+        } else {
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/work.php';
+        }
         return ob_get_clean();
     }
 
@@ -63,12 +81,21 @@ class Frontend {
     public function render_annual_leave_shortcode($atts) {
         $atts = shortcode_atts(array(
             'title' => __('Annual Leave', 'scrap-driver'),
+            'accordion' => false,
+            'open' => false,
         ), $atts);
         if (!$this->can_access()) {
             return $this->access_denied();
         }
         ob_start();
-        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/annual-leave.php';
+        if ( $atts['accordion'] ) {
+            ob_start();
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/annual-leave.php';
+            $content = ob_get_clean();
+            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
+        } else {
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/annual-leave.php';
+        }
         return ob_get_clean();
     }
 
@@ -106,6 +133,7 @@ class Frontend {
             return $this->access_denied();
         }
         
+        ob_start();
         if ( $atts['accordion'] ) {
             ob_start();
             require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/table.php';
@@ -132,12 +160,24 @@ class Frontend {
         </div>';
     }
 
-    public function render_start_shift_shortcode() {
+    public function render_start_shift_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'title' => __('Start Shift', 'scrap-driver'),
+            'accordion' => false,
+            'open' => false,
+        ), $atts);
         if (!$this->can_access()) {
             return $this->access_denied();
         }
         ob_start();
-        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/start.php';
+        if ( $atts['accordion'] ) {
+            ob_start();
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/start.php';
+            $content = ob_get_clean();
+            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
+        } else {
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/start.php';
+        }
         return ob_get_clean();
     }
 
