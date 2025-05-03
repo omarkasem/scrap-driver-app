@@ -1,75 +1,4 @@
-<?php
-/**
- * Template Name: Today's Collections
- * 
- * Template for viewing today's collections list
- */
-
-$is_shortcode = isset($is_shortcode) ? $is_shortcode : false;
-if(!$is_shortcode) {
-    get_header();
-}
-
-// Get the current user ID and role
-$current_user_id = get_current_user_id();
-$current_user = wp_get_current_user();
-$is_admin = current_user_can('manage_options');
-$is_driver = in_array('driver', $current_user->roles);
-
-// Check if user has permission to view
-if (!$is_admin && !$is_driver) {
-    ?>
-    <div class="wrap sda-collection-single">
-        <div class="sda-section sda-error-message">
-            <h1><?php _e('Access Denied', 'scrap-driver'); ?></h1>
-            <p><?php _e('Sorry, you do not have permission to view collections. Only administrators and drivers can access this page.', 'scrap-driver'); ?></p>
-            <a href="<?php echo esc_url(home_url()); ?>" class="button">
-                <?php _e('Return to Homepage', 'scrap-driver'); ?>
-            </a>
-        </div>
-    </div>
-    <?php
-    get_footer();
-    exit;
-}
-
-// Get today's date in Y-m-d format
-$today = date('Y-m-d');
-
-// Get collections based on user role
-$args = array(
-    'post_type' => 'sda-collection',
-    'posts_per_page' => -1,
-    'orderby' => 'meta_value',
-    'meta_key' => 'collection_date',
-    'order' => 'ASC',
-    'meta_query' => array(
-        array(
-            'key' => 'collection_date',
-            'value' => $today,
-            'compare' => '=',
-            'type' => 'DATE'
-        )
-    )
-);
-
-// If user is a driver, only show their assigned collections
-if ($is_driver) {
-    $args['meta_query'][] = array(
-        'key' => 'assigned_driver',
-        'value' => $current_user_id,
-        'compare' => '='
-    );
-}
-
-$collections = new WP_Query($args);
-?>
-
-<div class="wrap sda-collections-list" <?php if($is_shortcode) { echo 'style="margin:0;padding:0;"'; } ?>>
-    <?php if(!$is_shortcode) { ?>
-        <h1><?php _e("Today's Collections", 'scrap-driver'); ?></h1>
-    <?php } ?>
-
+<div class="wrap sda-collections-list">
     <div class="sda-section">
         <?php
         // Add this before the table to pass translations to JS
@@ -145,5 +74,3 @@ $collections = new WP_Query($args);
         </table>
     </div>
 </div>
-
-<?php if(!$is_shortcode) { get_footer(); } ?> 

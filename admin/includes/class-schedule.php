@@ -509,7 +509,7 @@ class Schedule {
         }
 
         // Redirect back to schedule page with success message
-        wp_redirect(add_query_arg('holiday_requested', '1', get_permalink($schedule_id)));
+        wp_redirect(add_query_arg('holiday_requested', '1', get_the_permalink()));
         exit;
     }
 

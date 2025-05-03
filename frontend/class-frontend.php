@@ -4,39 +4,182 @@ namespace ScrapDriver;
 class Frontend {
     public function init() {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
-
         add_filter('single_template', array($this, 'load_collection_template'));
         
-        // Change to theme_page_templates filter
-        add_filter('theme_page_templates', array($this, 'add_templates'));
-        add_filter('template_include', array($this, 'load_page_templates'));
-
         $this->includes();
         
         // Register shortcode for driver statistics
         add_shortcode('driver_statistics', array($this, 'render_statistics_shortcode'));
         add_shortcode('todays_collections', array($this, 'render_todays_collections_shortcode'));
-        add_shortcode('view_shifts', array($this, 'render_view_shifts_shortcode'));
+        add_shortcode('all_collections', array($this, 'render_all_collections_shortcode'));
+        add_shortcode('my_shifts', array($this, 'render_my_shifts_shortcode'));
+        add_shortcode('start_shift', array($this, 'render_start_shift_shortcode'));
+        add_shortcode('annual_leave', array($this, 'render_annual_leave_shortcode'));
+        add_shortcode('work_schedule', array($this, 'render_work_schedule_shortcode'));
+        add_shortcode('holiday_requests', array($this, 'render_holiday_requests_shortcode'));
     }
 
-    public function render_todays_collections_shortcode() {
+    public function render_holiday_requests_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'title' => __('Holiday Requests', 'scrap-driver'),
+        ), $atts);
+        if (!$this->can_access()) {
+            return $this->access_denied();
+        }
         ob_start();
-        $is_shortcode = true;
-
-        echo '<div class="sda-accordion-section">';
-        echo '<div class="sda-accordion-header"><h2>Today\'s Collections</h2><div class="sda-accordion-icon"></div></div>';
-        echo '<div class="sda-accordion-content"><div class="accordion-content-inner">';
-        include SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-todays-collections.php';
-        echo '</div></div></div>';
+        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/holiday.php';
         return ob_get_clean();
     }
 
-    public function render_view_shifts_shortcode() {
+    public function render_work_schedule_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'title' => __('Work Schedule', 'scrap-driver'),
+        ), $atts);
+        if (!$this->can_access()) {
+            return $this->access_denied();
+        }
         ob_start();
-        $is_shortcode = true;
-        include SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-shifts.php';
+        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/work.php';
         return ob_get_clean();
     }
+
+    public static function get_driver_schedule() {
+        $current_user_id = get_current_user_id();
+        $args = array(
+            'post_type' => 'driver_schedule',
+            'meta_key' => 'driver_id',
+            'meta_value' => $current_user_id,
+            'posts_per_page' => 1,
+            'fields' => 'ids',
+        );
+        
+        $holiday_requests = get_posts($args);
+        if (empty($holiday_requests)) {
+            return;
+        }
+        return $holiday_requests[0];
+    }
+
+    public function render_annual_leave_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'title' => __('Annual Leave', 'scrap-driver'),
+        ), $atts);
+        if (!$this->can_access()) {
+            return $this->access_denied();
+        }
+        ob_start();
+        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/annual-leave.php';
+        return ob_get_clean();
+    }
+
+    public function render_all_collections_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'title' => __('All Collections', 'scrap-driver'),
+            'accordion' => false,
+            'open' => false,
+        ), $atts);
+        if (!$this->can_access()) {
+            return $this->access_denied();
+        }
+        
+        ob_start();
+        $view_all = true;
+        if ( $atts['accordion'] ) {
+            ob_start();
+            $view_all = true;
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
+            $content = ob_get_clean();
+            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
+        } else {
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
+        }
+        return ob_get_clean();
+    }
+
+    public function render_my_shifts_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'title' => __('My Shifts', 'scrap-driver'),
+            'accordion' => false,
+            'open' => false,
+        ), $atts);
+        if (!$this->can_access()) {
+            return $this->access_denied();
+        }
+        
+        if ( $atts['accordion'] ) {
+            ob_start();
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/table.php';
+            $content = ob_get_clean();
+            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
+        } else {
+            ob_start();
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/table.php';
+        }
+        
+        return ob_get_clean();
+    }
+
+    public function render_accordion_section($title, $content, $open = false) {
+        $open_class = $open ? 'open' : '';
+        return '<div class="sda-accordion-section ' . $open_class . '">
+            <div class="sda-accordion-header">
+                <h2>' . $title . '</h2>
+                <span class="sda-accordion-icon"></span>
+            </div>
+            <div class="sda-accordion-content">
+                ' . $content . '
+            </div>
+        </div>';
+    }
+
+    public function render_start_shift_shortcode() {
+        if (!$this->can_access()) {
+            return $this->access_denied();
+        }
+        ob_start();
+        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/start.php';
+        return ob_get_clean();
+    }
+
+
+    public function render_todays_collections_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'title' => __('Today\'s Collections', 'scrap-driver'),
+            'accordion' => false,
+            'open' => false,
+        ), $atts);
+        if (!$this->can_access()) {
+            return $this->access_denied();
+        }
+        
+        if ( $atts['accordion'] ) {
+            ob_start();
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
+            $content = ob_get_clean();
+            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
+        } else {
+            ob_start();
+            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
+        }
+        return ob_get_clean();
+    }
+
+    public function can_access() {
+        $current_user = wp_get_current_user();
+        $is_admin = current_user_can('manage_options');
+        $is_driver = in_array('driver', $current_user->roles);
+
+        if (!$is_admin && !$is_driver) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function access_denied() {
+        require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/global/access-denied.php';
+    }
+
 
     public function includes() {
         require_once plugin_dir_path(__FILE__) . 'includes/class-collection.php';
@@ -44,53 +187,7 @@ class Frontend {
         require_once plugin_dir_path(__FILE__) . 'includes/class-frontend-statistics-controller.php';
     }
 
-    /**
-     * Add the page templates to the dropdown
-     */
-    public function add_templates($templates) {
-        $templates['view-collections.php'] = __('Collections List', 'scrap-driver');
-        $templates['view-todays-collections.php'] = __('Today\'s Collections', 'scrap-driver');
-        $templates['view-driver-dashboard.php'] = __('Driver Dashboard', 'scrap-driver');
-        $templates['driver-statistics.php'] = __('Driver Statistics', 'scrap-driver');
-        return $templates;
-    }
 
-    public function load_page_templates($template) {
-        // Get the template selected for the page
-        if (is_page()) {
-            $page_template = get_page_template_slug();
-            
-            if ('view-collections.php' === $page_template) {
-                $custom_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
-                if (file_exists($custom_template)) {
-                    return $custom_template;
-                }
-            }
-
-            if ('view-todays-collections.php' === $page_template) {
-                $custom_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-todays-collections.php';
-                if (file_exists($custom_template)) {
-                    return $custom_template;
-                }
-            }
-            
-            if ('view-driver-dashboard.php' === $page_template) {
-                $custom_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-driver-dashboard.php';
-                if (file_exists($custom_template)) {
-                    return $custom_template;
-                }
-            }
-            
-            if ('driver-statistics.php' === $page_template) {
-                $custom_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/driver-statistics.php';
-                if (file_exists($custom_template)) {
-                    return $custom_template;
-                }
-            }
-        }
-        
-        return $template;
-    }
 
     public function load_collection_template($template) {
         global $post;
