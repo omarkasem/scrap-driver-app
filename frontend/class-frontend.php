@@ -142,23 +142,23 @@ class Frontend {
     }
 
 
-    public function render_todays_collections_shortcode($atts) {
-        $atts = shortcode_atts(array(
-            'title' => __('Today\'s Collections', 'scrap-driver'),
+    public function render_todays_collections_shortcode( $atts ) {
+        $atts = shortcode_atts( array(
+            'title' => __( 'Today\'s Collections', 'scrap-driver' ),
             'accordion' => false,
             'open' => false,
-        ), $atts);
-        if (!$this->can_access()) {
+        ), $atts );
+        if ( !$this->can_access() ) {
             return $this->access_denied();
         }
         
+        ob_start();
         if ( $atts['accordion'] ) {
             ob_start();
             require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
             $content = ob_get_clean();
             echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
         } else {
-            ob_start();
             require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
         }
         return ob_get_clean();
