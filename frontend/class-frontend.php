@@ -17,6 +17,32 @@ class Frontend {
         add_shortcode('annual_leave', array($this, 'render_annual_leave_shortcode'));
         add_shortcode('work_schedule', array($this, 'render_work_schedule_shortcode'));
         add_shortcode('holiday_requests', array($this, 'render_holiday_requests_shortcode'));
+
+        add_filter('page_template', array($this, 'load_shifts_template'));
+        add_filter('theme_page_templates', array($this, 'add_templates'));
+    }
+
+
+
+    /**
+     * Add shifts template to page templates
+     */
+    public function add_templates($templates) {
+        $templates['driver-statistics.php'] = __('Driver Statistics', 'scrap-driver');
+        return $templates;
+    }
+
+    /**
+     * Load shifts list template
+     */
+    public function load_shifts_template($template) {
+        if (is_page_template('driver-statistics.php')) {
+            $new_template = SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/driver-statistics.php';
+            if (file_exists($new_template)) {
+                return $new_template;
+            }
+        }
+        return $template;
     }
 
     public function render_holiday_requests_shortcode($atts) {
