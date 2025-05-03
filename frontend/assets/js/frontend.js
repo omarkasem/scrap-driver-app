@@ -47,8 +47,8 @@ jQuery(document).ready(function($) {
         }
     });
 
-    if ($('#collections-table').length) {
-        $('#collections-table').DataTable({
+    if ($('.collections-table').length) {
+        $('.collections-table').DataTable({
             order: [[0, 'asc']], // Sort by Order column by default
             pageLength: 25,
             responsive: true,

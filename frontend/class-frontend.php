@@ -31,11 +31,11 @@ class Frontend {
         ob_start();
         if ( $atts['accordion'] ) {
             ob_start();
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/holiday.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/holiday.php';
             $content = ob_get_clean();
             echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
         } else {
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/holiday.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/holiday.php';
         }
         return ob_get_clean();
     }
@@ -52,11 +52,11 @@ class Frontend {
         ob_start();
         if ( $atts['accordion'] ) {
             ob_start();
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/work.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/work.php';
             $content = ob_get_clean();
             echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
         } else {
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/work.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/work.php';
         }
         return ob_get_clean();
     }
@@ -90,38 +90,16 @@ class Frontend {
         ob_start();
         if ( $atts['accordion'] ) {
             ob_start();
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/annual-leave.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/annual-leave.php';
             $content = ob_get_clean();
             echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
         } else {
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/annual-leave.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/schedule/annual-leave.php';
         }
         return ob_get_clean();
     }
 
-    public function render_all_collections_shortcode($atts) {
-        $atts = shortcode_atts(array(
-            'title' => __('All Collections', 'scrap-driver'),
-            'accordion' => false,
-            'open' => false,
-        ), $atts);
-        if (!$this->can_access()) {
-            return $this->access_denied();
-        }
-        
-        ob_start();
-        $view_all = true;
-        if ( $atts['accordion'] ) {
-            ob_start();
-            $view_all = true;
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
-            $content = ob_get_clean();
-            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
-        } else {
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
-        }
-        return ob_get_clean();
-    }
+
 
     public function render_my_shifts_shortcode($atts) {
         $atts = shortcode_atts(array(
@@ -136,12 +114,12 @@ class Frontend {
         ob_start();
         if ( $atts['accordion'] ) {
             ob_start();
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/table.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/table.php';
             $content = ob_get_clean();
             echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
         } else {
             ob_start();
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/table.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/table.php';
         }
         
         return ob_get_clean();
@@ -172,11 +150,35 @@ class Frontend {
         ob_start();
         if ( $atts['accordion'] ) {
             ob_start();
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/start.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/start.php';
             $content = ob_get_clean();
             echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
         } else {
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/start.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/shifts/start.php';
+        }
+        return ob_get_clean();
+    }
+
+    public function render_all_collections_shortcode( $atts ) {
+        $atts = shortcode_atts( array(
+            'title' => __( 'All Collections', 'scrap-driver' ),
+            'accordion' => false,
+            'open' => false,
+        ), $atts );
+        if ( !$this->can_access() ) {
+            return $this->access_denied();
+        }
+        
+        ob_start();
+        $view_all = true;
+        if ( $atts['accordion'] ) {
+            ob_start();
+            $view_all = true;
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/collection/table.php';
+            $content = ob_get_clean();
+            echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
+        } else {
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/collection/table.php';
         }
         return ob_get_clean();
     }
@@ -193,13 +195,15 @@ class Frontend {
         }
         
         ob_start();
+        $view_all = false;
         if ( $atts['accordion'] ) {
             ob_start();
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
+            $view_all = false;
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/collection/table.php';
             $content = ob_get_clean();
             echo $this->render_accordion_section( $atts['title'], $content, $atts['open'] );
         } else {
-            require_once SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-collections.php';
+            require SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/parts/collection/table.php';
         }
         return ob_get_clean();
     }
