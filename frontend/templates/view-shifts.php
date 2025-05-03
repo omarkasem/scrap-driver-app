@@ -3,7 +3,10 @@
  * Template Name: Driver Shifts List
  */
 
-get_header();
+$is_shortcode = isset($is_shortcode) ? $is_shortcode : false;
+if(!$is_shortcode) {
+    get_header();
+}
 
 // Get current user info
 $current_user = wp_get_current_user();
@@ -23,8 +26,12 @@ if (!$is_driver) {
         </div>
     </div>
     <?php
-    get_footer();
-    exit;
+    if(!$is_shortcode) {
+        get_footer();
+        exit;
+    }else{
+        return;
+    }
 }
 
 // Get active shift status
@@ -67,7 +74,9 @@ $shifts = new WP_Query($args);
 ?>
 
 <div class="wrap sda-shifts-list">
-    <h1><?php _e('My Shifts', 'scrap-driver'); ?></h1>
+    <?php if(!$is_shortcode) { ?>
+        <h1><?php _e('My Shifts', 'scrap-driver'); ?></h1>
+    <?php } ?>
 
     <div class="sda-section">
         <?php 
@@ -107,7 +116,9 @@ $shifts = new WP_Query($args);
     </div>
 
     <div class="sda-section">
-        <h2><?php _e('My Shifts', 'scrap-driver'); ?></h2>
+        <?php if(!$is_shortcode) { ?>
+            <h2><?php _e('My Shifts', 'scrap-driver'); ?></h2>
+        <?php } ?>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
@@ -146,4 +157,4 @@ $shifts = new WP_Query($args);
     </div>
 </div>
 
-<?php get_footer(); ?> 
+<?php if(!$is_shortcode) { get_footer(); } ?> 

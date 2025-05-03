@@ -5,7 +5,10 @@
  * Template for viewing today's collections list
  */
 
-get_header();
+$is_shortcode = isset($is_shortcode) ? $is_shortcode : false;
+if(!$is_shortcode) {
+    get_header();
+}
 
 // Get the current user ID and role
 $current_user_id = get_current_user_id();
@@ -63,7 +66,9 @@ $collections = new WP_Query($args);
 ?>
 
 <div class="wrap sda-collections-list">
-    <h1><?php _e("Today's Collections", 'scrap-driver'); ?></h1>
+    <?php if(!$is_shortcode) { ?>
+        <h1><?php _e("Today's Collections", 'scrap-driver'); ?></h1>
+    <?php } ?>
 
     <div class="sda-section">
         <?php
@@ -141,4 +146,4 @@ $collections = new WP_Query($args);
     </div>
 </div>
 
-<?php get_footer(); ?> 
+<?php if(!$is_shortcode) { get_footer(); } ?> 

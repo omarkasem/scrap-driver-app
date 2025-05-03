@@ -15,6 +15,22 @@ class Frontend {
         
         // Register shortcode for driver statistics
         add_shortcode('driver_statistics', array($this, 'render_statistics_shortcode'));
+        add_shortcode('todays_collections', array($this, 'render_todays_collections_shortcode'));
+        add_shortcode('view_shifts', array($this, 'render_view_shifts_shortcode'));
+    }
+
+    public function render_todays_collections_shortcode() {
+        ob_start();
+        $is_shortcode = true;
+        include SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-todays-collections.php';
+        return ob_get_clean();
+    }
+
+    public function render_view_shifts_shortcode() {
+        ob_start();
+        $is_shortcode = true;
+        include SCRAP_DRIVER_PLUGIN_DIR . 'frontend/templates/view-shifts.php';
+        return ob_get_clean();
     }
 
     public function includes() {
