@@ -638,6 +638,26 @@ class DriverSchedule {
     }
 }
 
+class LiveMap {
+    constructor() {
+        this.map = null;
+        this.defaultLocation = { lat: 51.509865, lng: -0.118092 }; // London as default
+
+        // Initialize only if we're on the live location page
+        if ( document.getElementById( 'driver-live-map' ) ) {
+            // Map will be initialized by the Google Maps callback
+        }
+    }
+
+    initMap() {
+        // Create basic map instance
+        this.map = new google.maps.Map( document.getElementById( 'driver-live-map' ), {
+            zoom: 10,
+            center: this.defaultLocation
+        });
+    }
+}
+
 // Initialize when DOM is ready
 jQuery(document).ready(function() {
     // Store routePlanning instance globally
@@ -645,3 +665,12 @@ jQuery(document).ready(function() {
     new Distance();
     new DriverSchedule();
 });
+
+window.liveMap = new LiveMap();
+
+// Google Maps callback function
+function initDriverMap() {
+    if (window.liveMap) {
+        window.liveMap.initMap();
+    }
+}

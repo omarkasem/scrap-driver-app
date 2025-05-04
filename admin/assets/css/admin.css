@@ -371,3 +371,22 @@
         transform: none;
     }
 }
+
+/* Live Location Map Styles */
+.live-location-container {
+    margin-top: 20px;
+}
+
+#driver-live-map {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+@media screen and (max-width: 782px) {
+    [data-tooltip]:hover:after {
+        left: auto;
+        right: 0;
+        transform: none;
+    }
+}

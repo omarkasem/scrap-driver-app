@@ -55,11 +55,37 @@ class LocationView {
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
             <div class="live-location-container">
-                <!-- Live location content will go here -->
-                <p><?php _e( 'View drivers\' live locations on the map.', 'scrap-driver' ); ?></p>
+                <div id="driver-live-map" style="height: 600px; width: 100%;"></div>
             </div>
         </div>
         <?php
+
+    }
+    
+    /**
+     * Get tracking data for the last hour
+     * 
+     * @param int $limit Optional. Number of records to return. Default 100.
+     * @return array Array of tracking data
+     */
+    public function get_last_hour_tracking_data( $limit = 100 ) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'scrap_driver_tracking';
+        $one_hour_ago = date( 'Y-m-d H:i:s', strtotime( '-1 hour' ) );
+        
+        $query = $wpdb->prepare(
+            "SELECT * FROM {$table_name} 
+            WHERE timestamp >= %s 
+            ORDER BY timestamp DESC 
+            LIMIT %d",
+            $one_hour_ago,
+            $limit
+        );
+        
+        $tracking_data = $wpdb->get_results( $query, ARRAY_A );
+        
+        return $tracking_data;
     }
     
     /**

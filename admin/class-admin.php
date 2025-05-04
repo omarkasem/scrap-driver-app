@@ -72,6 +72,19 @@ class Admin {
             'error' => __('Error optimizing route', 'scrap-driver-app')
         ));
 
+        $api_key = get_field( 'google_maps_api_key', 'option' );
+
+        // Load Google Maps script if API key is available
+        if ( !empty( $api_key ) ) {
+            wp_enqueue_script(
+                'google-maps-api',
+                'https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&callback=initDriverMap',
+                array(),
+                null,
+                true
+            );
+        }
+
 
         // Enqueue admin CSS
         wp_enqueue_style(
