@@ -15,6 +15,7 @@ class Admin {
         require_once plugin_dir_path(__FILE__) . 'includes/class-schedule.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-collection.php';
         require_once plugin_dir_path(__FILE__) . 'includes/class-tracking.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-location-view.php';
     }
 
     public function init() {
