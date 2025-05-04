@@ -86,6 +86,7 @@ class Collection {
         // Get current collection's order
         $current_order = $orders[$collection_id] ?? 0;
 
+
         // Check for any incomplete collections with lower order numbers
         foreach ($driver_collections as $collection) {
             $status = get_field('status', $collection->ID);

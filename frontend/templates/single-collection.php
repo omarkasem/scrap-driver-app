@@ -50,7 +50,7 @@ while (have_posts()) :
                         $shifts_page_url = home_url();
                     }
                     ?>
-                    <a href="<?php echo esc_url($shifts_page_url); ?>" class="button">
+                    <a href="<?php echo esc_url(home_url().'/shifts'); ?>" class="button">
                         <?php _e('Go to My Shifts Page', 'scrap-driver'); ?>
                     </a>
                 </div>
