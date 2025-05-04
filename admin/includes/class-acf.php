@@ -52,11 +52,11 @@ class Acf {
         if( function_exists('acf_add_options_page') ) {
             acf_add_options_page(array(
                 'page_title'    => 'Scrap Driver Settings',
-                'menu_title'    => 'Scrap Driver',
+                'menu_title'    => 'Settings',
                 'menu_slug'     => 'scrap-driver-settings',
                 'capability'    => 'manage_options',
                 'redirect'      => false,
-                'parent_slug'   => 'options-general.php'  // This places it under Settings
+                'parent_slug'   => 'driver-app'  // This places it under Settings
             ));
         }
     }

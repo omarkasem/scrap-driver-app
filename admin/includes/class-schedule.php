@@ -10,7 +10,6 @@ class Schedule {
      * Constructor
      */
     public function __construct() {
-        add_action('init', array($this, 'register_driver_schedule_cpt'));
         add_action('user_register', array($this, 'create_schedule_for_new_driver'));
         add_action('profile_update', array($this, 'check_driver_schedule_on_update'), 10, 2);
         add_action('save_post_driver_schedule', array($this, 'force_driver_name_as_title'), 10, 3);
@@ -54,46 +53,6 @@ class Schedule {
         return $field;
     }
 
-    /**
-     * Register Driver Schedule CPT
-     */
-    public function register_driver_schedule_cpt() {
-        $labels = array(
-            'name'               => __('Driver Schedules', 'mdtl'),
-            'singular_name'      => __('Driver Schedule', 'mdtl'),
-            'menu_name'          => __('Driver Schedules', 'mdtl'),
-            'add_new'            => __('Add New', 'mdtl'),
-            'add_new_item'       => __('Add New Driver Schedule', 'mdtl'),
-            'edit_item'          => __('Edit Driver Schedule', 'mdtl'),
-            'new_item'           => __('New Driver Schedule', 'mdtl'),
-            'view_item'          => __('View Driver Schedule', 'mdtl'),
-            'search_items'       => __('Search Driver Schedules', 'mdtl'),
-            'not_found'          => __('No driver schedules found', 'mdtl'),
-            'not_found_in_trash' => __('No driver schedules found in trash', 'mdtl'),
-        );
-        $args = array(
-            'labels'              => $labels,
-            'public'              => true,
-            'exclude_from_search' => true,
-            'publicly_queryable'  => true,
-            'show_ui'             => true,
-            'show_in_menu'        => true,
-            'query_var'           => true,
-            'rewrite'             => array('slug' => 'driver', 'with_front' => false),
-            'capability_type'     => 'post',
-            'has_archive'         => false,
-            'hierarchical'        => false,
-            'menu_position'       => null,
-            'supports'            => array('title'),
-            'menu_icon'           => 'dashicons-calendar-alt',
-            'capabilities'        => array(
-                'create_posts' => 'do_not_allow', // Prevent from creating new posts
-            ),
-            'map_meta_cap'        => true,
-        );
-
-        register_post_type('driver_schedule', $args);
-    }
 
     /**
      * Create schedule for new driver

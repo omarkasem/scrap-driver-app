@@ -3,8 +3,10 @@ namespace ScrapDriver\Admin;
 
 class CPT {
     public function __construct() {
+        add_action('admin_menu', array($this, 'register_driver_app_menu'));
         add_action('init', array($this, 'register_collection_post_type'));
         add_action('init', array($this, 'register_shift_post_type'));
+        add_action('init', array($this, 'register_driver_schedule_cpt'));
         add_action('admin_notices', array($this, 'add_manual_sync_button'));
         add_filter('manage_sda-collection_posts_columns', array($this, 'set_collection_columns'));
         add_action('manage_sda-collection_posts_custom_column', array($this, 'render_collection_columns'), 10, 2);
@@ -16,6 +18,63 @@ class CPT {
         add_filter('manage_sda-shift_posts_columns', array($this, 'set_shift_columns'));
         add_action('manage_sda-shift_posts_custom_column', array($this, 'render_shift_columns'), 10, 2);
     }
+
+    /**
+     * Register the main Driver APP menu
+     */
+    public function register_driver_app_menu() {
+        add_menu_page(
+            __( 'Driver APP', 'scrap-driver' ),
+            __( 'Driver APP', 'scrap-driver' ),
+            'edit_posts',
+            'driver-app',
+            '',
+            'dashicons-car',
+            25
+        );
+    }
+
+    /**
+     * Register Driver Schedule CPT
+     */
+    public function register_driver_schedule_cpt() {
+        $labels = array(
+            'name'               => __('Driver Schedules', 'mdtl'),
+            'singular_name'      => __('Driver Schedule', 'mdtl'),
+            'menu_name'          => __('Driver Schedules', 'mdtl'),
+            'add_new'            => __('Add New', 'mdtl'),
+            'add_new_item'       => __('Add New Driver Schedule', 'mdtl'),
+            'edit_item'          => __('Edit Driver Schedule', 'mdtl'),
+            'new_item'           => __('New Driver Schedule', 'mdtl'),
+            'view_item'          => __('View Driver Schedule', 'mdtl'),
+            'search_items'       => __('Search Driver Schedules', 'mdtl'),
+            'not_found'          => __('No driver schedules found', 'mdtl'),
+            'not_found_in_trash' => __('No driver schedules found in trash', 'mdtl'),
+        );
+        $args = array(
+            'labels'              => $labels,
+            'public'              => true,
+            'exclude_from_search' => true,
+            'publicly_queryable'  => true,
+            'show_ui'             => true,
+            'show_in_menu'        => 'driver-app',
+            'query_var'           => true,
+            'rewrite'             => array('slug' => 'driver', 'with_front' => false),
+            'capability_type'     => 'post',
+            'has_archive'         => false,
+            'hierarchical'        => false,
+            'menu_position'       => null,
+            'supports'            => array('title'),
+            'menu_icon'           => 'dashicons-calendar-alt',
+            'capabilities'        => array(
+                'create_posts' => 'do_not_allow', // Prevent from creating new posts
+            ),
+            'map_meta_cap'        => true,
+        );
+
+        register_post_type('driver_schedule', $args);
+    }
+
 
     public function register_collection_post_type() {
         $labels = array(
@@ -36,12 +95,12 @@ class CPT {
             'labels'              => $labels,
             'public'              => true,
             'show_ui'             => true,
-            'show_in_menu'        => true,
+            'show_in_menu'        => 'driver-app',
             'show_in_nav_menus'   => false,
             'supports'            => array('title'),
             'has_archive'         => false,
             'rewrite'             => array('slug' => 'collection', 'with_front' => false),
-            'menu_icon'           => 'dashicons-database',
+            'menu_position'       => 5,
         );
 
         register_post_type('sda-collection', $args);
@@ -66,15 +125,26 @@ class CPT {
             'labels'              => $labels,
             'public'              => true,
             'show_ui'             => true,
-            'show_in_menu'        => true,
+            'show_in_menu'        => 'driver-app',
             'show_in_nav_menus'   => false,
             'supports'            => array('title'),
             'has_archive'         => false,
             'rewrite'             => array('slug' => 'shift', 'with_front' => false),
-            'menu_icon'           => 'dashicons-clock',
             'capability_type'     => 'post',
             'map_meta_cap'        => true,
         );
+
+        if ( !post_type_exists( 'sda-collection' ) ) {
+            add_menu_page(
+                __( 'Driver APP', 'scrap-driver' ),
+                __( 'Driver APP', 'scrap-driver' ),
+                'edit_posts',
+                'driver-app',
+                '',
+                'dashicons-car',
+                25
+            );
+        }
 
         register_post_type('sda-shift', $args);
     }
