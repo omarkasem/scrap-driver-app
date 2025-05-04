@@ -642,19 +642,164 @@ class LiveMap {
     constructor() {
         this.map = null;
         this.defaultLocation = { lat: 51.509865, lng: -0.118092 }; // London as default
+        this.driverRoutes = []; // Store route polylines
+        this.driverMarkers = []; // Store start markers
+        this.colors = [
+            '#4285F4', // Google Blue
+            '#EA4335', // Google Red
+            '#FBBC05', // Google Yellow
+            '#34A853', // Google Green
+            '#8E44AD', // Purple
+            '#F39C12', // Orange
+            '#1ABC9C', // Turquoise
+            '#E74C3C', // Crimson
+            '#3498DB', // Light Blue
+            '#2ECC71'  // Emerald
+        ];
+        this.bounds = null;
 
         // Initialize only if we're on the live location page
-        if ( document.getElementById( 'driver-live-map' ) ) {
+        if (document.getElementById('driver-live-map')) {
             // Map will be initialized by the Google Maps callback
         }
     }
 
     initMap() {
         // Create basic map instance
-        this.map = new google.maps.Map( document.getElementById( 'driver-live-map' ), {
+        this.map = new google.maps.Map(document.getElementById('driver-live-map'), {
             zoom: 10,
-            center: this.defaultLocation
+            center: this.defaultLocation,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            mapTypeControl: true,
+            fullscreenControl: true,
+            streetViewControl: false
         });
+
+        // Create bounds object
+        this.bounds = new google.maps.LatLngBounds();
+        
+        // Check if we have tracking data
+        console.log(sdaDriversTracking.drivers);
+        if (typeof sdaDriversTracking !== 'undefined' && sdaDriversTracking.drivers) {
+            this.plotDriverRoutes(sdaDriversTracking.drivers);
+        } else {
+            console.log('No driver tracking data available');
+        }
+    }
+    
+    plotDriverRoutes(driversData) {
+        // Create legend container
+        const legendEl = document.getElementById('drivers-legend');
+        if (legendEl) {
+            legendEl.innerHTML = '<h3>Driver Routes</h3><div class="legend-items"></div>';
+            const legendItems = legendEl.querySelector('.legend-items');
+            
+            // Process each driver's data
+            let colorIndex = 0;
+            for (const driverId in driversData) {
+                const driver = driversData[driverId];
+                const points = driver.points;
+                
+                if (points.length > 0) {
+                    // Assign color for this driver
+                    const color = this.colors[colorIndex % this.colors.length];
+                    colorIndex++;
+                    
+                    // Create the route path coordinates
+                    const path = points.map(point => ({
+                        lat: parseFloat(point.latitude),
+                        lng: parseFloat(point.longitude)
+                    }));
+                    
+                    // Update bounds to include all points
+                    path.forEach(point => {
+                        this.bounds.extend(new google.maps.LatLng(point.lat, point.lng));
+                    });
+                    
+                    // Create polyline for the driver's route
+                    const routeLine = new google.maps.Polyline({
+                        path: path,
+                        geodesic: true,
+                        strokeColor: color,
+                        strokeOpacity: 1.0,
+                        strokeWeight: 4
+                    });
+                    
+                    // Add the polyline to the map
+                    routeLine.setMap(this.map);
+                    this.driverRoutes.push(routeLine);
+                    
+                    // Add start marker (first point)
+                    if (path.length > 0) {
+                        const startPoint = path[0];
+                        const startTime = points[0].timestamp;
+                        const formattedTime = this.formatTime(startTime);
+                        
+                        // Create car marker
+                        const marker = new google.maps.Marker({
+                            position: startPoint,
+                            map: this.map,
+                            title: `Start of shift - ${driver.driver_name} (${formattedTime})`,
+                            icon: {
+                                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                                scale: 6,
+                                fillColor: color,
+                                fillOpacity: 1,
+                                strokeWeight: 1,
+                                strokeColor: '#FFFFFF',
+                                rotation: this.calculateHeading(path)
+                            }
+                        });
+                        
+                        this.driverMarkers.push(marker);
+                    }
+                    
+                    // Add to legend
+                    const legendItem = document.createElement('div');
+                    legendItem.className = 'legend-item';
+                    legendItem.innerHTML = `
+                        <span class="color-box" style="background-color: ${color};"></span>
+                        <span class="driver-name">${driver.driver_name}</span>
+                        <span class="point-count">(${points.length} points)</span>
+                    `;
+                    
+                    // Add click handler to center on route
+                    legendItem.addEventListener('click', () => {
+                        const driverBounds = new google.maps.LatLngBounds();
+                        path.forEach(point => {
+                            driverBounds.extend(new google.maps.LatLng(point.lat, point.lng));
+                        });
+                        this.map.fitBounds(driverBounds);
+                    });
+                    
+                    legendItems.appendChild(legendItem);
+                }
+            }
+        }
+        
+        // Fit map to show all routes
+        if (!this.bounds.isEmpty()) {
+            this.map.fitBounds(this.bounds);
+        }
+    }
+    
+    // Calculate heading based on first two points (for marker rotation)
+    calculateHeading(path) {
+        if (path.length < 2) return 0;
+        
+        const p1 = path[0];
+        const p2 = path[1];
+        
+        return google.maps.geometry.spherical.computeHeading(
+            new google.maps.LatLng(p1.lat, p1.lng),
+            new google.maps.LatLng(p2.lat, p2.lng)
+        );
+    }
+    
+    // Format timestamp for display
+    formatTime(timestamp) {
+        const date = new Date(timestamp.replace(' ', 'T'));
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 }
 

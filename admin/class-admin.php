@@ -78,7 +78,7 @@ class Admin {
         if ( !empty( $api_key ) ) {
             wp_enqueue_script(
                 'google-maps-api',
-                'https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&callback=initDriverMap',
+                'https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=geometry,places&callback=initDriverMap',
                 array(),
                 null,
                 true

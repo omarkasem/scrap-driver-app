@@ -390,3 +390,55 @@
         transform: none;
     }
 }
+
+.drivers-legend {
+    margin: 15px 0;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.drivers-legend h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f8f8;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.legend-item:hover {
+    background: #f0f0f0;
+}
+
+.color-box {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    border-radius: 3px;
+}
+
+.driver-name {
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.point-count {
+    color: #767676;
+    font-size: 0.9em;
+}
