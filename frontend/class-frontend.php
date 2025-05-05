@@ -129,7 +129,7 @@ class Frontend {
 
     public function render_my_shifts_shortcode($atts) {
         $atts = shortcode_atts(array(
-            'title' => __('My Shifts', 'scrap-driver'),
+            'title' => __('All Shifts', 'scrap-driver'),
             'accordion' => false,
             'open' => false,
         ), $atts);
@@ -166,7 +166,7 @@ class Frontend {
 
     public function render_start_shift_shortcode($atts) {
         $atts = shortcode_atts(array(
-            'title' => __('Start Shift', 'scrap-driver'),
+            'title' => __('Today\'s Shifts', 'scrap-driver'),
             'accordion' => false,
             'open' => false,
         ), $atts);
