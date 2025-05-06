@@ -729,29 +729,64 @@ class LiveMap {
                     routeLine.setMap(this.map);
                     this.driverRoutes.push(routeLine);
                     
-                    // Add start marker (first point)
+                    // Add start marker (black circle)
                     if (path.length > 0) {
                         const startPoint = path[0];
                         const startTime = points[0].timestamp;
                         const formattedTime = this.formatTime(startTime);
                         
-                        // Create car marker
-                        const marker = new google.maps.Marker({
+                        // Create start marker (black circle)
+                        const startMarker = new google.maps.Marker({
                             position: startPoint,
                             map: this.map,
                             title: `Start of shift - ${driver.driver_name} (${formattedTime})`,
                             icon: {
-                                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                                scale: 6,
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 8,
+                                fillColor: '#000000',
+                                fillOpacity: 1,
+                                strokeWeight: 1,
+                                strokeColor: '#FFFFFF'
+                            }
+                        });
+                        
+                        this.driverMarkers.push(startMarker);
+                        
+                        // Add end marker (circle with initials)
+                        const endPoint = path[path.length - 1];
+                        const endTime = points[points.length - 1].timestamp;
+                        const formattedEndTime = this.formatTime(endTime);
+                        
+                        // Get driver initials
+                        const initials = driver.driver_name
+                            .split(' ')
+                            .map(name => name[0])
+                            .join('')
+                            .toUpperCase();
+                        
+                        // Create custom SVG marker for end point
+                        const endMarker = new google.maps.Marker({
+                            position: endPoint,
+                            map: this.map,
+                            title: `End of shift - ${driver.driver_name} (${formattedEndTime})`,
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 12,
                                 fillColor: color,
                                 fillOpacity: 1,
                                 strokeWeight: 1,
                                 strokeColor: '#FFFFFF',
-                                rotation: this.calculateHeading(path)
+                                labelOrigin: new google.maps.Point( 0, 0 )
+                            },
+                            label: {
+                                text: initials,
+                                color: '#FFFFFF',
+                                fontSize: '10px',
+                                fontWeight: 'bold'
                             }
                         });
                         
-                        this.driverMarkers.push(marker);
+                        this.driverMarkers.push(endMarker);
                     }
                     
                     // Add to legend
