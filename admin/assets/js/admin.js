@@ -662,6 +662,18 @@ class LiveMap {
         if (document.getElementById('driver-live-map')) {
             // Map will be initialized by the Google Maps callback
         }
+
+        // Add event listener for driver select
+        const driverSelect = document.getElementById('history-driver-select');
+        if (driverSelect) {
+            driverSelect.addEventListener('change', (e) => this.handleDriverChange(e));
+        }
+        
+        // Add event listener for location history form
+        const historyForm = document.getElementById('location-history-form');
+        if (historyForm) {
+            historyForm.addEventListener('submit', (e) => this.handleHistoryFilter(e));
+        }
     }
 
     initMap() {
@@ -679,7 +691,7 @@ class LiveMap {
         this.bounds = new google.maps.LatLngBounds();
         
         // Check if we have tracking data
-        console.log(sdaDriversTracking.drivers);
+ 
         if (typeof sdaDriversTracking !== 'undefined' && sdaDriversTracking.drivers) {
             this.plotDriverRoutes(sdaDriversTracking.drivers);
         } else {
@@ -835,6 +847,120 @@ class LiveMap {
     formatTime(timestamp) {
         const date = new Date(timestamp.replace(' ', 'T'));
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    handleDriverChange(e) {
+        const driverId = e.target.value;
+        const dateSelect = document.getElementById('history-date-select');
+        const submitButton = document.querySelector('#location-history-form button[type="submit"]');
+        
+        // Reset and disable date select
+        dateSelect.innerHTML = '<option value="">Select Shift Date</option>';
+        dateSelect.disabled = true;
+        submitButton.disabled = true;
+        
+        if (!driverId) {
+            return;
+        }
+        
+        // Show loading state
+        dateSelect.style.opacity = '0.5';
+        
+        // Fetch shift dates for selected driver
+        jQuery.ajax({
+            url: sdaRoute.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'get_driver_shift_dates',
+                nonce: sdaRoute.nonce,
+                driver_id: driverId
+            },
+            success: (response) => {
+                if (response.success && response.data.dates) {
+                    // Populate date select
+                    response.data.dates.forEach(date => {
+                        const option = document.createElement('option');
+                        option.value = date.value;
+                        option.textContent = date.label;
+                        dateSelect.appendChild(option);
+                    });
+                    dateSelect.disabled = false;
+                    submitButton.disabled = false;
+                } else {
+                    dateSelect.innerHTML = '<option value="">No shifts found</option>';
+                }
+            },
+            error: () => {
+                dateSelect.innerHTML = '<option value="">Error loading dates</option>';
+            },
+            complete: () => {
+                dateSelect.style.opacity = '1';
+            }
+        });
+    }
+
+    handleHistoryFilter(e) {
+        e.preventDefault();
+        
+        const driverId = document.getElementById('history-driver-select').value;
+        const date = document.getElementById('history-date-select').value;
+        
+        if (!driverId || !date) {
+            alert('Please select both a driver and a date');
+            return;
+        }
+        
+        // Show loading state
+        const mapElement = document.getElementById('driver-live-map');
+        mapElement.style.opacity = '0.5';
+        
+        // Clear existing routes and markers
+        this.clearMap();
+        
+        // Fetch tracking data
+        jQuery.ajax({
+            url: sdaRoute.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'get_location_history',
+                nonce: sdaRoute.nonce,
+                driver_id: driverId,
+                date: date
+            },
+            success: (response) => {
+                if (response.success && response.data.drivers) {
+                    this.plotDriverRoutes(response.data.drivers);
+                } else {
+                    alert('No tracking data found for the selected date');
+                }
+            },
+            error: () => {
+                alert('Error fetching tracking data');
+            },
+            complete: () => {
+                mapElement.style.opacity = '1';
+            }
+        });
+    }
+    
+    clearMap() {
+        // Clear existing routes
+        this.driverRoutes.forEach(route => route.setMap(null));
+        this.driverRoutes = [];
+        
+        // Clear existing markers
+        this.driverMarkers.forEach(marker => marker.setMap(null));
+        this.driverMarkers = [];
+        
+        // Clear legend
+        const legendEl = document.getElementById('drivers-legend');
+        const legendItems = legendEl?.querySelector('.legend-items');
+        if (legendItems) {
+            legendItems.innerHTML = '';
+        }
+        
+        // Reset bounds
+        this.bounds = new google.maps.LatLngBounds();
     }
 }
 

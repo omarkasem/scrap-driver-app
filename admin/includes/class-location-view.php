@@ -20,6 +20,10 @@ class LocationView {
     public function __construct() {
         // Add admin menu pages
         add_action( 'admin_menu', array( $this, 'add_location_menu_pages' ) );
+        
+        // Add AJAX handler for location history
+        add_action('wp_ajax_get_location_history', array($this, 'ajax_get_location_history'));
+        add_action('wp_ajax_get_driver_shift_dates', array($this, 'ajax_get_driver_shift_dates'));
     }
     
     /**
@@ -122,9 +126,12 @@ class LocationView {
             </div>
         </div>
         <?php
-        
+        $time = 24;
+        if(isset($_GET['location-history'])){
+            $time = 99999999999;
+        }
         // Get drivers tracking data and pass to JavaScript
-        $tracking_data = $this->get_driver_tracking_data( 24, 1000 ); // Get 24 hours of data, up to 1000 points per driver
+        $tracking_data = $this->get_driver_tracking_data( $time, 1000 ); // Get 24 hours of data, up to 1000 points per driver
         
         if ( ! empty( $tracking_data ) ) {
             wp_localize_script( 'scrap-driver-admin', 'sdaDriversTracking', array(
@@ -163,15 +170,175 @@ class LocationView {
      * Render the Location History page
      */
     public function render_location_history_page() {
+        global $wpdb;
+        
+        // Get all drivers
+        $drivers = get_users(array(
+            'meta_key' => 'collection_driver',
+            'meta_compare' => 'EXISTS'
+        ));
+        
         ?>
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+            
+            <div class="location-history-filters">
+                <form id="location-history-form">
+                    <select name="driver" id="history-driver-select">
+                        <option value=""><?php _e('Select Driver', 'scrap-driver'); ?></option>
+                        <?php foreach ($drivers as $driver): ?>
+                            <option value="<?php echo esc_attr($driver->ID); ?>">
+                                <?php echo esc_html($driver->display_name); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    
+                    <select name="shift_date" id="history-date-select" disabled>
+                        <option value=""><?php _e('Select Shift Date', 'scrap-driver'); ?></option>
+                    </select>
+                    
+                    <button type="submit" class="button button-primary" disabled>
+                        <?php _e('Apply Filter', 'scrap-driver'); ?>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Driver routes legend -->
+            <div id="drivers-legend" class="drivers-legend">
+                <!-- Legend will be populated by JavaScript -->
+            </div>
+            
             <div class="location-history-container">
-                <!-- Location history content will go here -->
-                <p><?php _e( 'View historical location data for drivers.', 'scrap-driver' ); ?></p>
+                <div id="driver-live-map" style="height: 600px; width: 100%;"></div>
             </div>
         </div>
         <?php
+    }
+    
+    /**
+     * AJAX handler for getting location history
+     */
+    public function ajax_get_location_history() {
+        // Verify nonce
+        check_ajax_referer('sda_route_nonce', 'nonce');
+        
+        $driver_id = isset($_POST['driver_id']) ? intval($_POST['driver_id']) : 0;
+        $date = isset($_POST['date']) ? sanitize_text_field($_POST['date']) : '';
+        
+        if (!$driver_id || !$date) {
+            wp_send_json_error('Missing required parameters');
+            return;
+        }
+        
+        $tracking_data = $this->get_driver_tracking_history($driver_id, $date);
+        
+        if (!empty($tracking_data)) {
+            wp_send_json_success(array('drivers' => $tracking_data));
+        } else {
+            wp_send_json_error('No tracking data found');
+        }
+    }
+    
+    /**
+     * Get tracking data for specific driver and date
+     * 
+     * @param int $driver_id Driver ID
+     * @param string $date Date in Y-m-d format
+     * @return array Array of tracking data
+     */
+    public function get_driver_tracking_history($driver_id, $date) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'scrap_driver_tracking';
+        $start_of_day = $date . ' 00:00:00';
+        $end_of_day = $date . ' 23:59:59';
+        
+        // Get tracking points for the specific driver and date
+        $query = $wpdb->prepare(
+            "SELECT * FROM {$table_name} 
+            WHERE driver_id = %d 
+            AND timestamp >= %s 
+            AND timestamp <= %s 
+            ORDER BY timestamp ASC",
+            $driver_id,
+            $start_of_day,
+            $end_of_day
+        );
+        
+        $tracking_points = $wpdb->get_results($query, ARRAY_A);
+        
+        if (!empty($tracking_points)) {
+            $driver = get_user_by('id', $driver_id);
+            return array(
+                $driver_id => array(
+                    'driver_id' => $driver_id,
+                    'driver_name' => $driver->display_name,
+                    'points' => $tracking_points
+                )
+            );
+        }
+        
+        return array();
+    }
+    
+    /**
+     * Get shift dates for a specific driver
+     * 
+     * @param int $driver_id Driver ID
+     * @return array Array of shift dates
+     */
+    public function get_driver_shift_dates($driver_id) {
+        $shifts = get_posts(array(
+            'post_type' => 'sda-shift',
+            'posts_per_page' => -1,
+            'meta_key' => 'start_time',
+            'orderby' => 'meta_value',
+            'order' => 'DESC',
+            'meta_query' => array(
+                array(
+                    'key' => 'assigned_driver',
+                    'value' => $driver_id,
+                    'compare' => '='
+                )
+            )
+        ));
+        
+        $dates = array();
+        foreach ($shifts as $shift) {
+            $start_time = get_post_meta($shift->ID, 'start_time', true);
+            if ($start_time) {
+                $date = date('Y-m-d', strtotime($start_time));
+                $formatted_date = date('F j, Y', strtotime($start_time));
+                $dates[] = array(
+                    'value' => $date,
+                    'label' => $formatted_date
+                );
+            }
+        }
+        
+        return $dates;
+    }
+    
+    /**
+     * AJAX handler for getting driver shift dates
+     */
+    public function ajax_get_driver_shift_dates() {
+        check_ajax_referer('sda_route_nonce', 'nonce');
+        
+        $driver_id = isset($_POST['driver_id']) ? intval($_POST['driver_id']) : 0;
+        
+        if (!$driver_id) {
+            wp_send_json_error('Missing driver ID');
+            return;
+        }
+        
+        $dates = $this->get_driver_shift_dates($driver_id);
+        
+        if (!empty($dates)) {
+            wp_send_json_success(array('dates' => $dates));
+        } else {
+            wp_send_json_error('No shifts found for this driver');
+        }
     }
 }
 
