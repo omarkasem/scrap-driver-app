@@ -61,17 +61,12 @@ class LocationView {
         $hours_ago = date( 'Y-m-d H:i:s', strtotime( "-{$hours_back} hour" ) );
         
         // First get distinct drivers
-        // $query = $wpdb->prepare(
-        //     "SELECT DISTINCT driver_id, driver_name FROM {$table_name} 
-        //     WHERE timestamp >= %s 
-        //     AND driver_id > 0
-        //     ORDER BY driver_name ASC",
-        //     $hours_ago
-        // );
         $query = $wpdb->prepare(
             "SELECT DISTINCT driver_id, driver_name FROM {$table_name} 
-            WHERE driver_id > 0
-            ORDER BY driver_name ASC", array()
+            WHERE timestamp >= %s 
+            AND driver_id > 0
+            ORDER BY driver_name ASC",
+            $hours_ago
         );
         
         $drivers = $wpdb->get_results( $query );
@@ -84,22 +79,14 @@ class LocationView {
         
         // For each driver, get their tracking points ordered by timestamp
         foreach ( $drivers as $driver ) {
-            // $query = $wpdb->prepare(
-            //     "SELECT * FROM {$table_name} 
-            //     WHERE driver_id = %d 
-            //     AND timestamp >= %s 
-            //     ORDER BY timestamp ASC 
-            //     LIMIT %d",
-            //     $driver->driver_id,
-            //     $hours_ago,
-            //     $limit
-            // );
             $query = $wpdb->prepare(
                 "SELECT * FROM {$table_name} 
                 WHERE driver_id = %d 
+                AND timestamp >= %s 
                 ORDER BY timestamp ASC 
                 LIMIT %d",
                 $driver->driver_id,
+                $hours_ago,
                 $limit
             );
             
