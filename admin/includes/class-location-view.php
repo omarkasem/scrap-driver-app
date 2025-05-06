@@ -263,6 +263,29 @@ class LocationView {
             $end_time = get_post_meta($shift_id, 'end_time', true);
             $shift_collections = get_post_meta($shift_id, 'shift_collections', true);
             
+            // Get collection locations
+            $collection_locations = array();
+            if ($shift_collections) {
+                $collections = maybe_unserialize($shift_collections);
+                $distance = new Distance();
+                
+                foreach ($collections as $collection_id) {
+                    $address = get_post_meta($collection_id, 'customer_info_address', true);
+                    $postcode = get_post_meta($collection_id, 'customer_info_postcode', true);
+                    $lat_lng = $distance->get_lat_lng_by_address($address, $postcode, $collection_id);
+                    
+                    if (!is_wp_error($lat_lng) && isset($lat_lng['lat'], $lat_lng['lng'])) {
+                        $collection_locations[] = array(
+                            'id' => $collection_id,
+                            'lat' => $lat_lng['lat'],
+                            'lng' => $lat_lng['lng'],
+                            'address' => $address,
+                            'postcode' => $postcode
+                        );
+                    }
+                }
+            }
+            
             // Format the time using Distance class method
             $distance = new Distance();
             $formatted_time = $distance->format_time_duration($total_time);
@@ -272,7 +295,8 @@ class LocationView {
                 'total_time' => $formatted_time ? $formatted_time : 'N/A',
                 'start_time' => $start_time ? date('H:i', strtotime($start_time)) : 'N/A',
                 'end_time' => $end_time ? date('H:i', strtotime($end_time)) : 'N/A',
-                'total_collections' => $shift_collections ? count(maybe_unserialize($shift_collections)) : 0
+                'total_collections' => $shift_collections ? count(maybe_unserialize($shift_collections)) : 0,
+                'collection_locations' => $collection_locations
             );
         }
         

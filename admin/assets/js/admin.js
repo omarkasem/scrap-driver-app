@@ -657,6 +657,7 @@ class LiveMap {
             '#2ECC71'  // Emerald
         ];
         this.bounds = null;
+        this.collectionMarkers = []; // Add new array for collection markers
 
         // Initialize only if we're on the live location page
         if (document.getElementById('driver-live-map')) {
@@ -824,6 +825,33 @@ class LiveMap {
             }
         }
         
+        // Check if we have metrics with collection locations in the global variable
+        if (window.sdaLocationHistory && 
+            window.sdaLocationHistory.metrics && 
+            window.sdaLocationHistory.metrics.collection_locations) {
+            
+            const collections = window.sdaLocationHistory.metrics.collection_locations;
+            
+            collections.forEach(collection => {
+                // Create car marker for each collection
+                const collectionMarker = new google.maps.Marker({
+                    position: { lat: parseFloat(collection.lat), lng: parseFloat(collection.lng) },
+                    map: this.map,
+                    title: `Collection at ${collection.address}, ${collection.postcode}`,
+                    icon: {
+                        url: 'https://maps.google.com/mapfiles/kml/shapes/cabs.png',
+                        scaledSize: new google.maps.Size(32, 32),
+                        anchor: new google.maps.Point(16, 16)
+                    }
+                });
+                
+                this.collectionMarkers.push(collectionMarker);
+                
+                // Extend bounds to include collection point
+                this.bounds.extend(collectionMarker.getPosition());
+            });
+        }
+        
         // Fit map to show all routes
         if (!this.bounds.isEmpty()) {
             this.map.fitBounds(this.bounds);
@@ -935,6 +963,9 @@ class LiveMap {
             },
             success: (response) => {
                 if (response.success) {
+                    // Store the response data globally for access in plotDriverRoutes
+                    window.sdaLocationHistory = response.data;
+                    
                     if (response.data.drivers) {
                         this.plotDriverRoutes(response.data.drivers);
                     }
@@ -993,6 +1024,10 @@ class LiveMap {
         // Clear existing markers
         this.driverMarkers.forEach(marker => marker.setMap(null));
         this.driverMarkers = [];
+        
+        // Clear collection markers
+        this.collectionMarkers.forEach(marker => marker.setMap(null));
+        this.collectionMarkers = [];
         
         // Clear legend
         const legendEl = document.getElementById('drivers-legend');
