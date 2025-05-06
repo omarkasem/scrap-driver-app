@@ -917,6 +917,12 @@ class LiveMap {
         // Clear existing routes and markers
         this.clearMap();
         
+        // Clear existing metrics if any
+        const existingMetrics = document.querySelector('.shift-metrics');
+        if (existingMetrics) {
+            existingMetrics.remove();
+        }
+        
         // Fetch tracking data
         jQuery.ajax({
             url: sdaRoute.ajaxurl,
@@ -928,8 +934,44 @@ class LiveMap {
                 date: date
             },
             success: (response) => {
-                if (response.success && response.data.drivers) {
-                    this.plotDriverRoutes(response.data.drivers);
+                if (response.success) {
+                    if (response.data.drivers) {
+                        this.plotDriverRoutes(response.data.drivers);
+                    }
+                    
+                    // Display metrics if available
+                    if (response.data.metrics) {
+                        const metrics = response.data.metrics;
+                        const metricsHtml = `
+                            <div class="shift-metrics">
+                                <h3>Driver Metrics</h3>
+                                <div class="metric-item">
+                                    <span class="metric-icon dashicons dashicons-location"></span>
+                                    <span class="metric-label">Distance:</span>
+                                    <span class="metric-value">${metrics.total_distance}</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon dashicons dashicons-clock"></span>
+                                    <span class="metric-label">Duration:</span>
+                                    <span class="metric-value">${metrics.total_time}</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon dashicons dashicons-calendar-alt"></span>
+                                    <span class="metric-label">Time:</span>
+                                    <span class="metric-value">${metrics.start_time} - ${metrics.end_time}</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon dashicons dashicons-clipboard"></span>
+                                    <span class="metric-label">Collections:</span>
+                                    <span class="metric-value">${metrics.total_collections}</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Insert metrics before the map
+                        const mapContainer = document.querySelector('.location-history-container');
+                        mapContainer.insertAdjacentHTML('beforebegin', metricsHtml);
+                    }
                 } else {
                     alert('No tracking data found for the selected date');
                 }

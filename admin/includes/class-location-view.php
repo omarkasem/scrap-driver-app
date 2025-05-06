@@ -230,10 +230,57 @@ class LocationView {
             return;
         }
         
+        // Get shift data for this driver and date
+        $args = array(
+            'post_type' => 'sda-shift',
+            'posts_per_page' => 1,
+            'meta_query' => array(
+                array(
+                    'key' => 'assigned_driver',
+                    'value' => $driver_id,
+                    'compare' => '='
+                ),
+                array(
+                    'key' => 'start_time',
+                    'value' => $date,
+                    'compare' => 'LIKE'
+                )
+            )
+        );
+        
+        $shift = get_posts($args);
+        
         $tracking_data = $this->get_driver_tracking_history($driver_id, $date);
+        $metrics = array();
+        
+        if (!empty($shift)) {
+            $shift_id = $shift[0]->ID;
+            
+            // Get shift metrics
+            $total_distance = get_post_meta($shift_id, 'total_distance', true);
+            $total_time = get_post_meta($shift_id, 'total_time', true);
+            $start_time = get_post_meta($shift_id, 'start_time', true);
+            $end_time = get_post_meta($shift_id, 'end_time', true);
+            $shift_collections = get_post_meta($shift_id, 'shift_collections', true);
+            
+            // Format the time using Distance class method
+            $distance = new Distance();
+            $formatted_time = $distance->format_time_duration($total_time);
+            
+            $metrics = array(
+                'total_distance' => $total_distance ? round($total_distance, 2) . ' miles' : 'N/A',
+                'total_time' => $formatted_time ? $formatted_time : 'N/A',
+                'start_time' => $start_time ? date('H:i', strtotime($start_time)) : 'N/A',
+                'end_time' => $end_time ? date('H:i', strtotime($end_time)) : 'N/A',
+                'total_collections' => $shift_collections ? count(maybe_unserialize($shift_collections)) : 0
+            );
+        }
         
         if (!empty($tracking_data)) {
-            wp_send_json_success(array('drivers' => $tracking_data));
+            wp_send_json_success(array(
+                'drivers' => $tracking_data,
+                'metrics' => $metrics
+            ));
         } else {
             wp_send_json_error('No tracking data found');
         }
