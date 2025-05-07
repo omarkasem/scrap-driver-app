@@ -69,7 +69,8 @@ class Admin {
             'loader' => $ajax_loader_img,
             'optimizing' => __('Optimizing route...', 'scrap-driver-app'),
             'success' => __('Route optimized successfully!', 'scrap-driver-app'),
-            'error' => __('Error optimizing route', 'scrap-driver-app')
+            'error' => __('Error optimizing route', 'scrap-driver-app'),
+            'car_icon' => SCRAP_DRIVER_PLUGIN_URL . 'admin/assets/images/gps-navigation.png'
         ));
 
         $api_key = get_field( 'google_maps_api_key', 'option' );

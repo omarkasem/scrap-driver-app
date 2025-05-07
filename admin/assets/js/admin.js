@@ -839,9 +839,9 @@ class LiveMap {
                     map: this.map,
                     title: `Collection at ${collection.address}, ${collection.postcode}`,
                     icon: {
-                        url: 'https://maps.google.com/mapfiles/kml/shapes/cabs.png',
-                        scaledSize: new google.maps.Size(32, 32),
-                        anchor: new google.maps.Point(16, 16)
+                        url: sdaRoute.car_icon,
+                        scaledSize: new google.maps.Size(42, 42),
+                        anchor: new google.maps.Point(8, 8)
                     }
                 });
                 
