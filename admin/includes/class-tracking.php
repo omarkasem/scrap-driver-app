@@ -27,10 +27,10 @@ class Tracking {
                         return is_array( $param ) && ! empty( $param );
                     }
                 ),
-                'driver_name' => array(
+                'driver_id' => array(
                     'required' => true,
                     'validate_callback' => function( $param ) {
-                        return is_string( $param ) && ! empty( $param );
+                        return is_numeric( $param ) && intval( $param ) > 0;
                     }
                 )
             )
@@ -58,11 +58,11 @@ class Tracking {
      */
     public function process_tracking_data( $request ) {
         $coordinates = $request->get_param( 'coordinates' );
-        $driver_name = $request->get_param( 'driver_name' );
+        $driver_id = intval( $request->get_param( 'driver_id' ) );
         $timestamp = current_time( 'mysql' );
         
-        // Find the driver using flexible matching
-        $driver = $this->find_driver( $driver_name );
+        // Get the driver user object
+        $driver = get_user_by( 'ID', $driver_id );
         
         if ( $driver ) {
             // Check if user is a collection driver
@@ -70,7 +70,7 @@ class Tracking {
             
             if ( $is_driver ) {
                 // Save tracking data for verified driver
-                $this->save_tracking_data( $driver->ID, $driver_name, $coordinates, $timestamp );
+                $this->save_tracking_data( $driver->ID, $driver->user_login, $coordinates, $timestamp );
                 
                 return new \WP_REST_Response( array(
                     'success' => true,
@@ -78,8 +78,8 @@ class Tracking {
                 ), 200 );
             } else {
                 // User exists but is not a driver
-                $this->log_error( "User {$driver_name} is not a collection driver" );
-                $this->save_tracking_data( 0, $driver_name, $coordinates, $timestamp );
+                $this->log_error( "User ID {$driver_id} is not a collection driver" );
+                $this->save_tracking_data( 0, $driver->user_login, $coordinates, $timestamp );
                 
                 return new \WP_REST_Response( array(
                     'success' => false,
@@ -88,80 +88,14 @@ class Tracking {
             }
         } else {
             // Driver not found
-            $this->log_error( "Driver not found: {$driver_name}" );
-            $this->save_tracking_data( 0, $driver_name, $coordinates, $timestamp );
+            $this->log_error( "Driver not found with ID: {$driver_id}" );
+            $this->save_tracking_data( 0, "Unknown (ID: {$driver_id})", $coordinates, $timestamp );
             
             return new \WP_REST_Response( array(
                 'success' => false,
                 'message' => 'Driver not found, but location was saved'
             ), 400 );
         }
-    }
-    
-    /**
-     * Find a driver user using login name matching
-     * 
-     * @param string $driver_name The driver name to search for
-     * @return \WP_User|false User object if found, false otherwise
-     */
-    private function find_driver( $driver_name ) {
-        // First try exact match by login name
-        $driver = get_user_by( 'login', $driver_name );
-        if ( $driver ) {
-            return $driver;
-        }
-        
-        // Try case-insensitive match
-        $lowercase_name = strtolower( $driver_name );
-        
-        // Get all users (use a reasonable limit to avoid performance issues)
-        $args = array(
-            'number' => 100, // Adjust as needed for your site
-            'fields' => array( 'ID', 'user_login' )
-        );
-        
-        $user_query = new \WP_User_Query( $args );
-        $users = $user_query->get_results();
-        
-        // First pass: Look for case-insensitive exact match
-        foreach ( $users as $user ) {
-            if ( strtolower( $user->user_login ) === $lowercase_name ) {
-                return get_user_by( 'ID', $user->ID );
-            }
-        }
-        
-        // Second pass: Find the nearest match using strpos
-        $best_match = null;
-        $best_match_pos = PHP_INT_MAX; // Start with maximum value
-        $best_match_reverse_pos = PHP_INT_MAX;
-        
-        foreach ( $users as $user ) {
-            $user_login_lower = strtolower( $user->user_login );
-            
-            // Check if user_login contains the driver name
-            $pos = strpos( $user_login_lower, $lowercase_name );
-            if ( $pos !== false && $pos < $best_match_pos ) {
-                $best_match = $user;
-                $best_match_pos = $pos;
-            }
-            
-            // Check if driver name contains the user_login
-            $reverse_pos = strpos( $lowercase_name, $user_login_lower );
-            if ( $reverse_pos !== false && $reverse_pos < $best_match_reverse_pos ) {
-                // Only replace if we haven't found a direct match already
-                if ( $best_match === null ) {
-                    $best_match = $user;
-                    $best_match_reverse_pos = $reverse_pos;
-                }
-            }
-        }
-        
-        // Return the best match if one was found
-        if ( $best_match ) {
-            return get_user_by( 'ID', $best_match->ID );
-        }
-        
-        return false;
     }
     
     /**
