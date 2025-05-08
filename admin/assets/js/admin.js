@@ -840,7 +840,7 @@ class LiveMap {
                     title: `Collection at ${collection.address}, ${collection.postcode}`,
                     icon: {
                         url: sdaRoute.car_icon,
-                        scaledSize: new google.maps.Size(42, 42),
+                        scaledSize: new google.maps.Size(32, 32),
                         anchor: new google.maps.Point(8, 8)
                     }
                 });
